@@ -7,6 +7,7 @@ import AdminPage from './pages/adminPage.jsx'
 import ManagerPage from './pages/managerPage.jsx'
 import CashierPage from './pages/cashierPage.jsx'
 import { Toaster } from 'react-hot-toast'
+import Dashboard from './pages/dashboard'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/admin/*" element={<AdminPage />} />
           <Route path="/manager/*" element={<ManagerPage />} />
           <Route path="/cashier/*" element={<CashierPage />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
         </Routes>
 
       </div>
