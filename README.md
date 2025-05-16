@@ -10,11 +10,13 @@ A full-stack application for managing suit rentals.
 ## Setup Instructions
 
 1. Frontend setup:
+   ```bash
    cd rentman-frontend
    npm install
    npm run dev
    
-2. Backend setup:
+3. Backend setup:
+   ```bash
    cd rentman-backend
    npm install
    npm start
