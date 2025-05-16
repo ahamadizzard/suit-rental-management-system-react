@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button.jsx";
 import { Link } from "react-router-dom";
 import { Route, Routes } from "react-router-dom";
 // import AdminProductPage from "./admin/productPage";
@@ -16,6 +17,7 @@ export default function AdminPage() {
                 <Link to="/admin/users">Users</Link>
                 <Link to="/admin/orders">Orders</Link>
                 <Link to="/admin/reviews">Reviews</Link>
+                <Button>This is ShadCN Button</Button>
             </div>
             <div className="w-[calc(100%-200px)] h-full ">
                 <Routes path="/*">
