@@ -21,6 +21,7 @@ import {
   SidebarRail,
   SidebarSeparator
 } from "@/components/ui/sidebar"
+import { Link } from "react-router-dom"
 
 // This is sample data.
 const data = {
@@ -30,16 +31,16 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Products",
+          title: "Item Master",
           url: "#",
           items: [
             {
-              title: "View Products",
-              url: "#",
+              title: "View Items",
+              url: "/dashboard/itemmaster",
               isActive: true,
             },
             {
-              title: "Add Products",
+              title: "Add Item",
               url: "#",
               isActive: true,
             }
@@ -271,9 +272,7 @@ const data = {
   ],
 }
 
-export function AppSidebar({
-  ...props
-}) {
+export function AppSidebar({ ...props }) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -295,6 +294,7 @@ export function AppSidebar({
         <SidebarSeparator className="bg-neutral-600" />
         {/* <SearchForm /> */}
       </SidebarHeader>
+      {/* ... SidebarHeader remains the same ... */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
@@ -329,7 +329,7 @@ export function AppSidebar({
                                     {subItem.items.map((subSubItem) => (
                                       <SidebarMenuSubItem key={subSubItem.title}>
                                         <SidebarMenuSubButton asChild isActive={subSubItem.isActive}>
-                                          <a href={subSubItem.url}>{subSubItem.title}</a>
+                                          <Link to={subSubItem.url}>{subSubItem.title}</Link>
                                         </SidebarMenuSubButton>
                                       </SidebarMenuSubItem>
                                     ))}
@@ -338,7 +338,7 @@ export function AppSidebar({
                               </Collapsible>
                             ) : (
                               <SidebarMenuSubButton asChild isActive={subItem.isActive}>
-                                <a href={subItem.url}>{subItem.title}</a>
+                                <Link to={subItem.url}>{subItem.title}</Link>
                               </SidebarMenuSubButton>
                             )}
                           </SidebarMenuSubItem>

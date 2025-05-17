@@ -12,7 +12,13 @@ import bodyParser from "body-parser";
 dotenv.config();
 const PORT = process.env.PORT || 6000;
 const app = express();
-app.use(cors());
+// Enable CORS for all routes
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 // Middleware to check if the user is authenticated

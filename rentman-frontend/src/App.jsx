@@ -1,33 +1,49 @@
-import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import HomePage from './pages/home.jsx'
-import LoginPage from './pages/login.jsx'
-import RegisterPage from './pages/register.jsx'
-import AdminPage from './pages/adminPage.jsx'
-import ManagerPage from './pages/managerPage.jsx'
-import CashierPage from './pages/cashierPage.jsx'
-import { Toaster } from 'react-hot-toast'
-import Dashboard from './pages/dashboard'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+import LoginPage from './pages/login.jsx';
+import HomePage from './pages/home.jsx';
+import DashboardLayout from './pages/dashboard.jsx';
+import Unauthorized from './components/unauthorized.jsx';
+import AdminProductPage from './pages/admin/productPage';
 
 function App() {
-
   return (
-    <BrowserRouter position="top-right">
-      <div>
-        <Toaster />
-        <Routes path="/*">
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/admin/*" element={<AdminPage />} />
-          <Route path="/manager/*" element={<ManagerPage />} />
-          <Route path="/cashier/*" element={<CashierPage />} />
-          <Route path="/dashboard/*" element={<Dashboard />} />
-        </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-      </div>
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<HomePage />} />
+
+            {/* Admin only routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              {/* <Route path="users" element={<UserManagement />} /> */}
+              {/* <Route path="settings" element={<SystemSettings />} /> */}
+            </Route>
+
+            {/* Manager routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
+              <Route path="/dashboard/itemmaster" element={<AdminProductPage />}
+              />
+              {/* <Route path="reports" element={<Reports />} /> */}
+              {/* <Route path="price-adjustment" element={<PriceAdjustment />} /> */}
+            </Route>
+
+            {/* Cashier routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
+              {/* <Route path="sales" element={<Sales />} /> */}
+              {/* <Route path="dry-cleaning" element={<DryCleaning />} /> */}
+              {/* <Route path="tailoring" element={<Tailoring />} /> */}
+            </Route>
+          </Route>
+        </Route>
+
+        <Route path="/unauthorized" element={<Unauthorized />} />
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

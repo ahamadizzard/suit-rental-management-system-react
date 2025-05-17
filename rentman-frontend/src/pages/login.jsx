@@ -19,35 +19,40 @@ export default function Login() {
     async function handleSubmit(e) {
         e.preventDefault(); // Prevent default form submission behavior
         setIsLoading(true);
+
         try {
             const response = await axios.post(import.meta.env.VITE_API_BASE_URL + "/api/users/login", {
                 email: email,
                 password: password
             })
+            // console.log("Response:", response);
             toast.success("Login successful")
             localStorage.setItem("token", response.data.token);
-            localStorage.setItem("user", response.data.firstName);
-            localStorage.setItem("role", response.data.role);
-
-            // const token = localStorage.getItem('token');
-            // const userFirstName = localStorage.getItem('user');
-            // const role = localStorage.getItem('role');
-
-            if (response.data.role === "admin") {
-                console.log("Admin login")
-                setIsLoading(false);
-                navigate("/admin")
-            } else if (response.data.role === "manager") {
-                console.log("Manager login")
-                setIsLoading(false);
-                navigate("/manager")
-            } else {
-                console.log("cashier login")
-                setIsLoading(false);
-                navigate("/")
-            }
+            localStorage.setItem("userFirstName", response.data.firstName);
+            localStorage.setItem("userRole", response.data.role);
+            setIsLoading(false);
+            navigate("/dashboard")
         } catch (error) {
-            toast.error(`Login failed ${error.response?.data?.message || error.message}`)
+            // console.error("Full error object:", error);
+            // Improved error handling
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                // const errorMessage = error.response.data.message || 'Login failed';
+                if (error.response.status === 404) {
+                    toast.error('Email not found');
+                } else if (error.response.status === 401) {
+                    toast.error('Invalid password');
+                } else {
+                    toast.error(errorMessage);
+                }
+            } else if (error.request) {
+                // The request was made but no response was received
+                toast.error('No response from server');
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                toast.error(`Error: ${error.message}`);
+            }
             setIsLoading(false);
         }
     }
