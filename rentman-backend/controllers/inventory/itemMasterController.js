@@ -103,3 +103,40 @@ export async function updateItemMaster(req, res) {
     res.status(400).json({ message: error.message });
   }
 }
+
+// Get item by itemCode (not ID)
+// In controller
+export async function getItemByCode(req, res) {
+  try {
+    // Handle both string and numeric itemCodes
+    const item = await ItemMaster.findOne({
+      $or: [
+        { itemCode: req.params.itemCode },
+        { itemCode: parseInt(req.params.itemCode) },
+      ],
+    });
+
+    if (!item) return res.status(404).send("Item not found");
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+// Update item by itemCode
+export async function updateItemByCode(req, res) {
+  try {
+    const item = await ItemMaster.findOneAndUpdate(
+      { itemCode: req.params.itemCode },
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!item) return res.status(404).send("Item not found");
+    res.status(200).json({
+      message: "Item updated successfully",
+      updatedItem: item,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}

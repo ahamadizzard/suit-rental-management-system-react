@@ -5,6 +5,9 @@ import HomePage from './pages/home.jsx';
 import DashboardLayout from './pages/dashboard.jsx';
 import Unauthorized from './components/unauthorized.jsx';
 import AdminProductPage from './pages/admin/productPage';
+import AddProductPage from './pages/admin/addProduct';
+import AddGroupPage from './pages/admin/addGroupPage';
+import GroupMasterPage from './pages/admin/groupMasterPage';
 
 function App() {
   return (
@@ -25,8 +28,10 @@ function App() {
 
             {/* Manager routes */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
-              <Route path="/dashboard/itemmaster" element={<AdminProductPage />}
-              />
+              <Route path="/dashboard/itemmaster" element={<AdminProductPage />} />
+              <Route path="/dashboard/itemmaster/add" element={<AddProductPage />} />
+              <Route path="/dashboard/groupmaster/add" element={<AddGroupPage />} />
+              <Route path="/dashboard/groupmaster" element={<GroupMasterPage />} />
               {/* <Route path="reports" element={<Reports />} /> */}
               {/* <Route path="price-adjustment" element={<PriceAdjustment />} /> */}
             </Route>

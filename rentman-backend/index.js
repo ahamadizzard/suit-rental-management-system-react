@@ -8,6 +8,7 @@ import userRouter from "./routes/userRouter.js";
 import cors from "cors";
 
 import bodyParser from "body-parser";
+import groupMasterRouter from "./routes/groupMasterRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -55,6 +56,8 @@ connectDB();
 //     console.log("Mongodb Connection Error" + err);
 //   });
 app.use("/api/itemmaster", itemMasterRouter);
+// app.use("/api/itemmaster/:itemCode", itemMasterRouter);
+app.use("/api/groupmaster", groupMasterRouter);
 app.use("/api/users", userRouter);
 
 app.listen(PORT, () => {

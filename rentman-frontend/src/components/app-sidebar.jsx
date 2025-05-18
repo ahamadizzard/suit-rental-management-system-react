@@ -41,7 +41,7 @@ const data = {
             },
             {
               title: "Add Item",
-              url: "#",
+              url: "/dashboard/itemmaster/add",
               isActive: true,
             }
 
@@ -70,12 +70,12 @@ const data = {
           items: [
             {
               title: "View Product Group",
-              url: "#",
+              url: "/dashboard/groupmaster",
               isActive: true,
             },
             {
               title: "Add Product Group",
-              url: "#",
+              url: "/dashboard/groupmaster/add",
               isActive: true,
             }
 
