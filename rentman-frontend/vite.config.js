@@ -12,4 +12,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["@radix-ui/react-icons"],
+    exclude: ["@radix-ui/react-icons"],
+  },
 });

@@ -27,6 +27,82 @@ import { Link } from "react-router-dom"
 const data = {
   navMain: [
     {
+      title: "Sales Module",
+      url: "#",
+      items: [
+        {
+          title: "Item Booking",
+          url: "#",
+          items: [
+            {
+              title: "View Booking",
+              url: "#",
+              isActive: true,
+            },
+            {
+              title: "New Booking",
+              url: "/dashboard/sales/newbooking",
+              isActive: true,
+            },
+            {
+              title: "Modify Booking",
+              url: "/dashboard/itemmaster/add",
+              isActive: true,
+            },
+            {
+              title: "Item Sales",
+              url: "#",
+              isActive: true,
+            },
+            {
+              title: "Sales Return",
+              url: "#",
+              isActive: true,
+            },
+
+          ]
+        },
+        {
+          title: "Dry Clean",
+          url: "#",
+          items: [
+            {
+              title: "View Dry Clean",
+              url: "#",
+              isActive: true,
+            },
+            {
+              title: "Add Dry Clean",
+              url: "#",
+              isActive: true,
+            }
+
+          ]
+        },
+        {
+          title: "Product Group",
+          url: "#",
+          items: [
+            {
+              title: "View Groups",
+              url: "/dashboard/groupmaster",
+              isActive: true,
+            },
+            {
+              title: "Add a Group",
+              url: "/dashboard/groupmaster/add",
+              isActive: true,
+            }
+
+          ]
+        },
+        {
+          title: "Project Structure",
+          url: "#",
+        },
+      ],
+    },
+    {
       title: "Inventory",
       url: "#",
       items: [
@@ -57,7 +133,7 @@ const data = {
               isActive: true,
             },
             {
-              title: "Add Dry Clean Details",
+              title: "Add Dry Clean",
               url: "#",
               isActive: true,
             }
@@ -279,7 +355,7 @@ export function AppSidebar({ ...props }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/dashboard">
                 <div>
                   <img src="/logoW.png" width="80px" height="80px" alt="logo" />
                 </div>

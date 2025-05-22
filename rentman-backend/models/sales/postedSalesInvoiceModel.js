@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const salesInvoiceSchema = new mongoose.Schema({
-  invoiceNo: { type: String, required: true, unique: true },
+  invoiceNo: { type: String, required: true },
   invoiceDate: { type: Date, required: true },
   customerId: { type: String },
   customerName: { type: String },
@@ -26,12 +26,13 @@ const salesInvoiceSchema = new mongoose.Schema({
   isDelivered: { type: Boolean, default: false },
   createdOn: { type: Date, default: Date.now },
   modifiedOn: { type: Date },
-  items: [
+  invoicePostedOn: { type: Date, default: Date.now },
+  invoicePostComments: { type: String },
+  SalesInvDetails: [
     {
       itemCode: { type: String, required: true },
       itemShortName: { type: String },
       itemDescription: { type: String },
-      itemSize: { type: String },
       deliveryDate: { type: Date, required: true },
       returnDate: { type: Date, required: true },
       amount: { type: Number, default: 0 },

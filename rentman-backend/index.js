@@ -6,9 +6,9 @@ import connectDB from "./config/db.js";
 import itemMasterRouter from "./routes/itemMasterRouter.js";
 import userRouter from "./routes/userRouter.js";
 import cors from "cors";
-
 import bodyParser from "body-parser";
 import groupMasterRouter from "./routes/groupMasterRouter.js";
+import salesInvoiceRouter from "./routes/salesInvoiceRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -48,17 +48,10 @@ app.use((req, res, next) => {
 //connecting to the database
 connectDB();
 
-// this is the method we learnt in the class
-// mongoose
-//   .connect(process.env.MONGODB_URI)
-//   .then(() => console.log("Connected to MongoDB"))
-//   .catch((err) => {
-//     console.log("Mongodb Connection Error" + err);
-//   });
 app.use("/api/itemmaster", itemMasterRouter);
-// app.use("/api/itemmaster/:itemCode", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
 app.use("/api/users", userRouter);
+app.use("/api/salesinvoice", salesInvoiceRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

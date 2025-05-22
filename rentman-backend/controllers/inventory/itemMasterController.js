@@ -32,28 +32,26 @@ export async function createItemMaster(req, res) {
   // Create a new item master with the data from the request body
   const itemMaster = new ItemMaster({
     itemCode: req.body.itemCode,
-    itemShortName: req.body.itemShortName,
-    itemSize: req.body.itemSize,
-    itemGroup: req.body.itemGroup,
-    itemGroupDesc: req.body.itemGroupDesc,
-    itemShortDesc: req.body.itemShortDesc,
-    itemPrice: req.body.itemPrice,
     itemName: req.body.itemName,
+    itemShortDesc: req.body.itemShortDesc,
+    itemGroupShortDesc: req.body.itemGroupShortDesc,
+    itemSize: req.body.itemSize,
+    itemPrice: req.body.itemPrice,
     itemDateAdded: req.body.itemDateAdded,
     itemMaterialType: req.body.itemMaterialType,
     itemMaterialVendor: req.body.itemMaterialVendor,
     itemRemarks: req.body.itemRemarks,
-    itemImages: req.body.itemImages,
+    isSchoolItem: req.body.isSchoolItem,
     itemStatus: req.body.itemStatus,
-    itemBlockedReason: req.body.itemBlockedReason,
-    itemBlockedDate: req.body.itemBlockedDate,
+    contributor: req.body.contributor,
+    // itemBlockedReason: req.body.itemBlockedReason,
+    // itemBlockedDate: req.body.itemBlockedDate,
     // itemRentCount: req.body.itemRentCount,
     // itemLastRented: req.body.itemLastRented,
     // itemLastRentedInv: req.body.itemLastRentedInv,
     // itemLastDryClean: req.body.itemLastDryClean,
-    isSchoolItem: req.body.isSchoolItem,
-    isBlocked: req.body.isBlocked,
-    contributor: req.body.contributor,
+
+    // isBlocked: req.body.isBlocked,
   });
   try {
     // Save the new item master to the database

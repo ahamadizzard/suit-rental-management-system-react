@@ -1,5 +1,5 @@
 // src/components/Unauthorized.jsx
-import { AlertCircle, ArrowLeft, Home } from "lucide-react";
+import { AlertCircle, ArrowLeft, Home, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -36,6 +36,11 @@ export function Unauthorized() {
                         <Home className="mr-2 h-4 w-4" />
                         Return to Dashboard
                     </Button>
+                    <Button onClick={() => navigate('/login')} variant={"destructive"}>
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Return to Login Page
+                    </Button>
+
                 </div>
 
                 <p className="text-sm text-muted-foreground text-center pt-4">

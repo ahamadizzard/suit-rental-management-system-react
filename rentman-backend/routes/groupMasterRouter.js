@@ -5,15 +5,17 @@ import {
   createGroupMaster,
   updateGroupMaster,
   getLastGroupId,
+  deleteGroupMaster,
 } from "../controllers/inventory/groupMasterController.js";
 
 const groupMasterRouter = express.Router();
 
 groupMasterRouter.get("/", getGroupMaster);
 groupMasterRouter.get("/last", getLastGroupId);
-groupMasterRouter.get("/:itemCode", getGroupMasterById);
+groupMasterRouter.get("/:groupId", getGroupMasterById);
 groupMasterRouter.post("/", createGroupMaster);
-groupMasterRouter.put("/:itemCode", updateGroupMaster);
+groupMasterRouter.put("/:groupId", updateGroupMaster);
+groupMasterRouter.delete("/:groupId", deleteGroupMaster);
 
 // itemMasterRouter.delete("/:itemCode", deleteItemMaster);
 

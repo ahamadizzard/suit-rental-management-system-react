@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { FaSave, FaTimes, FaEye, FaUpload } from 'react-icons/fa';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FaSave, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-export default function AddGroupPage() {
+
+
+export default function EditGroupPage() {
+    const params = useParams();
+    const groupId = params.groupId;
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [isFetchingLastId, setIsFetchingLastId] = useState(true);
+    // const [isFetchingLastId, setIsFetchingLastId] = useState(true);
     const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
         groupId: '',
@@ -24,36 +28,25 @@ export default function AddGroupPage() {
             return;
         }
 
-        // Fetch the last group ID when component mounts
-        const fetchLastGroupId = async () => {
-            try {
-                const response = await axios.get(
-                    import.meta.env.VITE_API_BASE_URL + '/api/groupmaster/last',
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }
-                );
-
-                let newGroupId = '001'; // Default if no groups exist
-
-                if (response.data && response.data.lastGroupId) {
-                    const lastId = parseInt(response.data.lastGroupId);
-                    newGroupId = (lastId + 1).toString().padStart(3, '0');
-                }
-
-                setFormData(prev => ({ ...prev, groupId: newGroupId }));
-            } catch (error) {
-                toast.error('Failed to fetch last group ID. Using default ID.');
-                setFormData(prev => ({ ...prev, groupId: '001' }));
-            } finally {
-                setIsFetchingLastId(false);
+        axios.get(import.meta.env.VITE_API_BASE_URL + '/api/groupmaster/' + groupId, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-        };
+        })
+            .then((response) => {
+                setFormData({
+                    groupId: response.data.groupId,
+                    groupName: response.data.groupName,
+                    groupShortName: response.data.groupShortName,
+                    groupDescription: response.data.groupDescription
+                });
+            })
+            .catch((error) => {
+                toast.error('Failed to fetch group data');
+                navigate('/dashboard/groupmaster');
+            });
 
-        fetchLastGroupId();
-    }, [token, navigate]);
+    }, []);
 
     const validateForm = () => {
         const newErrors = {};
@@ -87,8 +80,8 @@ export default function AddGroupPage() {
 
         setIsLoading(true);
         try {
-            const response = await axios.post(
-                import.meta.env.VITE_API_BASE_URL + '/api/groupmaster',
+            const response = await axios.put(
+                import.meta.env.VITE_API_BASE_URL + '/api/groupmaster/' + groupId,
                 formData,
                 {
                     headers: {
@@ -96,10 +89,10 @@ export default function AddGroupPage() {
                     }
                 }
             );
-            toast.success('Group added successfully');
+            toast.success('Group Updated successfully');
             navigate('/dashboard/groupmaster');
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Error adding group');
+            toast.error(error.response?.data?.message || 'Error updating group');
         } finally {
             setIsLoading(false);
         }
@@ -126,9 +119,9 @@ export default function AddGroupPage() {
                                 readOnly
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             />
-                            {isFetchingLastId && (
+                            {/* {isFetchingLastId && (
                                 <p className="mt-1 text-sm text-gray-500">Generating group ID...</p>
-                            )}
+                            )} */}
                         </div>
 
                         <div>
@@ -141,11 +134,11 @@ export default function AddGroupPage() {
                                 name="groupName"
                                 value={formData.groupName}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${errors.groupName ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+
                                 placeholder="Enter group name"
                             />
-                            {errors.groupName && <p className="mt-1 text-sm text-red-600">{errors.groupName}</p>}
+                            {/* {errors.groupName && <p className="mt-1 text-sm text-red-600">{errors.groupName}</p>} */}
                         </div>
 
                         <div>
@@ -158,12 +151,12 @@ export default function AddGroupPage() {
                                 name="groupShortName"
                                 value={formData.groupShortName}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${errors.groupShortName ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+
                                 placeholder="Enter short name (max 10 chars)"
                                 maxLength="20"
                             />
-                            {errors.groupShortName && <p className="mt-1 text-sm text-red-600">{errors.groupShortName}</p>}
+                            {/* {errors.groupShortName && <p className="mt-1 text-sm text-red-600">{errors.groupShortName}</p>} */}
                         </div>
                     </div>
 
@@ -192,7 +185,7 @@ export default function AddGroupPage() {
                         </button>
                         <button
                             type="submit"
-                            disabled={isLoading || isFetchingLastId}
+                            // disabled={isLoading || isFetchingLastId}
                             className="text-white bg-blue-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-blue-200 text-md shadow-lg shadow-blue-500/50 hover:scale-110 transition-all duration-200"
                         >
                             {isLoading ? (
