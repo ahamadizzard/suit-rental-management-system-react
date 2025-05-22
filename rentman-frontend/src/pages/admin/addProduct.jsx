@@ -103,18 +103,40 @@ export default function AddProduct() {
         }))
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setIsSubmitting(true)
-
-        const token = localStorage.getItem("token")
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+    const checkItemCodeExists = async (itemCode) => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_API_BASE_URL}/api/itemmaster/${itemCode}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            return !!response.data;
+        } catch (error) {
+            // If 404, item does not exist
+            if (error.response && error.response.status === 404) return false;
+            // Other errors
+            throw error;
         }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
 
         try {
+            // Check if item code exists
+            const exists = await checkItemCodeExists(formData.itemCode);
+            if (exists) {
+                toast.error("Item code already exists. Please use a different code.");
+                setIsSubmitting(false);
+                return;
+            }
+            const token = localStorage.getItem("token");
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
             const response = await axios.post(
                 import.meta.env.VITE_API_BASE_URL + "/api/itemmaster",
                 {
@@ -123,15 +145,14 @@ export default function AddProduct() {
                     itemPrice: Number(formData.itemPrice)
                 },
                 config
-            )
-
-            toast.success("Product added successfully!")
-            navigate("/dashboard/itemmaster")
+            );
+            toast.success("Product added successfully!");
+            navigate("/dashboard/itemmaster");
         } catch (error) {
-            console.error("Error adding item:", error)
-            toast.error("Failed to add product. Please try again.")
+            console.error("Error adding item:", error);
+            toast.error("Failed to add product. Please try again.");
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 

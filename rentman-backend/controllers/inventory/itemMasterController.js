@@ -54,6 +54,11 @@ export async function createItemMaster(req, res) {
     // isBlocked: req.body.isBlocked,
   });
   try {
+    // Check if itemCode already exists
+    const existing = await ItemMaster.findOne({ itemCode: req.body.itemCode });
+    if (existing) {
+      return res.status(400).json({ message: "Item code already exists. Please use a different code." });
+    }
     // Save the new item master to the database
     const savedItemMaster = await itemMaster.save();
     // Return a 201 status code and the saved item master
