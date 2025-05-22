@@ -48,7 +48,7 @@ export default function DashboardLayout() {
     return (
         <SidebarProvider
             style={{
-                "--sidebar-width": "16rem",
+                "--sidebar-width": "15rem",
             }}
         >
             <AppSidebar />

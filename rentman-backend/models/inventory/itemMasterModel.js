@@ -8,7 +8,7 @@ const itemMasterSchema = new mongoose.Schema(
     itemGroupShortDesc: { type: String, required: true },
     itemSize: { type: Number, required: true },
     itemPrice: { type: Number, required: true, default: 0 },
-    itemDateAdded: { type: Date, default: Date.now, format: "DD-MMM-YYYY" },
+    itemDateAdded: { type: String, default: Date.now, format: "DD-MMM-YYYY" },
     itemMaterialType: { type: String, default: "" },
     itemMaterialVendor: { type: String, default: "" },
     itemRemarks: { type: String, default: "" },
@@ -16,7 +16,7 @@ const itemMasterSchema = new mongoose.Schema(
     itemStatus: { type: String, default: "Available" }, // Available, Rented, DryClean, Blocked
     contributor: { type: String, default: "BlazorHub" },
     itemBlockedReason: { type: String, default: "" },
-    itemBlockedDate: { type: Date, default: "" },
+    itemBlockedDate: { type: String, default: "" },
     isBlocked: { type: Boolean, default: false },
     itemRentCount: { type: Number, default: 0 },
     itemLastRented: { type: Date, default: "" },
