@@ -57,7 +57,9 @@ export async function createItemMaster(req, res) {
     // Check if itemCode already exists
     const existing = await ItemMaster.findOne({ itemCode: req.body.itemCode });
     if (existing) {
-      return res.status(400).json({ message: "Item code already exists. Please use a different code." });
+      return res.status(400).json({
+        message: "Item code already exists. Please use a different code.",
+      });
     }
     // Save the new item master to the database
     const savedItemMaster = await itemMaster.save();
@@ -139,6 +141,44 @@ export async function updateItemByCode(req, res) {
       message: "Item updated successfully",
       updatedItem: item,
     });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+// get item by itemgroupshortdesc
+export async function getItemByGroupShortDesc(req, res) {
+  try {
+    // 1. Use the correct field name from your schema
+    console.log(req.params.itemGroupShortDesc);
+    const items = await ItemMaster.find({
+      itemGroupShortDesc: req.params.itemGroupShortDesc,
+    });
+
+    // 2. Check for empty array rather than null
+    if (items.length === 0) {
+      return res.status(404).json({ message: "No items found for this group" });
+    }
+
+    res.status(200).json(items);
+  } catch (error) {
+    // 3. Better error logging
+    console.error("Error fetching items:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
+// delete item by itemCode
+export async function deleteItemByCode(req, res) {
+  try {
+    const item = await ItemMaster.findOneAndDelete({
+      itemCode: req.params.itemCode,
+    });
+    if (!item) return res.status(404).send("Item not found");
+    res.status(200).json({ message: "Item deleted successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

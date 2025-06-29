@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
-import { toast } from "react-hot-toast"
+import toast from "react-hot-toast"
 import { format } from "date-fns"
 import { CalendarIcon } from "@radix-ui/react-icons"
 
@@ -39,6 +39,7 @@ const statusOptions = ["Available", "Rented", "DryClean", "Blocked"]
 
 export default function AddProduct() {
     const navigate = useNavigate()
+    const inputRef = useRef(null);
     const [formData, setFormData] = useState({
         itemCode: "",
         itemName: "",
@@ -58,6 +59,13 @@ export default function AddProduct() {
 
     const [groups, setGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(false);
+
+    useEffect(() => {
+        // Focus the item code input when the component mounts
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
 
     // Fetch groups on component mount
     useEffect(() => {
@@ -79,6 +87,7 @@ export default function AddProduct() {
             } catch (error) {
                 console.error("Failed to fetch groups:", error);
             } finally {
+                // toast.success("groups loaded successfully!");
                 setLoadingGroups(false);
             }
         };
@@ -110,12 +119,14 @@ export default function AddProduct() {
                 `${import.meta.env.VITE_API_BASE_URL}/api/itemmaster/${itemCode}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            console.log("Item code check response:", response);
             return !!response.data;
         } catch (error) {
             // If 404, item does not exist
             if (error.response && error.response.status === 404) return false;
             // Other errors
-            throw error;
+            // throw error;
+            return null; // Indicate an error occurred
         }
     };
 
@@ -178,6 +189,9 @@ export default function AddProduct() {
                                     <Input
                                         id="itemCode"
                                         name="itemCode"
+                                        type="text"
+                                        placeholder="Enter a unique item code"
+                                        ref={inputRef}
                                         value={formData.itemCode}
                                         onChange={handleChange}
                                         required
@@ -204,45 +218,44 @@ export default function AddProduct() {
                                         required
                                     />
                                 </div>
+                                <div className="space-y-2 flex flex-col md:flex-row gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="itemGroupShortDesc">Group *</Label>
+                                        {loadingGroups ? (
+                                            <Input disabled placeholder="Loading groups..." />
+                                        ) : (
+                                            <Select
+                                                value={formData.itemGroupShortDesc}
+                                                onValueChange={handleGroupChange}
+                                                required
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a group" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {groups.map((group) => (
+                                                        <SelectItem
+                                                            key={group.groupId}
+                                                            value={group.groupShortName}
+                                                        >
+                                                            {group.groupShortName}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="itemGroupShortDesc">Group Short Description *</Label>
-                                    {loadingGroups ? (
-                                        <Input disabled placeholder="Loading groups..." />
-                                    ) : (
-                                        <Select
-                                            value={formData.itemGroupShortDesc}
-                                            onValueChange={handleGroupChange}
-                                            required
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a group" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {groups.map((group) => (
-                                                    <SelectItem
-                                                        key={group.groupId}
-                                                        value={group.groupShortName}
-                                                    >
-                                                        {group.groupShortName}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="itemContributor">Item Contributor</Label>
+                                        <Input
+                                            id="itemContributor"
+                                            name="itemContributor"
+                                            value={formData.itemContributor}
+                                            placeholder="BlazorHub"
+                                        />
+                                    </div>
                                 </div>
-
-                                {/* <div className="space-y-2">
-                                    <Label htmlFor="itemGroupShortDesc">Group Short Description *</Label>
-                                    <Input
-                                        id="itemGroupShortDesc"
-                                        name="itemGroupShortDesc"
-                                        value={formData.itemGroupShortDesc}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div> */}
-
                                 <div className="space-y-2">
                                     <Label htmlFor="itemSize">Item Size *</Label>
                                     <Input

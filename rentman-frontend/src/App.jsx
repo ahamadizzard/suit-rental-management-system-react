@@ -11,6 +11,7 @@ import AddGroupPage from './pages/admin/addGroupPage';
 import GroupMasterPage from './pages/admin/groupMasterPage';
 import EditGroupPage from './pages/admin/editGroupPage.jsx';
 import NewBookingInvoice from './pages/cashier/newBookingInvoice.jsx';
+import { Toaster } from 'react-hot-toast';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -23,43 +24,46 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
+      <div>
+        <Toaster position='top-right' />
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<HomePage />} />
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<HomePage />} />
 
-            {/* Admin only routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              {/* <Route path="users" element={<UserManagement />} /> */}
-              {/* <Route path="settings" element={<SystemSettings />} /> */}
-            </Route>
+              {/* Admin only routes */}
+              <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                {/* <Route path="users" element={<UserManagement />} /> */}
+                {/* <Route path="settings" element={<SystemSettings />} /> */}
+              </Route>
 
-            {/* Manager routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
-              <Route path="/dashboard/itemmaster" element={<AdminProductPage />} />
-              <Route path="/dashboard/itemmaster/add" element={<AddProductPage />} />
-              <Route path="/dashboard/groupmaster/add" element={<AddGroupPage />} />
-              <Route path="/dashboard/groupmaster" element={<GroupMasterPage />} />
-              <Route path="/dashboard/groupmaster/editgroup/:groupId" element={<EditGroupPage />} />
-              {/* <Route path="reports" element={<Reports />} /> */}
-              {/* <Route path="price-adjustment" element={<PriceAdjustment />} /> */}
-            </Route>
+              {/* Manager routes */}
+              <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
+                <Route path="/dashboard/itemmaster" element={<AdminProductPage />} />
+                <Route path="/dashboard/itemmaster/add" element={<AddProductPage />} />
+                <Route path="/dashboard/groupmaster/add" element={<AddGroupPage />} />
+                <Route path="/dashboard/groupmaster" element={<GroupMasterPage />} />
+                <Route path="/dashboard/groupmaster/editgroup/:groupId" element={<EditGroupPage />} />
+                {/* <Route path="reports" element={<Reports />} /> */}
+                {/* <Route path="price-adjustment" element={<PriceAdjustment />} /> */}
+              </Route>
 
-            {/* Cashier routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
-              <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
-              {/* <Route path="dry-cleaning" element={<DryCleaning />} /> */}
-              {/* <Route path="tailoring" element={<Tailoring />} /> */}
+              {/* Cashier routes */}
+              <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
+                <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
+                {/* <Route path="dry-cleaning" element={<DryCleaning />} /> */}
+                {/* <Route path="tailoring" element={<Tailoring />} /> */}
+              </Route>
             </Route>
           </Route>
-        </Route>
 
-        <Route path="/unauthorized" element={<Unauthorized />} />
-      </Routes>
+          <Route path="/unauthorized" element={<Unauthorized />} />
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
