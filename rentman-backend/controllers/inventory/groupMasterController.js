@@ -12,19 +12,20 @@ export async function getGroupMaster(req, res) {
   }
 }
 
-// export async function getGroupMasterById(req, res) {
-//   const groupId = req.params.groupId;
-//   try {
-//     const groupMaster = await GroupMaster.findById(groupId);
-//     // If the item master is not found, return a 404 status code and a message
-//     if (!groupMaster) return res.status(404).send("Group not found");
-//     // Otherwise, return a 200 status code and the item master
-//     res.status(200).json(groupMaster);
-//   } catch (error) {
-//     // If an error occurs, return a 500 status code and the error message
-//     res.status(500).json({ message: error.message });
-//   }
-// }
+export async function getGroupMasterOld(req, res) {
+  try {
+    const groupMaster = await GroupMaster.find();
+
+    // Explicitly return empty array if no documents found
+    if (!groupMaster || groupMaster.length === 0) {
+      return res.status(200).json([]); // Send empty array instead of 204
+    }
+
+    res.status(200).json(groupMaster); // Always return 200 with data
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 export async function getGroupMasterById(req, res) {
   const groupId = req.params.groupId;

@@ -13,6 +13,34 @@
   }
 }
 
+/* Fix for Select dropdown */
+@layer components {
+  .SelectContent {
+    z-index: 9999;
+    position: relative;
+  }
+
+  .SelectViewport {
+    padding: 5px;
+  }
+
+  .SelectItem {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .SelectItem[data-highlighted] {
+    background-color: hsl(240 4.8% 95.9%);
+    color: hsl(240 10% 3.9%);
+  }
+}
+
+.SelectContent {
+  z-index: 9999 !important;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

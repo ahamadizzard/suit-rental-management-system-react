@@ -9,6 +9,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import groupMasterRouter from "./routes/groupMasterRouter.js";
 import salesInvoiceRouter from "./routes/salesInvoiceRouter.js";
+import contributorRouter from "./routes/contributorRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -52,6 +53,7 @@ app.use("/api/itemmaster", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
 app.use("/api/users", userRouter);
 app.use("/api/salesinvoice", salesInvoiceRouter);
+app.use("/api/contributor", contributorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

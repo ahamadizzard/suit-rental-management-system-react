@@ -14,7 +14,7 @@ const itemMasterSchema = new mongoose.Schema(
     itemRemarks: { type: String, default: "" },
     isSchoolItem: { type: Boolean, default: false },
     itemStatus: { type: String, default: "Available" }, // Available, Rented, DryClean, Blocked
-    contributor: { type: String, default: "BlazorHub" },
+    contributor: { type: String, default: "Blazor Hub" },
     itemBlockedReason: { type: String, default: "" },
     itemBlockedDate: { type: String, default: "" },
     isBlocked: { type: Boolean, default: false },

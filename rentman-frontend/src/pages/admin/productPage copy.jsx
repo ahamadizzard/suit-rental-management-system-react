@@ -5,9 +5,9 @@ import { FaSearch, FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import Modal from 'react-modal';
 import { Button } from '@/components/ui/button';
-// import { Label } from '@/components/ui/label';
-// import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue, SelectLabel } from '@/components/ui/select';
-// import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue, SelectLabel } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 Modal.setAppElement('#root');
 
@@ -17,10 +17,7 @@ export default function AdminProductPage() {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loadingGroups, setLoadingGroups] = useState(false);
-    const [loadingContributor, setLoadingContributor] = useState(false);
     const [groups, setGroups] = useState([]);
-    const [contributors, setContributors] = useState([]);
-
 
     // Modal states
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -29,7 +26,6 @@ export default function AdminProductPage() {
 
     // const [productToDelete, setProductToDelete] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    // const [selectedContributor, setSelectedContributor] = useState(null);
     // const navigate = useNavigate();
 
     // Fetch groups on component mount
@@ -53,22 +49,22 @@ export default function AdminProductPage() {
 
                 const data = response.data;
 
-                // console.log("Fetched groups:", data); // Confirm data shape
+                console.log("Fetched groups:", data); // Confirm data shape
 
                 // Check if data is an array
                 if (Array.isArray(data)) {
-                    const sortedGroups = data.sort((a, b) =>
-                        (a.groupShortName || '').localeCompare(b.groupShortName || '')
-                    );
+                    // const sortedGroups = data.sort((a, b) =>
+                    //     (a.groupShortName || '').localeCompare(b.groupShortName || '')
+                    // );
 
-                    setGroups(sortedGroups);
-                    // setGroups(data);
-                    // console.log("Groups after fetch:", data);
+                    // setGroups(sortedGroups);
+                    setGroups(data);
+                    console.log("Groups after fetch:", data);
 
                 } else {
                     // If data is not an array, handle accordingly
                     setGroups([]);
-                    // console.warn("Expected an array but got:", data);
+                    console.warn("Expected an array but got:", data);
                 }
             } catch (error) {
                 console.error("Fetch failed:", error);
@@ -78,35 +74,52 @@ export default function AdminProductPage() {
             }
 
         };
+
         fetchGroups();
     }, []);
 
-    //fetch contributors on component mount
+    // useEffect(() => {
+    //     const fetchGroups = async () => {
+    //         try {
+    //             setLoadingGroups(true);
+    //             const token = localStorage.getItem("token");
+
+    //             const response = await axios.get(
+    //                 `${import.meta.env.VITE_API_BASE_URL}/api/groupmaster`,
+    //                 {
+    //                     headers: {
+    //                         Authorization: `Bearer ${token}`,
+    //                         'Content-Type': 'application/json'
+    //                     },
+    //                     transformResponse: [function (data) {
+    //                         // Handle case where server returns 204 with no body
+    //                         return data ? JSON.parse(data) : [];
+    //                     }]
+    //                 }
+    //             );
+
+    //             console.log("Response data:", response.data); // Should now log [] if empty
+
+    //             const sortedGroups = response.data?.sort((a, b) =>
+    //                 a.groupShortName.localeCompare(b.groupShortName)
+    //             ) || []; // Fallback to empty array
+
+    //             setGroups(sortedGroups);
+    //         } catch (error) {
+    //             console.error("Fetch failed:", error);
+    //             setGroups([]); // Explicit empty state
+    //         } finally {
+    //             setLoadingGroups(false);
+    //         }
+    //     };
+
+    //     fetchGroups();
+    // }, []);
+
     useEffect(() => {
-        const fetchContributors = async () => {
-            try {
-                setLoadingContributor(true);
-                const token = localStorage.getItem("token");
-                const response = await axios.get(
-                    `${import.meta.env.VITE_API_BASE_URL}/api/contributor`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-                setContributors(response.data);
-                // console.log("Fetched contributors:", response.data);
-            } catch (error) {
-                console.error("Error fetching contributors:", error);
-                toast.error("Failed to load contributors");
-            } finally {
-                setLoadingContributor(false);
-            }
-        };
-        fetchContributors();
-    }, []);
+        console.log("Updated groups state:", groups);
+    }, [groups]);
+
 
     // Fetch products on component mount
     // This will also be triggered when isLoading is set to true
@@ -130,40 +143,6 @@ export default function AdminProductPage() {
             ...prev,
             itemGroupShortDesc: value
         }));
-    };
-    const handleContributorChange = (value) => {
-        setSelectedProduct(prev => ({
-            ...prev,
-            contributor: value
-        }));
-    };
-
-    const handleSaveProduct = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.put(
-                `${import.meta.env.VITE_API_BASE_URL}/api/itemMaster/${selectedProduct.itemCode}`,
-                selectedProduct,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            // toast.success("Product updated successfully!");
-            toast.success('Product updated successfully');
-            setIsEditModalOpen(false);
-            setIsLoading(true); // Refresh data
-            // Close the modal or refresh data as needed
-            // onClose(); // Assuming you have a function to close the modal
-            // Optionally: Refresh the product list
-            // fetchProducts(); 
-        } catch (error) {
-            console.error("Error updating product:", error);
-            toast.error(error.response?.data?.message || "Failed to update product");
-        }
     };
 
     useEffect(() => {
@@ -250,7 +229,7 @@ export default function AdminProductPage() {
             default: return 'bg-gray-100 text-gray-800 shadow-lg shadow-gray-500/50';
         }
     };
-
+    console.log('Groups data near return statement:', groups);
     return (
         <div className="w-full h-full max-h-full  bg-gray-50 p-6">
             <div className=" mx-auto">
@@ -286,7 +265,7 @@ export default function AdminProductPage() {
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow overflow-hidden mx-4">
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
                         <div className="overflow-x-auto">
                             {/* Delete Confirmation Modal */}
                             <Modal
@@ -568,7 +547,7 @@ export default function AdminProductPage() {
                             >
                                 <div className="p-6 w-full">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-bold text-blue-800">Edit Item</h2>
+                                        <h2 className="text-2xl font-bold text-gray-800">Edit Item</h2>
                                         <button
                                             onClick={() => setIsEditModalOpen(false)}
                                             className="text-gray-500 hover:text-gray-700"
@@ -581,7 +560,7 @@ export default function AdminProductPage() {
                                         <form className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-sm font-bold text-blue-800 mb-1">Item Code</label>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Item Code</label>
                                                     <input
                                                         type="text"
                                                         value={selectedProduct.itemCode}
@@ -590,7 +569,7 @@ export default function AdminProductPage() {
                                                     />
                                                 </div>
                                                 <div className='col-span-2'>
-                                                    <label className="block text-sm font-bold text-blue-800 mb-1">Item Name</label>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Item Name</label>
                                                     <input
                                                         type="text"
                                                         value={selectedProduct.itemName}
@@ -602,7 +581,7 @@ export default function AdminProductPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-bold text-blue-800 mb-1">Short Description</label>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Short Description</label>
                                                     <input
                                                         type="text"
                                                         value={selectedProduct.itemShortDesc || ''}
@@ -613,61 +592,91 @@ export default function AdminProductPage() {
                                                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                                     />
                                                 </div>
-
                                                 <div className="space-y-2">
-                                                    <label htmlFor="itemGroupShortDesc" className="block text-sm font-bold text-blue-800">
-                                                        Group *
-                                                    </label>
-
+                                                    <Label htmlFor="itemGroupShortDesc">Group *</Label>
                                                     {loadingGroups ? (
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Loading groups..."
-                                                            disabled
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
-                                                        />
+                                                        <Input placeholder="Loading groups..." />
                                                     ) : (
-                                                        <div className="relative">
-                                                            <select
-                                                                id="itemGroupShortDesc"
-                                                                value={selectedProduct?.itemGroupShortDesc || ""}
-                                                                onChange={(e) => handleGroupChange(e.target.value)}
-                                                                required
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
-                                                            >
-                                                                <option value="">{groups.length ? "Select group" : "No groups available"}</option>
-
+                                                        <Select
+                                                            value={selectedProduct?.itemGroupShortDesc || ""}
+                                                            onValueChange={handleGroupChange}
+                                                            required
+                                                        >
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Select a group" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="z-50 max-h-60 overflow-y-auto">
                                                                 {groups.length > 0 ? (
                                                                     groups.map((group) => (
-                                                                        <option
+                                                                        <SelectItem
                                                                             key={group.groupId}
                                                                             value={group.groupShortName}
-                                                                            className="flex items-center gap-2 py-1"
                                                                         >
-                                                                            {group.groupShortName} - {group.groupName}
-                                                                        </option>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className="font-medium">{group.groupShortName}</span>
+                                                                                <span className="text-muted-foreground text-xs">
+                                                                                    ({group.groupName})
+                                                                                </span>
+                                                                            </div>
+                                                                        </SelectItem>
                                                                     ))
                                                                 ) : (
-                                                                    <option value="" disabled>
+                                                                    <SelectItem value="none" disabled>
                                                                         No groups available
-                                                                    </option>
+                                                                    </SelectItem>
                                                                 )}
-                                                            </select>
-
-                                                            {/* Custom dropdown arrow */}
-                                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
+                                                            </SelectContent>
+                                                        </Select>
                                                     )}
                                                 </div>
 
-                                                <div>
-                                                    <label className="block text-sm font-bold text-blue-800 mb-1">Size</label>
+
+                                                {/* <div>
+
+<div className="space-y-2">
+                                                    <Label htmlFor="itemGroupShortDesc">Group *</Label>
+                                                    {loadingGroups ? (
+
+                                                        <Input disabled placeholder="Loading groups..." />
+                                                    ) : (
+                                                        <Select
+                                                            value={selectedProduct.itemGroupShortDesc}
+                                                            onValueChange={handleGroupChange}
+                                                            required
+                                                            className="z-50"
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a group" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {groups.map((group) => (
+                                                                    <SelectItem
+                                                                        key={group.groupId}
+                                                                        value={group.groupShortName}
+                                                                    >
+                                                                        {group.groupShortName}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
+                                                </div>
+
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Group</label>
                                                     <input
-                                                        type="number"
+                                                        type="text"
+                                                        value={selectedProduct.itemGroupShortDesc || ''}
+                                                        onChange={(e) => setSelectedProduct({
+                                                            ...selectedProduct,
+                                                            itemGroupShortDesc: e.target.value
+                                                        })}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                                    />
+                                                </div> */}
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Size</label>
+                                                    <input
+                                                        type="text"
                                                         value={selectedProduct.itemSize || ''}
                                                         onChange={(e) => setSelectedProduct({
                                                             ...selectedProduct,
@@ -677,9 +686,9 @@ export default function AdminProductPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-bold text-blue-800 mb-1">Price</label>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-1">Price</label>
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         value={selectedProduct.itemPrice || ''}
                                                         onChange={(e) => setSelectedProduct({
                                                             ...selectedProduct,
@@ -689,7 +698,7 @@ export default function AdminProductPage() {
                                                     />
                                                 </div>
 
-                                                <div className="flex items-center border p-2 text-blue-800 rounded-md">
+                                                <div className="flex items-center border p-2 border-gray-300 rounded-md">
                                                     <input
                                                         type="checkbox"
                                                         id="isBlocked"
@@ -700,7 +709,7 @@ export default function AdminProductPage() {
                                                         })}
                                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                     />
-                                                    <label htmlFor="isBlocked" className="ml-2 block text-sm font-bold text-blue-800">
+                                                    <label htmlFor="isBlocked" className="ml-2 block text-sm font-bold text-gray-700">
                                                         Blocked
                                                     </label>
                                                 </div>
@@ -715,19 +724,20 @@ export default function AdminProductPage() {
                                                         })}
                                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                     />
-                                                    <label htmlFor="isBlocked" className="ml-2 block text-sm font-bold text-blue-800">
+                                                    <label htmlFor="isBlocked" className="ml-2 block text-sm font-bold text-gray-700">
                                                         School Item
                                                     </label>
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-bold text-blue-800 mb-1">Remarks</label>
-                                                <textarea
+                                                <label className="block text-sm font-bold text-gray-700 mb-1">Remarks</label>
+                                                <input
+                                                    type="area"
                                                     name="remarks"
                                                     id="remarks"
                                                     maxLength={500}
                                                     autoComplete="off"
-                                                    rows={2} // You can adjust the number of rows
+                                                    rows="2"
                                                     placeholder="Enter remarks"
                                                     value={selectedProduct.itemRemarks || ''}
                                                     onChange={(e) => setSelectedProduct({
@@ -737,9 +747,8 @@ export default function AdminProductPage() {
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                                 />
                                             </div>
-
                                             <div>
-                                                <label className="block text-sm font-bold text-blue-800 mb-1">Material Type</label>
+                                                <label className="block text-sm font-bold text-gray-700 mb-1">Material Type</label>
                                                 <input
                                                     type="text"
                                                     value={selectedProduct.itemMaterialType || ''}
@@ -751,7 +760,7 @@ export default function AdminProductPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-bold text-blue-800 mb-1">Material Vendor</label>
+                                                <label className="block text-sm font-bold text-gray-700 mb-1">Material Vendor</label>
                                                 <input
                                                     type="text"
                                                     value={selectedProduct.itemMaterialVendor || ''}
@@ -762,69 +771,35 @@ export default function AdminProductPage() {
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                                 />
                                             </div>
-
-                                            <div className="space-y-2">
-                                                <label htmlFor="itemGroupShortDesc" className="block text-sm font-bold text-blue-800">
-                                                    Contributor
-                                                </label>
-
-                                                {loadingContributor ? (
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Loading contributors..."
-                                                        disabled
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
-                                                    />
-                                                ) : (
-                                                    <div className="relative">
-                                                        <select
-                                                            id="itemContributor"
-                                                            value={selectedProduct?.contributor || ""}
-                                                            onChange={(e) => handleContributorChange(e.target.value)}
-                                                            required
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
-                                                        >
-                                                            <option className='font-bold ' value="">{contributors.length ? "Select Contributor" : "No contributors available"}</option>
-
-                                                            {contributors.length > 0 ? (
-                                                                contributors.map((contributor) => (
-                                                                    <option
-                                                                        key={contributor.contributorId}
-                                                                        value={contributor.contributorName}
-                                                                        className="flex items-center gap-2 py-1"
-                                                                    >
-                                                                        {contributor.contributorName} - {contributor.percentage || 'N/A'}
-                                                                    </option>
-                                                                ))
-                                                            ) : (
-                                                                <option value="" disabled>
-                                                                    No contributors available
-                                                                </option>
-                                                            )}
-                                                        </select>
-
-                                                        {/* Custom dropdown arrow */}
-                                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-1">Contributor</label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedProduct.contributor || ''}
+                                                    onChange={(e) => setSelectedProduct({
+                                                        ...selectedProduct,
+                                                        contributor: e.target.value
+                                                    })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                                />
                                             </div>
 
                                             <div className="mt-6 flex justify-end space-x-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => setIsEditModalOpen(false)}
-                                                    className="px-4 py-2 border border-gray-300 font-bold text-gray-700 rounded-md hover:bg-red-800 cursor-pointer hover:text-white transition-colors duration-200"
+                                                    className="px-4 py-2 border border-gray-300 font-bold text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer hover:text-white transition-colors duration-200"
                                                 >
                                                     Cancel
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={handleSaveProduct}
-                                                    className="px-4 py-2 bg-blue-700 font-bold text-white rounded-md hover:bg-blue-900 cursor-pointer hover:text-white transition-colors duration-200"
+                                                    onClick={() => {
+                                                        toast.success('Product updated successfully');
+                                                        setIsEditModalOpen(false);
+                                                        setIsLoading(true); // Refresh data
+                                                    }}
+                                                    className="px-4 py-2 bg-green-600 font-bold text-white rounded-md hover:bg-green-700 cursor-pointer hover:text-white transition-colors duration-200"
                                                 >
                                                     Save Changes
                                                 </button>
@@ -891,9 +866,7 @@ export default function AdminProductPage() {
                                                         {product.itemStatus}
                                                     </span>
                                                 </td>
-                                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${product.isBlocked ? "text-red-500 font-bold" : "text-gray-500"}`}>
-                                                    {product.isBlocked ? "Yes" : "No"}
-                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.blocked ? "Yes" : "No"}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td>
                                                 <td className="px-6 py-4 ">
                                                     <div className="flex space-x-4">
@@ -933,9 +906,8 @@ export default function AdminProductPage() {
                             </table>
                         </div>
                     </div>
-                )
-                }
-            </div >
-        </div >
+                )}
+            </div>
+        </div>
     );
 }
