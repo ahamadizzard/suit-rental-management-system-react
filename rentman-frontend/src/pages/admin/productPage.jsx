@@ -5,32 +5,27 @@ import { FaSearch, FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import Modal from 'react-modal';
 import { Button } from '@/components/ui/button';
-// import { Label } from '@/components/ui/label';
-// import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue, SelectLabel } from '@/components/ui/select';
-// import { Input } from '@/components/ui/input';
 
 Modal.setAppElement('#root');
 
 export default function AdminProductPage() {
     const [isLoading, setIsLoading] = useState(true);
+
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
     const [loadingGroups, setLoadingGroups] = useState(false);
     const [loadingContributor, setLoadingContributor] = useState(false);
     const [groups, setGroups] = useState([]);
-    const [contributors, setContributors] = useState([]);
 
+    const [contributors, setContributors] = useState([]);
 
     // Modal states
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-    // const [productToDelete, setProductToDelete] = useState(null);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    // const [selectedContributor, setSelectedContributor] = useState(null);
-    // const navigate = useNavigate();
 
     // Fetch groups on component mount
     useEffect(() => {
@@ -53,8 +48,6 @@ export default function AdminProductPage() {
 
                 const data = response.data;
 
-                // console.log("Fetched groups:", data); // Confirm data shape
-
                 // Check if data is an array
                 if (Array.isArray(data)) {
                     const sortedGroups = data.sort((a, b) =>
@@ -62,13 +55,9 @@ export default function AdminProductPage() {
                     );
 
                     setGroups(sortedGroups);
-                    // setGroups(data);
-                    // console.log("Groups after fetch:", data);
-
                 } else {
                     // If data is not an array, handle accordingly
                     setGroups([]);
-                    // console.warn("Expected an array but got:", data);
                 }
             } catch (error) {
                 console.error("Fetch failed:", error);
@@ -156,10 +145,6 @@ export default function AdminProductPage() {
             toast.success('Product updated successfully');
             setIsEditModalOpen(false);
             setIsLoading(true); // Refresh data
-            // Close the modal or refresh data as needed
-            // onClose(); // Assuming you have a function to close the modal
-            // Optionally: Refresh the product list
-            // fetchProducts(); 
         } catch (error) {
             console.error("Error updating product:", error);
             toast.error(error.response?.data?.message || "Failed to update product");
@@ -175,13 +160,11 @@ export default function AdminProductPage() {
     }, [searchTerm, products]);
 
     const handleView = (product) => {
-        // navigate('/admin/view-product', { state: product });
         setSelectedProduct(product);
         setIsViewModalOpen(true);
     };
 
     const handleModify = (product) => {
-        // navigate('/admin/edit-product', { state: product });
         setSelectedProduct(product);
         setIsEditModalOpen(true);
     };
@@ -891,8 +874,22 @@ export default function AdminProductPage() {
                                                         {product.itemStatus}
                                                     </span>
                                                 </td>
-                                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${product.isBlocked ? "text-red-500 font-bold" : "text-gray-500"}`}>
-                                                    {product.isBlocked ? "Yes" : "No"}
+                                                <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${product.isBlocked ? "text-red-600" : "text-gray-500"}`}>
+                                                    {product.isBlocked ? (
+                                                        <span className="inline-flex items-center">
+                                                            <svg className="w-3 h-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                                            </svg>
+                                                            Blocked
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center">
+                                                            <svg className="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                            </svg>
+                                                            Active
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td>
                                                 <td className="px-6 py-4 ">

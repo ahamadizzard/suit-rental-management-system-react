@@ -1,39 +1,4 @@
-// import axios from "axios";
-// import { useEffect } from "react";
-// import { useState } from "react";
-
-// export default function NewBookingInvoice() {
-//     const [isLoading, setIsLoading] = useState(false);
-//     const [isFetchingLastId, setIsFetchingLastId] = useState(true);
-//     const [errors, setErrors] = useState({});
-//     const [invoiceNumber, setInvoiceNumber] = useState('');
-
-
-//     function generateInvoiceNumber() {
-//         const now = new Date();
-
-//         const day = String(now.getDate()).padStart(2, '0');
-//         const month = String(now.getMonth() + 1).padStart(2, '0');
-//         const year = now.getFullYear();
-//         const hours = String(now.getHours()).padStart(2, '0');
-//         const minutes = String(now.getMinutes()).padStart(2, '0');
-
-//         return `${day}${month}${year}${hours}${minutes}`;
-//     }
-//     useEffect(() => {
-//         setInvoiceNumber(generateInvoiceNumber());
-//     }, []);
-
-
-//     return (
-//         <div>
-//             <h1>Booking Invoice</h1>
-//             <p>Invoice Number: {invoiceNumber}</p>
-//             {/* Add your booking invoice form and logic here */}
-//         </div>
-//     );
-// }
-"use client"
+// "use client"
 import { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
@@ -81,22 +46,28 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 
 export default function SalesInvoicePage() {
-    const [groups, setGroups] = useState([])
+    const [loading, setLoading] = useState(false)
+
     const [items, setItems] = useState([])
     const [selectedItems, setSelectedItems] = useState([])
-    const [loading, setLoading] = useState(false)
     const [invoiceNumber, setInvoiceNumber] = useState('')
-    const [customer, setCustomer] = useState("01")
-    const [selectedGroup, setSelectedGroup] = useState('')
     const [selectedItem, setSelectedItem] = useState('')
-    const userName = localStorage.getItem('userFirstName')
-
     const [selectedItemCode, setSelectedItemCode] = useState('');
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [alteration, setAlteration] = useState('');
     const [itemPrice, setItemPrice] = useState('');
 
-    const [searchTerm, setSearchTerm] = useState('');
+    const [customer, setCustomer] = useState("01")
+
+    const userName = localStorage.getItem('userFirstName')
+
+    const [groups, setGroups] = useState([])
+    const [selectedGroup, setSelectedGroup] = useState('')
+
+
+
+
 
 
     const { register, handleSubmit, watch, setValue } = useForm({
