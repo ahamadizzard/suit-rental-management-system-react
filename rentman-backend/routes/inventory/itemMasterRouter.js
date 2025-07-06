@@ -8,7 +8,7 @@ import {
   updateItemByCode,
   getItemByGroupShortDesc,
   deleteItemByCode,
-} from "../controllers/inventory/itemMasterController.js";
+} from "../../controllers/inventory/itemMasterController.js";
 
 const itemMasterRouter = express.Router();
 

@@ -5,7 +5,7 @@ import {
   getContributor,
   getContributorById,
   updateContributor,
-} from "../controllers/inventory/contributorController.js";
+} from "../../controllers/inventory/contributorController.js";
 
 const contributorRouter = express.Router();
 

@@ -2,7 +2,7 @@ import express from "express";
 import {
   generateInvoiceNumber,
   createSalesInvoice,
-} from "../controllers/sales/salesInvoiceController.js";
+} from "../../controllers/sales/salesInvoiceController.js";
 
 const router = express.Router();
 

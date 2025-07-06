@@ -6,7 +6,7 @@ import {
   updateGroupMaster,
   getLastGroupId,
   deleteGroupMaster,
-} from "../controllers/inventory/groupMasterController.js";
+} from "../../controllers/inventory/groupMasterController.js";
 
 const groupMasterRouter = express.Router();
 

@@ -1,10 +1,11 @@
-import SalesInvoice from "../../models/sales/salesInvoiceModel.js";
+// import SalesInvoice from "../../models/sales/salesInvoiceModel.js";
+import SalesInvoiceMaster from "../../models/sales/salesInvoiceMasterModel.js";
 
 // Export an async function to get all sales invoices
 export async function getSalesInvoice(req, res) {
   try {
     // Find all sales invoices in the database
-    const salesInvoices = await SalesInvoice.find();
+    const salesInvoices = await SalesInvoiceMaster.find();
     // Return a 200 status code and the sales invoices
     res.status(200).json(salesInvoices);
   } catch (error) {
@@ -16,7 +17,9 @@ export async function getSalesInvoice(req, res) {
 export async function getSalesInvoiceById(req, res) {
   const invoiceId = req.params.invoiceId;
   try {
-    const salesInvoice = await SalesInvoice.findOne({ invoiceId: invoiceId });
+    const salesInvoice = await SalesInvoiceMaster.findOne({
+      invoiceId: invoiceId,
+    });
     if (!salesInvoice) return res.status(404).send("Sales Invoice not found");
     res.status(200).json(salesInvoice);
   } catch (error) {
@@ -25,7 +28,7 @@ export async function getSalesInvoiceById(req, res) {
 }
 // Export an async function to create a new sales invoice
 export async function createSalesInvoice(req, res) {
-  const salesInvoice = new SalesInvoice(req.body);
+  const salesInvoice = new SalesInvoiceMaster(req.body);
   try {
     const newSalesInvoice = await salesInvoice.save();
     res.status(201).json({
@@ -40,7 +43,7 @@ export async function createSalesInvoice(req, res) {
 export async function updateSalesInvoice(req, res) {
   const invoiceId = req.params.invoiceId;
   try {
-    const updatedSalesInvoice = await SalesInvoice.findOneAndUpdate(
+    const updatedSalesInvoice = await SalesInvoiceMaster.findOneAndUpdate(
       { invoiceId: invoiceId },
       req.body,
       { new: true }
@@ -59,7 +62,7 @@ export async function updateSalesInvoice(req, res) {
 export async function deleteSalesInvoice(req, res) {
   const invoiceId = req.params.invoiceId;
   try {
-    const deletedSalesInvoice = await SalesInvoice.findOneAndDelete({
+    const deletedSalesInvoice = await SalesInvoiceMaster.findOneAndDelete({
       invoiceId: invoiceId,
     });
     if (!deletedSalesInvoice)
@@ -76,7 +79,7 @@ export async function deleteSalesInvoice(req, res) {
 // Export an async function to get the last sales invoice ID
 export async function getLastSalesInvoiceId(req, res) {
   try {
-    const lastSalesInvoice = await SalesInvoice.findOne(
+    const lastSalesInvoice = await SalesInvoiceMaster.findOne(
       {},
       {},
       { sort: { invoiceId: -1 } }

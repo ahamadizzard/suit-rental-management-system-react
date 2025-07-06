@@ -3,13 +3,15 @@ import express from "express";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import connectDB from "./config/db.js";
-import itemMasterRouter from "./routes/itemMasterRouter.js";
-import userRouter from "./routes/userRouter.js";
+import itemMasterRouter from "./routes/inventory/itemMasterRouter.js";
+import userRouter from "./routes/employee/userRouter.js";
 import cors from "cors";
 import bodyParser from "body-parser";
-import groupMasterRouter from "./routes/groupMasterRouter.js";
-import salesInvoiceRouter from "./routes/salesInvoiceRouter.js";
-import contributorRouter from "./routes/contributorRouter.js";
+import groupMasterRouter from "./routes/inventory/groupMasterRouter.js";
+import salesInvoiceMasterRouter from "./routes/sales/Not Completed/salesInvoiceMasterRouter.js";
+import contributorRouter from "./routes/inventory/contributorRouter.js";
+import salesInvoiceDetails from "./routes/sales/salesInvoiceDetailsRouter.js";
+import customersRouter from "./routes/customer/customersRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -52,8 +54,10 @@ connectDB();
 app.use("/api/itemmaster", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
 app.use("/api/users", userRouter);
-app.use("/api/salesinvoice", salesInvoiceRouter);
+app.use("/api/salesinvoice", salesInvoiceMasterRouter);
 app.use("/api/contributor", contributorRouter);
+app.use("/api/salesinvoicedetails", salesInvoiceDetails);
+app.use("/api/customers", customersRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
