@@ -150,7 +150,7 @@ export async function updateItemByCode(req, res) {
 export async function getItemByGroupShortDesc(req, res) {
   try {
     // 1. Use the correct field name from your schema
-    console.log(req.params.itemGroupShortDesc);
+    // console.log(req.params.itemGroupShortDesc);
     const items = await ItemMaster.find({
       itemGroupShortDesc: req.params.itemGroupShortDesc,
     });
@@ -179,6 +179,19 @@ export async function deleteItemByCode(req, res) {
     });
     if (!item) return res.status(404).send("Item not found");
     res.status(200).json({ message: "Item deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+// get all the items which is not blocked
+export async function getUnblockedItems(req, res) {
+  try {
+    const items = await ItemMaster.find({
+      isBlocked: false,
+      itemGroupShortDesc: req.params.itemGroupShortDesc,
+    });
+    res.status(200).json(items);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

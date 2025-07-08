@@ -12,6 +12,9 @@ import salesInvoiceMasterRouter from "./routes/sales/Not Completed/salesInvoiceM
 import contributorRouter from "./routes/inventory/contributorRouter.js";
 import salesInvoiceDetails from "./routes/sales/salesInvoiceDetailsRouter.js";
 import customersRouter from "./routes/customer/customersRouter.js";
+import dailyTransactionsRouter from "./routes/sales/dailyTransactionsRouter.js";
+import salesInvoiceDetailsRouter from "./routes/sales/salesInvoiceDetailsRouter.js";
+import batchBookingRouter from "./routes/sales/batchBookingRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -53,11 +56,15 @@ connectDB();
 
 app.use("/api/itemmaster", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
-app.use("/api/users", userRouter);
-app.use("/api/salesinvoice", salesInvoiceMasterRouter);
 app.use("/api/contributor", contributorRouter);
-app.use("/api/salesinvoicedetails", salesInvoiceDetails);
+
+app.use("/api/users", userRouter);
+
+app.use("/api/salesinvoice", salesInvoiceMasterRouter);
+app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);
+app.use("/api/dailytransactions", dailyTransactionsRouter);
 app.use("/api/customers", customersRouter);
+app.use("/api/batchbooking", batchBookingRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

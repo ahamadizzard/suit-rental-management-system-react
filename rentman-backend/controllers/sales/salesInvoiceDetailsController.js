@@ -79,7 +79,7 @@ export async function getBookingsByCustomerId(req, res) {
 export async function getBookingsByItemId(req, res) {
   try {
     const bookings = await SalesInvoiceDetails.find({
-      itemId: req.params.itemId,
+      itemCode: req.params.itemId,
     });
     res.json(bookings);
   } catch (err) {

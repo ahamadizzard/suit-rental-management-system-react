@@ -9,10 +9,10 @@ import {
 
 const salesInvoiceMasterRouter = express.Router();
 
-salesInvoiceMasterRouter.get("/salesInvoice", getSalesInvoice);
+salesInvoiceMasterRouter.get("/", getSalesInvoice);
 salesInvoiceMasterRouter.get("/salesInvoice/:invoiceId", getSalesInvoiceById);
-salesInvoiceMasterRouter.post("/salesInvoice", createSalesInvoice);
-salesInvoiceMasterRouter.put("/salesInvoice", updateSalesInvoice);
+salesInvoiceMasterRouter.post("/", createSalesInvoice);
+salesInvoiceMasterRouter.put("/salesInvoice/:invoiceId", updateSalesInvoice);
 salesInvoiceMasterRouter.delete("/salesInvoice/:invoiceId", deleteSalesInvoice);
 
 export default salesInvoiceMasterRouter;

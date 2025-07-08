@@ -8,6 +8,7 @@ import {
   updateItemByCode,
   getItemByGroupShortDesc,
   deleteItemByCode,
+  getUnblockedItems,
 } from "../../controllers/inventory/itemMasterController.js";
 
 const itemMasterRouter = express.Router();
@@ -19,6 +20,7 @@ itemMasterRouter.put("/:itemCode", updateItemByCode);
 // itemMasterRouter.get("/:itemGroupShortDesc", getItemByGroupShortDesc);
 itemMasterRouter.get("/group/:itemGroupShortDesc", getItemByGroupShortDesc);
 itemMasterRouter.delete("/:itemCode", deleteItemByCode);
+itemMasterRouter.get("/unblocked", getUnblockedItems);
 
 // itemMasterRouter.delete("/:itemCode", deleteItemMaster);
 
