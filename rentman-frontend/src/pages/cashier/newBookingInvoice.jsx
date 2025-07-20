@@ -46,6 +46,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import toast from 'react-hot-toast'
 import "../../theme.css";
+import Swal from 'sweetalert2'
 
 export default function SalesInvoicePage() {
     const [loading, setLoading] = useState(false)
@@ -492,20 +493,64 @@ export default function SalesInvoicePage() {
 
     // Clear/cancel everything and start fresh
     const handleClearInvoice = () => {
-        setSelectedItems([]);
-        setInvoiceNumber(generateInvoiceNumber());
-        setValue('customerId', '');
-        setValue('customerName', '');
-        setValue('customerAddress', '');
-        setValue('customerTel1', '');
-        setValue('customerTel2', '');
-        setValue('nic1', '');
-        setValue('nic2', '');
-        setValue('remarks', '');
-        setValue('totalDiscount', 0);
-        setValue('advancePaid', 0);
-        setValue('depositAmount', 0);
-        setBookingStatus('Pending');
+        Swal.fire({
+            title: 'Clear Invoice',
+            text: 'Are you sure you want to clear the invoice? This will remove all items and customer details.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, clear it!'
+        }).then(
+            (result) => {
+                if (result.isConfirmed) {
+                    // Clear all state and form values
+                    setSelectedItems([]);
+                    setSelectedItem('');
+                    setSelectedItemDetails(null);
+                    setItemPrice('');
+                    setAlteration('');
+                    setSelectedGroup('');
+                    setSelectedCustomer('');
+                    setValue('customerId', '');
+                    setValue('customerName', '');
+                    setValue('customerAddress', '');
+                    setValue('customerTel1', '');
+                    setValue('customerTel2', '');
+                    setValue('nic1', '');
+                    setValue('nic2', '');
+                    setValue('remarks', '');
+                    setValue('deliveryDate', new Date().toISOString().split('T')[0]);
+                    setValue('returnDate', new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                    setValue('totalDiscount', 0);
+                    setValue('advancePaid', 0);
+                    setValue('depositAmount', 0);
+                    setBookingStatus('Pending');
+                    // Reset invoice number
+                    setInvoiceNumber(generateInvoiceNumber());
+                } else {
+                    return;
+                }
+            }
+        );
+
+        // const confirmClear = window.confirm('Are you sure you want to clear the invoice? This will remove all items and customer details.');
+        // if (!confirmClear) return;
+
+        // setSelectedItems([]);
+        // setInvoiceNumber(generateInvoiceNumber());
+        // setValue('customerId', '');
+        // setValue('customerName', '');
+        // setValue('customerAddress', '');
+        // setValue('customerTel1', '');
+        // setValue('customerTel2', '');
+        // setValue('nic1', '');
+        // setValue('nic2', '');
+        // setValue('remarks', '');
+        // setValue('totalDiscount', 0);
+        // setValue('advancePaid', 0);
+        // setValue('depositAmount', 0);
+        // setBookingStatus('Pending');
     };
 
     // Helper: fetch bookings for an item
@@ -661,7 +706,7 @@ export default function SalesInvoicePage() {
                         </CardContent>
                     </Card>
                     {/* Items Table */}
-                    <div className="border-2 border-[#0a174e] rounded-xl bg-white/95 overflow-x-auto max-h-[340px] shadow-md">
+                    <div className="border-2 border-[#0a174e] rounded-xl bg-white/95 overflow-x-auto max-h-[340px] shadow-md mb-3">
                         <Table className="text-xs">
                             <TableHeader className="bg-gradient-to-r from-[#0a174e]/80 via-[#f5f7fa]/80 to-[#d7263d]/80">
                                 <TableRow>
@@ -778,236 +823,270 @@ export default function SalesInvoicePage() {
                             </Card>
                         )}
                     </div>
+                    <div className="grid grid-cols-1 gap-2">
+                        {/* Customer & Dates Card */}
+                        <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg">
+                            <CardHeader className="py-2 px-4 border-b-2 flex flex-row items-center gap-2" style={{ background: "linear-gradient(90deg, var(--color-navy-light) 60%, var(--color-red-light) 100%)", borderColor: "var(--color-navy)" }}>
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-[var(--color-navy)]"><rect x="3" y="6" width="18" height="12" rx="3" fill="var(--color-navy)" /><rect x="7" y="10" width="10" height="4" rx="2" fill="var(--color-red-light)" /></svg>
+                                <CardTitle className="text-base font-bold tracking-wide" style={{ color: "var(--color-navy)" }}>Customer & Dates</CardTitle>
+                            </CardHeader>
+                            <CardContent className="py-2 px-4">
+                                <div className="grid grid-cols-2 gap-1">
+                                    <div className="w-[150px] h-[45px]">
+                                        <Label className="text-xs">Customer List</Label>
+                                        <Combobox value={selectedCustomer} onValueChange={handleCustomerSelect} >
+
+                                            <ComboboxAnchor>
+                                                <ComboboxInput placeholder="Customer..." className="h-7 text-xs" />
+                                                <ComboboxTrigger>
+                                                    <ChevronDown className="h-3 w-3" />
+                                                </ComboboxTrigger>
+                                            </ComboboxAnchor>
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No customers</ComboboxEmpty>
+                                                {customers.map((customer) => (
+                                                    <ComboboxItem key={customer.customerId} value={customer.customerId}>
+                                                        {customer.customerId} - {customer.customerName}
+                                                    </ComboboxItem>
+                                                ))}
+                                            </ComboboxContent>
+                                        </Combobox>
+                                    </div>
+                                    {/* <div>
+                                            <Label htmlFor="customerId" className="text-xs">Customer ID</Label>
+                                            <Input id="customerId" {...register('customerId')} className="h-7 text-xs" value="01" autoFocus tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerName')?.focus(); } }} />
+                                        </div> */}
+                                    <div>
+                                        <Label htmlFor="customerName" className="text-xs">Name</Label>
+                                        <Input id="customerName" {...register('customerName')} className="h-10 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerAddress')?.focus(); } }} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Label htmlFor="customerAddress" className="text-xs">Address</Label>
+                                        <Textarea id="customerAddress" {...register('customerAddress')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel1')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="customerTel1" className="text-xs">Tel 1</Label>
+                                        <Input id="customerTel1" {...register('customerTel1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel2')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="customerTel2" className="text-xs">Tel 2</Label>
+                                        <Input id="customerTel2" {...register('customerTel2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic1')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="nic1" className="text-xs">NIC 1</Label>
+                                        <Input id="nic1" {...register('nic1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic2')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="nic2" className="text-xs">NIC 2</Label>
+                                        <Input id="nic2" {...register('nic2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('deliveryDate')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="deliveryDate" className="text-xs">Delivery</Label>
+                                        <Input
+                                            type="date"
+                                            id="deliveryDate"
+                                            {...register('deliveryDate')}
+                                            className="h-7 text-xs"
+                                            tabIndex={0}
+                                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('returnDate')?.focus(); } }}
+                                            onChange={(e) => {
+                                                setValue('deliveryDate', e.target.value)
+                                                handleDateChange('deliveryDate', e.target.value)
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="returnDate" className="text-xs">Return</Label>
+                                        <Input
+                                            type="date"
+                                            id="returnDate"
+                                            {...register('returnDate')}
+                                            className="h-7 text-xs"
+                                            tabIndex={0}
+                                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('totalDiscount')?.focus(); } }}
+                                            onChange={(e) => {
+                                                setValue('returnDate', e.target.value)
+                                                handleDateChange('returnDate', e.target.value)
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        {/* Payment Card */}
+                        <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg">
+                            <CardHeader className="py-2 px-4 border-b-2 flex flex-row items-center gap-2" style={{ background: "linear-gradient(90deg, var(--color-red-light) 60%, var(--color-navy-light) 100%)", borderColor: "var(--color-navy)" }}>
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-[var(--color-red)]"><rect x="3" y="6" width="18" height="12" rx="3" fill="var(--color-red-light)" /><rect x="7" y="10" width="10" height="4" rx="2" fill="var(--color-navy-light)" /></svg>
+                                <CardTitle className="text-base font-bold tracking-wide" style={{ color: "var(--color-red)" }}>Payment</CardTitle>
+                            </CardHeader>
+                            <CardContent className="py-2 px-4">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <Label htmlFor="totalAmount" className="text-xs">Total</Label>
+                                        <Input id="totalAmount" type="number" readOnly {...register('totalAmount', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="totalDiscount" className="text-xs">Discount</Label>
+                                        <Input id="totalDiscount" type="number" {...register('totalDiscount', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('advancePaid')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="netTotal" className="text-xs">Net</Label>
+                                        <Input id="netTotal" type="number" readOnly {...register('netTotal', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="advancePaid" className="text-xs">Advance</Label>
+                                        <Input id="advancePaid" type="number" {...register('advancePaid', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('depositAmount')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="balanceAmount" className="text-xs">Balance</Label>
+                                        <Input id="balanceAmount" type="number" readOnly {...register('balanceAmount', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="depositAmount" className="text-xs">Deposit</Label>
+                                        <Input id="depositAmount" type="number" {...register('depositAmount', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('remarks')?.focus(); } }} />
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <Label htmlFor="remarks" className="text-xs">Remarks</Label>
+                                    <Textarea id="remarks" {...register('remarks')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('bookingStatus')?.focus(); } }} />
+                                </div>
+                                <div className="mt-2">
+                                    <Label htmlFor="bookingStatus" className="text-xs">Booking Status</Label>
+                                    <Select id="bookingStatus" value={bookingStatus} onValueChange={setBookingStatus}>
+                                        <SelectTrigger className="h-7 text-xs" tabIndex={0}>
+                                            <SelectValue placeholder="Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Pending">Pending</SelectItem>
+                                            <SelectItem value="Completed">Completed</SelectItem>
+                                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    {/* Sticky action bar for Save/Cancel */}
+                    <div className="sticky bottom-0 z-20 flex justify-end gap-3 bg-gradient-to-r from-[#f5f7fa]/80 to-[#e5e9f7]/80 py-3 px-2 rounded-b-xl border-t-2 border-[#0a174e] shadow-inner">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="h-8 px-6 text-base border-2 border-[#0a174e] bg-white text-[#0a174e] hover:bg-gray-300 cursor-pointer font-bold shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none"
+                            onClick={handleClearInvoice}
+                            disabled={saving}
+                            tabIndex={0}
+                        >
+                            <svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#d7263d" /><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" strokeWidth="2" /></svg>
+                            Clear/Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            ref={saveButtonRef}
+                            disabled={selectedItems.length === 0 || saving}
+                            className="h-8 px-6 text-base bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white font-bold border-2 border-[#0a174e] shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none animated-btn"
+                            tabIndex={0}
+                            aria-label="Save Invoice (Ctrl+S)"
+                        >
+                            {saving ? (
+                                <span className="flex items-center gap-2"><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Saving...</span>
+                            ) : (
+                                <span className="flex items-center gap-2"><svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#0a174e" /><path d="M8 12h8" stroke="#fff" strokeWidth="2" /></svg>Save Invoice</span>
+                            )}
+                        </Button>
+                    </div>
+                    <div className="text-xs text-[#0a174e] mt-2 text-right font-semibold">Tip: Use <span className="font-bold text-[#d7263d]">Tab</span> to move, <span className="font-bold text-[#d7263d]">Enter</span> to add, <span className="font-bold text-[#d7263d]">Ctrl+S</span> to save, <span className="font-bold text-[#d7263d]">Esc</span> to close dialogs.</div>
+
+                    {/* Confirmation Dialog */}
+                    {showConfirmDialog && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(10,23,78,0.50)' }}>
+                            <div
+                                className="relative bg-gradient-to-br from-[#f5f7fa]/95 via-[#fff]/98 to-[#e5e9f7]/95 p-0 rounded-2xl shadow-2xl border-2 border-[#0a174e] animate-fade-in min-w-[340px] max-w-[95vw]"
+                                style={{ boxShadow: '0 12px 40px 0 rgba(10,23,78,0.18)' }}
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="confirm-dialog-title"
+                            >
+                                {/* Decorative top bar */}
+                                <div className="h-2 w-full rounded-t-2xl bg-gradient-to-r from-[#0a174e] via-[#d7263d] to-[#0a174e] mb-2" />
+                                <div className="px-8 pt-4 pb-2 flex flex-col items-center">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-[#0a174e]"><circle cx="12" cy="12" r="10" fill="#e5e9f7" /><path d="M12 8v4" stroke="#0a174e" strokeWidth="2" strokeLinecap="round" /><circle cx="12" cy="16" r="1" fill="#d7263d" /></svg>
+                                        <div id="confirm-dialog-title" className="text-xl font-bold text-[#0a174e] drop-shadow">Confirm Save Invoice</div>
+                                    </div>
+                                    <div className="mb-2 text-[#0a174e] text-base text-center">Are you sure you want to <span className="font-semibold text-[#d7263d]">save this invoice</span> and all related bookings/transactions?</div>
+                                </div>
+                                <div className="flex gap-4 justify-end mt-4 px-8 pb-6">
+                                    <Button
+                                        variant="outline"
+                                        className="border-2 border-[#0a174e] text-[#0a174e] focus:ring-2 focus:ring-[#d7263d] focus:outline-none px-6 py-2 rounded-lg text-base font-semibold hover:bg-[#e5e9f7] transition"
+                                        onClick={() => { setShowConfirmDialog(false); setPendingFormData(null); }}
+                                        tabIndex={0}
+                                        autoFocus
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                setShowConfirmDialog(false); setPendingFormData(null);
+                                            }
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        className="bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white focus:ring-2 focus:ring-[#d7263d] focus:outline-none px-6 py-2 rounded-lg text-base font-semibold shadow-md transition border-2 border-[#0a174e]"
+                                        onClick={handleConfirmedSave}
+                                        tabIndex={0}
+                                        disabled={saving}
+                                        onKeyDown={e => {
+                                            if ((e.key === 'Enter' || e.key === ' ') && !saving) {
+                                                handleConfirmedSave();
+                                            }
+                                        }}
+                                    >
+                                        {saving ? (
+                                            <span className="flex items-center gap-2"><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Saving...</span>
+                                        ) : 'Yes, Save'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 {/* Right: Customer, Dates, Payment */}
                 <div className="flex-1 min-w-[320px] max-w-[800px]">
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 gap-2">
-                            {/* Customer & Dates Card */}
-                            <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg">
-                                <CardHeader className="py-2 px-4 border-b-2 flex flex-row items-center gap-2" style={{ background: "linear-gradient(90deg, var(--color-navy-light) 60%, var(--color-red-light) 100%)", borderColor: "var(--color-navy)" }}>
-                                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-[var(--color-navy)]"><rect x="3" y="6" width="18" height="12" rx="3" fill="var(--color-navy)" /><rect x="7" y="10" width="10" height="4" rx="2" fill="var(--color-red-light)" /></svg>
-                                    <CardTitle className="text-base font-bold tracking-wide" style={{ color: "var(--color-navy)" }}>Customer & Dates</CardTitle>
-                                </CardHeader>
-                                <CardContent className="py-2 px-4">
-                                    <div className="grid grid-cols-2 gap-1">
-                                        <div className="w-[150px] h-[45px]">
-                                            <Label className="text-xs">Customer List</Label>
-                                            <Combobox value={selectedCustomer} onValueChange={handleCustomerSelect} >
 
-                                                <ComboboxAnchor>
-                                                    <ComboboxInput placeholder="Customer..." className="h-7 text-xs" />
-                                                    <ComboboxTrigger>
-                                                        <ChevronDown className="h-3 w-3" />
-                                                    </ComboboxTrigger>
-                                                </ComboboxAnchor>
-                                                <ComboboxContent>
-                                                    <ComboboxEmpty>No customers</ComboboxEmpty>
-                                                    {customers.map((customer) => (
-                                                        <ComboboxItem key={customer.customerId} value={customer.customerId}>
-                                                            {customer.customerId} - {customer.customerName}
-                                                        </ComboboxItem>
-                                                    ))}
-                                                </ComboboxContent>
-                                            </Combobox>
-                                        </div>
-                                        {/* <div>
-                                            <Label htmlFor="customerId" className="text-xs">Customer ID</Label>
-                                            <Input id="customerId" {...register('customerId')} className="h-7 text-xs" value="01" autoFocus tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerName')?.focus(); } }} />
-                                        </div> */}
-                                        <div>
-                                            <Label htmlFor="customerName" className="text-xs">Name</Label>
-                                            <Input id="customerName" {...register('customerName')} className="h-10 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerAddress')?.focus(); } }} />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <Label htmlFor="customerAddress" className="text-xs">Address</Label>
-                                            <Textarea id="customerAddress" {...register('customerAddress')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel1')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="customerTel1" className="text-xs">Tel 1</Label>
-                                            <Input id="customerTel1" {...register('customerTel1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel2')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="customerTel2" className="text-xs">Tel 2</Label>
-                                            <Input id="customerTel2" {...register('customerTel2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic1')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="nic1" className="text-xs">NIC 1</Label>
-                                            <Input id="nic1" {...register('nic1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic2')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="nic2" className="text-xs">NIC 2</Label>
-                                            <Input id="nic2" {...register('nic2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('deliveryDate')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="deliveryDate" className="text-xs">Delivery</Label>
-                                            <Input
-                                                type="date"
-                                                id="deliveryDate"
-                                                {...register('deliveryDate')}
-                                                className="h-7 text-xs"
-                                                tabIndex={0}
-                                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('returnDate')?.focus(); } }}
-                                                onChange={(e) => {
-                                                    setValue('deliveryDate', e.target.value)
-                                                    handleDateChange('deliveryDate', e.target.value)
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="returnDate" className="text-xs">Return</Label>
-                                            <Input
-                                                type="date"
-                                                id="returnDate"
-                                                {...register('returnDate')}
-                                                className="h-7 text-xs"
-                                                tabIndex={0}
-                                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('totalDiscount')?.focus(); } }}
-                                                onChange={(e) => {
-                                                    setValue('returnDate', e.target.value)
-                                                    handleDateChange('returnDate', e.target.value)
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                </CardContent>
+                            <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg flex flex-col items-center">
+                                <h2>Customer purchase history will be here</h2>
                             </Card>
-                            {/* Payment Card */}
-                            <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg">
-                                <CardHeader className="py-2 px-4 border-b-2 flex flex-row items-center gap-2" style={{ background: "linear-gradient(90deg, var(--color-red-light) 60%, var(--color-navy-light) 100%)", borderColor: "var(--color-navy)" }}>
-                                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-[var(--color-red)]"><rect x="3" y="6" width="18" height="12" rx="3" fill="var(--color-red-light)" /><rect x="7" y="10" width="10" height="4" rx="2" fill="var(--color-navy-light)" /></svg>
-                                    <CardTitle className="text-base font-bold tracking-wide" style={{ color: "var(--color-red)" }}>Payment</CardTitle>
-                                </CardHeader>
-                                <CardContent className="py-2 px-4">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <Label htmlFor="totalAmount" className="text-xs">Total</Label>
-                                            <Input id="totalAmount" type="number" readOnly {...register('totalAmount', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="totalDiscount" className="text-xs">Discount</Label>
-                                            <Input id="totalDiscount" type="number" {...register('totalDiscount', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('advancePaid')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="netTotal" className="text-xs">Net</Label>
-                                            <Input id="netTotal" type="number" readOnly {...register('netTotal', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="advancePaid" className="text-xs">Advance</Label>
-                                            <Input id="advancePaid" type="number" {...register('advancePaid', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('depositAmount')?.focus(); } }} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="balanceAmount" className="text-xs">Balance</Label>
-                                            <Input id="balanceAmount" type="number" readOnly {...register('balanceAmount', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="depositAmount" className="text-xs">Deposit</Label>
-                                            <Input id="depositAmount" type="number" {...register('depositAmount', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('remarks')?.focus(); } }} />
-                                        </div>
-                                    </div>
-                                    <div className="mt-2">
-                                        <Label htmlFor="remarks" className="text-xs">Remarks</Label>
-                                        <Textarea id="remarks" {...register('remarks')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('bookingStatus')?.focus(); } }} />
-                                    </div>
-                                    <div className="mt-2">
-                                        <Label htmlFor="bookingStatus" className="text-xs">Booking Status</Label>
-                                        <Select id="bookingStatus" value={bookingStatus} onValueChange={setBookingStatus}>
-                                            <SelectTrigger className="h-7 text-xs" tabIndex={0}>
-                                                <SelectValue placeholder="Status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
-                                                <SelectItem value="Completed">Completed</SelectItem>
-                                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                        {/* Sticky action bar for Save/Cancel */}
-                        <div className="sticky bottom-0 z-20 flex justify-end gap-3 bg-gradient-to-r from-[#f5f7fa]/80 to-[#e5e9f7]/80 py-3 px-2 rounded-b-xl border-t-2 border-[#0a174e] shadow-inner">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-8 px-6 text-base border-2 border-[#0a174e] bg-white text-[#0a174e] font-bold shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none"
-                                onClick={handleClearInvoice}
-                                disabled={saving}
-                                tabIndex={0}
-                            >
-                                <svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#d7263d" /><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" strokeWidth="2" /></svg>
-                                Clear/Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                ref={saveButtonRef}
-                                disabled={selectedItems.length === 0 || saving}
-                                className="h-8 px-6 text-base bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white font-bold border-2 border-[#0a174e] shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none animated-btn"
-                                tabIndex={0}
-                                aria-label="Save Invoice (Ctrl+S)"
-                            >
-                                {saving ? (
-                                    <span className="flex items-center gap-2"><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Saving...</span>
-                                ) : (
-                                    <span className="flex items-center gap-2"><svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#0a174e" /><path d="M8 12h8" stroke="#fff" strokeWidth="2" /></svg>Save Invoice</span>
-                                )}
-                            </Button>
-                        </div>
-                        <div className="text-xs text-[#0a174e] mt-2 text-right font-semibold">Tip: Use <span className="font-bold text-[#d7263d]">Tab</span> to move, <span className="font-bold text-[#d7263d]">Enter</span> to add, <span className="font-bold text-[#d7263d]">Ctrl+S</span> to save, <span className="font-bold text-[#d7263d]">Esc</span> to close dialogs.</div>
 
-                        {/* Confirmation Dialog */}
-                        {showConfirmDialog && (
-                            <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(10,23,78,0.50)' }}>
-                                <div
-                                    className="relative bg-gradient-to-br from-[#f5f7fa]/95 via-[#fff]/98 to-[#e5e9f7]/95 p-0 rounded-2xl shadow-2xl border-2 border-[#0a174e] animate-fade-in min-w-[340px] max-w-[95vw]"
-                                    style={{ boxShadow: '0 12px 40px 0 rgba(10,23,78,0.18)' }}
-                                    role="dialog"
-                                    aria-modal="true"
-                                    aria-labelledby="confirm-dialog-title"
-                                >
-                                    {/* Decorative top bar */}
-                                    <div className="h-2 w-full rounded-t-2xl bg-gradient-to-r from-[#0a174e] via-[#d7263d] to-[#0a174e] mb-2" />
-                                    <div className="px-8 pt-4 pb-2 flex flex-col items-center">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-[#0a174e]"><circle cx="12" cy="12" r="10" fill="#e5e9f7" /><path d="M12 8v4" stroke="#0a174e" strokeWidth="2" strokeLinecap="round" /><circle cx="12" cy="16" r="1" fill="#d7263d" /></svg>
-                                            <div id="confirm-dialog-title" className="text-xl font-bold text-[#0a174e] drop-shadow">Confirm Save Invoice</div>
+
+                            {/* Bookings card at bottom of screen, always visible if bookings exist for selected item and not in modal */}
+                            {Array.isArray(itemBookingInfo) && itemBookingInfo.length > 0 && !showBookingConflict && (
+                                <Card className="mb-2 border-2 border-[#0a174e] shadow-lg bg-white/90 animate-fade-in">
+                                    <CardHeader className="py-2 px-4 border-b-2 flex flex-row items-center gap-2" style={{ background: "linear-gradient(90deg, var(--color-navy-light) 60%, var(--color-red-light) 100%)", borderColor: "var(--color-navy)" }}>
+                                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-[var(--color-navy)]"><circle cx="12" cy="12" r="10" fill="var(--color-navy-light)" /><path d="M12 8v4" stroke="var(--color-red)" strokeWidth="2" strokeLinecap="round" /><circle cx="12" cy="16" r="1" fill="var(--color-red)" /></svg>
+                                        <CardTitle className="text-base font-bold tracking-wide" style={{ color: "var(--color-navy)" }}>Bookings for this item</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="py-2 px-4">
+                                        <div className="text-xs text-[var(--color-navy)] max-h-[160px] overflow-y-auto">
+                                            {itemBookingInfo.map((booking, idx) => (
+                                                <div key={booking._id || idx} className="mb-2 p-2 border-b border-[var(--color-navy-light)] last:border-b-0">
+                                                    <div><b>Item Code:</b> {booking.itemCode}</div>
+                                                    <div><b>Invoice #:</b> {booking.invoiceNo}</div>
+                                                    <div><b>Name:</b> {booking.itemShortDesc || '-'}</div>
+                                                    <div><b>Size:</b> {booking.itemSize || '-'}</div>
+                                                    <div><b>Delivery:</b> {booking.deliveryDate ? new Date(booking.deliveryDate).toLocaleDateString() : '-'}</div>
+                                                    <div><b>Return:</b> {booking.returnDate ? new Date(booking.returnDate).toLocaleDateString() : '-'}</div>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <div className="mb-2 text-[#0a174e] text-base text-center">Are you sure you want to <span className="font-semibold text-[#d7263d]">save this invoice</span> and all related bookings/transactions?</div>
-                                    </div>
-                                    <div className="flex gap-4 justify-end mt-4 px-8 pb-6">
-                                        <Button
-                                            variant="outline"
-                                            className="border-2 border-[#0a174e] text-[#0a174e] focus:ring-2 focus:ring-[#d7263d] focus:outline-none px-6 py-2 rounded-lg text-base font-semibold hover:bg-[#e5e9f7] transition"
-                                            onClick={() => { setShowConfirmDialog(false); setPendingFormData(null); }}
-                                            tabIndex={0}
-                                            autoFocus
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    setShowConfirmDialog(false); setPendingFormData(null);
-                                                }
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            className="bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white focus:ring-2 focus:ring-[#d7263d] focus:outline-none px-6 py-2 rounded-lg text-base font-semibold shadow-md transition border-2 border-[#0a174e]"
-                                            onClick={handleConfirmedSave}
-                                            tabIndex={0}
-                                            disabled={saving}
-                                            onKeyDown={e => {
-                                                if ((e.key === 'Enter' || e.key === ' ') && !saving) {
-                                                    handleConfirmedSave();
-                                                }
-                                            }}
-                                        >
-                                            {saving ? (
-                                                <span className="flex items-center gap-2"><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Saving...</span>
-                                            ) : 'Yes, Save'}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
+
+
+                        </div>
+
                     </form>
                 </div>
             </div>
