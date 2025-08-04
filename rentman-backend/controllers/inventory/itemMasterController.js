@@ -196,3 +196,24 @@ export async function getUnblockedItems(req, res) {
     res.status(400).json({ message: error.message });
   }
 }
+
+export async function searchItem(req, res) {
+  const searchQuery = parseInt(req.params.query);
+
+  try {
+    const itemMaster = await itemMaster.find({
+      $or: [
+        // { itemCode: req.params.itemCode },
+        // { itemCode: parseInt(req.params.itemCode) },
+        { itemCode: { $regex: searchQuery, $options: "i" } },
+        // this code being used for some complex search with multiple queries for arrays
+        // { altNames: { $elemMatch: { $regex: searchQuery, $options: "i" } } },
+        // { altNames: { $regex: searchQuery, $options: "i" } },
+      ],
+      isBlocked: false,
+    });
+    res.status(200).json(itemMaster);
+  } catch (error) {
+    res.status(500).json({ message: "Error searching products", error: error });
+  }
+}

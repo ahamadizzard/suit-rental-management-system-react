@@ -40,13 +40,20 @@ import {
     ComboboxSeparator,
     ComboboxTrigger,
 } from "@/components/ui/combobox";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronDownIcon } from "lucide-react";
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import toast from 'react-hot-toast'
 import "../../theme.css";
 import Swal from 'sweetalert2'
+import { Calendar } from '@/components/ui/calendar'
+import { DayPicker } from 'react-day-picker'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 export default function SalesInvoicePage() {
     const [loading, setLoading] = useState(false)
@@ -61,6 +68,9 @@ export default function SalesInvoicePage() {
     const [alteration, setAlteration] = useState('');
     const [itemPrice, setItemPrice] = useState('');
     const [lastAddedItemCode, setLastAddedItemCode] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("")
+    const [searchedItems, setSearchedItems] = useState([]);
+    const [error, setError] = useState(null);
 
     const [invoiceNumber, setInvoiceNumber] = useState('')
 
@@ -81,7 +91,10 @@ export default function SalesInvoicePage() {
     const [showBookingConflict, setShowBookingConflict] = useState(false);
     const [pendingItemToAdd, setPendingItemToAdd] = useState(null);
 
+    const [open, setOpen] = useState(false)
+    const [date, setDate] = useState(new Date());
 
+    const [comboInputValue, setComboInputValue] = useState('');
 
     // Keyboard shortcuts: Ctrl+S to save, Esc to close dialog
     useEffect(() => {
@@ -191,6 +204,45 @@ export default function SalesInvoicePage() {
             fetchItems()
         }
     }, [selectedGroup])
+
+    // search item
+    useEffect(() => {
+        setLoading(true);
+        const searchItems = async () => {
+            if (searchQuery.length > 0) {
+                try {
+                    const response = await axios.get(
+                        import.meta.env.VITE_API_BASE_URL + '/api/itemmaster/search/' + searchQuery
+                    )
+                    setSearchedItems(response.data);
+
+                } catch (error) {
+                    setError(error.response?.data?.message || "Failed to search items");
+                    setSearchedItems([]); // Clear products on error
+                    console.log(error);
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                axios.get(import.meta.env.VITE_API_BASE_URL + '/api/itemmaster/')
+                    .then((response) => {
+                        setSearchedItems(response.data)
+                        setLoading(false)
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            }
+        };
+
+        // Add debouncing (500ms delay)
+        const debounceTimer = setTimeout(() => {
+            setLoading(true);
+            searchItems();
+        }, 500);
+
+        return () => clearTimeout(debounceTimer); // Cleanup on unmount or query change
+    }, [searchQuery]);
 
     // // Load customer details when ID changes
     // useEffect(() => {
@@ -574,6 +626,14 @@ export default function SalesInvoicePage() {
         }
     }
 
+    function formatDate(date) {
+        if (!date) return "";
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = date.toLocaleString("en-US", { month: "short" });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
     return (
         <div className="min-h-screen" style={{ background: "var(--color-bg-gradient)", minHeight: '100vh' }}>
             {/* Modern Header with Navy/Red Branding */}
@@ -584,15 +644,46 @@ export default function SalesInvoicePage() {
                     <div className="flex flex-row items-center justify-between px-10 py-5 w-full z-10">
                         <div className="flex flex-row items-center gap-4">
                             {/* Logo circle */}
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-2" style={{ background: "linear-gradient(135deg, var(--color-navy-light), var(--color-red-light))", borderColor: "var(--color-white)" }}>
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="var(--color-white)" /><text x="16" y="22" textAnchor="middle" fontSize="16" fontWeight="bold" fill="var(--color-navy)">BH</text></svg>
+                            <div className='rounded-xl'>
+                                <img src="/logoW.png" width="80px" height="80px" alt="logo" />
                             </div>
+
                             <div className="flex flex-col">
                                 <span className="text-3xl font-extrabold tracking-wide drop-shadow" style={{ color: "var(--color-navy)" }}>Blazer Hub <span style={{ color: "var(--color-red)" }}>Rental</span></span>
                                 <span className="text-xs font-semibold" style={{ color: "var(--color-navy)" }}>Fast, Reliable, and Easy Suit Rental</span>
                             </div>
                         </div>
                         <div className="flex flex-row gap-6 items-center">
+                            <span className="text-base font-semibold flex items-center gap-1" style={{ color: "var(--color-navy)" }}>
+                                <svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3" fill="var(--color-navy)" /><rect x="6" y="10" width="12" height="4" rx="2" fill="var(--color-red-light)" /></svg>Date
+                            </span>
+
+                            <div className="flex flex-col gap-3">
+                                <Popover open={open} onOpenChange={setOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            id="date"
+                                            className="w-48 justify-between font-normal"
+                                        >
+                                            {date ? formatDate(date) : "Select date"}
+                                            <ChevronDownIcon />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={date}
+                                            captionLayout="dropdown"
+                                            onSelect={(date) => {
+                                                setDate(date)
+                                                setOpen(false)
+                                            }}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
                             <span className="text-base font-semibold flex items-center gap-1" style={{ color: "var(--color-navy)" }}>
                                 <svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3" fill="var(--color-navy)" /><rect x="6" y="10" width="12" height="4" rx="2" fill="var(--color-red-light)" /></svg>Invoice #
                             </span>
@@ -643,7 +734,22 @@ export default function SalesInvoicePage() {
                                 {/* Item Combobox */}
                                 <div className="w-[160px]">
                                     <Label className="text-xs">Item</Label>
-                                    <Combobox value={selectedItem} onValueChange={handleComboBoxItemSelect}>
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        className="border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:border-accent transition duration-200 w-full max-w-xs"
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value)
+                                            setLoading(true)
+                                        }}
+                                    />
+                                    {/* <Combobox value={selectedItem} onValueChange={handleComboBoxItemSelect} onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleComboBoxItemSelect(selectedItem);
+                                        }
+                                    }}
+                                    >
                                         <ComboboxAnchor>
                                             <ComboboxInput placeholder="Item..." className="h-7 text-xs" />
                                             <ComboboxTrigger>
@@ -654,11 +760,12 @@ export default function SalesInvoicePage() {
                                             <ComboboxEmpty>No items</ComboboxEmpty>
                                             {items.map((item) => (
                                                 <ComboboxItem key={item.itemCode} value={item.itemCode}>
-                                                    {item.itemCode} - {item.itemShortDesc} - {item.itemSize}
-                                                </ComboboxItem>
-                                            ))}
-                                        </ComboboxContent>
-                                    </Combobox>
+                                                    {item.itemCode}
+                                                    {/* - {item.itemShortDesc} - {item.itemSize} */}
+                                    {/* </ComboboxItem> */}
+                                    {/* ))} */}
+                                    {/* </ComboboxContent> */}
+                                    {/* </Combobox> */}
                                 </div>
                                 {/* Item Name */}
                                 <div className="w-[100px]">
@@ -1055,6 +1162,19 @@ export default function SalesInvoicePage() {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 gap-2">
 
+                            <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg flex flex-col items-center">
+                                <h2>Items List here</h2>
+                                {
+                                    // map the searchedItems array and display each item
+                                    searchedItems.map((item, idx) => (
+                                        <div key={item.itemCode} className="p-2 border-b border-[#0a174e] w-full text-left hover:bg-[#f5f7fa] cursor-pointer" onClick={() => handleAddItem(item)}>
+                                            <div className="text-sm font-semibold">{item.itemShortDesc} ({item.itemSize})</div>
+                                            <div className="text-xs text-gray-600">Code: {item.itemCode}</div>
+                                        </div>
+                                    ))
+
+                                }
+                            </Card>
                             <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg flex flex-col items-center">
                                 <h2>Customer purchase history will be here</h2>
                             </Card>

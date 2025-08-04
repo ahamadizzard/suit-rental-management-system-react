@@ -17,6 +17,17 @@
   --color-bg-lighter: #e5e9f7;
   --color-white: #fff;
   --color-black: #000;
+
+  --melon: #fec5bbff;
+  --pale-dogwood: #fcd5ceff;
+  --misty-rose: #fae1ddff;
+  --seashell: #f8edebff;
+  --platinum: #e8e8e4ff;
+  --platinum-2: #d8e2dcff;
+  --linen: #ece4dbff;
+  --champagne-pink: #ffe5d9ff;
+  --apricot: #ffd7baff;
+  --peach: #fec89aff;
 }
 
 /* Example usage:

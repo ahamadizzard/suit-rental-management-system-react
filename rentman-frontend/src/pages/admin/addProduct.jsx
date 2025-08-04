@@ -169,8 +169,8 @@ export default function AddProduct() {
 
     return (
         <div className="container mx-auto py-8">
-            <Card>
-                <CardHeader>
+            <Card >
+                <CardHeader className="bg-blue-300 text-white">
                     <CardTitle className="text-2xl font-bold">Add New Product</CardTitle>
                     <CardDescription>
                         Fill out the form below to add a new product to the inventory

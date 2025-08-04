@@ -9,12 +9,14 @@ import {
   getItemByGroupShortDesc,
   deleteItemByCode,
   getUnblockedItems,
+  searchItem,
 } from "../../controllers/inventory/itemMasterController.js";
 
 const itemMasterRouter = express.Router();
 
 itemMasterRouter.get("/", getItemMaster);
 itemMasterRouter.get("/:itemCode", getItemByCode);
+itemMasterRouter.get("/search/:query", searchItem);
 itemMasterRouter.post("/", createItemMaster);
 itemMasterRouter.put("/:itemCode", updateItemByCode);
 // itemMasterRouter.get("/:itemGroupShortDesc", getItemByGroupShortDesc);
