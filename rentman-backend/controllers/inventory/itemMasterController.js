@@ -197,22 +197,41 @@ export async function getUnblockedItems(req, res) {
   }
 }
 
-export async function searchItem(req, res) {
-  const searchQuery = parseInt(req.params.query);
+// export async function searchItem(req, res) {
+//   const searchQuery = req.params.query;
 
+//   try {
+//     const items = await ItemMaster.find({
+//       $or: [
+//         // { itemCode: req.params.itemCode },
+//         // { itemCode: parseInt(req.params.itemCode) },
+//         { itemCode: { $regex: searchQuery, $options: "i" } },
+//         // this code being used for some complex search with multiple queries for arrays
+//         // { altNames: { $elemMatch: { $regex: searchQuery, $options: "i" } } },
+//         // { altNames: { $regex: searchQuery, $options: "i" } },
+//       ],
+//       isBlocked: false,
+//     });
+//     res.status(200).json(items);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error searching products", error: error });
+//   }
+// }
+
+export async function searchItem(req, res) {
+  const searchQuery = req.params.query;
   try {
-    const itemMaster = await itemMaster.find({
-      $or: [
-        // { itemCode: req.params.itemCode },
-        // { itemCode: parseInt(req.params.itemCode) },
-        { itemCode: { $regex: searchQuery, $options: "i" } },
-        // this code being used for some complex search with multiple queries for arrays
-        // { altNames: { $elemMatch: { $regex: searchQuery, $options: "i" } } },
-        // { altNames: { $regex: searchQuery, $options: "i" } },
-      ],
+    // Use $expr and $regexMatch to match itemCode starting with searchQuery
+    const items = await ItemMaster.find({
       isBlocked: false,
+      $expr: {
+        $regexMatch: {
+          input: { $toString: "$itemCode" },
+          regex: `^${searchQuery}`,
+        },
+      },
     });
-    res.status(200).json(itemMaster);
+    res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ message: "Error searching products", error: error });
   }

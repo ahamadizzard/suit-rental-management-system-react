@@ -316,7 +316,9 @@ export default function SalesInvoicePage() {
     // handle item selection in the combobox and load only the items of the selected group and the item is not blocked
     const handleComboBoxItemSelect = async (itemCode) => {
         setSelectedItem(itemCode);
-        const selectedItemObj = items.find(item => item.itemCode === itemCode);
+        // const selectedItemObj = await items.find(item => item.itemCode === itemCode);
+        const selectedItemObj = items.find(item => String(item.itemCode) === String(itemCode));
+        // console.log('Selected item:', selectedItemObj);
         if (selectedItemObj?.isBlocked) {
             toast.error('This item is blocked. Please select another item.');
             setSelectedItem('');
@@ -337,6 +339,7 @@ export default function SalesInvoicePage() {
         setShowBookingConflict(false);
         setPendingItemToAdd(null);
         setSelectedItemDetails(selectedItemObj);
+        // console.log('selectedItemDetails:', selectedItemObj);
         setItemPrice(selectedItemObj?.itemPrice || '');
         setAlteration('');
         setTimeout(() => {
@@ -390,6 +393,7 @@ export default function SalesInvoicePage() {
         setItemPrice('');
         setAlteration('');
         setSelectedItem(''); // Clear combobox value so all items show again
+        setSearchQuery(''); // Clear search query
         // Focus back to item combobox for fast entry
         setTimeout(() => {
             const combo = document.querySelector('input[placeholder="Item..."]');
@@ -716,7 +720,7 @@ export default function SalesInvoicePage() {
                         <CardContent className="py-2 px-4">
                             <div className="flex flex-wrap items-end gap-2 mb-4">
                                 {/* Group Select */}
-                                <div className="w-[120px]">
+                                <div className="w-[100px]">
                                     <Label className="text-xs">Group</Label>
                                     <Select onValueChange={setSelectedGroup} value={selectedGroup}>
                                         <SelectTrigger className="h-7 text-xs">
@@ -731,18 +735,25 @@ export default function SalesInvoicePage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                {/* Item Combobox */}
+                                {/* Item input box */}
                                 <div className="w-[160px]">
                                     <Label className="text-xs">Item</Label>
                                     <input
                                         type="text"
                                         placeholder="Search"
-                                        className="border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:border-accent transition duration-200 w-full max-w-xs"
+                                        className="border border-gray-300 rounded-lg py-1 px-1 focus:outline-none focus:border-accent transition duration-200 w-full max-w-xs"
                                         value={searchQuery}
                                         onChange={(e) => {
                                             setSearchQuery(e.target.value)
                                             setLoading(true)
                                         }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                // handleSearch()
+                                                handleComboBoxItemSelect(searchQuery);
+                                            }
+                                        }
+                                        }
                                     />
                                     {/* <Combobox value={selectedItem} onValueChange={handleComboBoxItemSelect} onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
@@ -1161,20 +1172,75 @@ export default function SalesInvoicePage() {
                 <div className="flex-1 min-w-[320px] max-w-[800px]">
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 gap-2">
+                            {/* Item list card */}
+                            <Card className="mb-2 border-2 border-[#0a174e] p-2 bg-white/90 shadow-lg flex flex-col items-start animate-fade-in">
+                                {/* <h2>Items List here</h2> */}
+                                <div className="w-[780px] max-w-full"
+                                    style={{
+                                        maxHeight: "350px", // or any height you want
+                                        overflowY: "auto", // to allow vertical scrolling
+                                        overflowX: "auto", // to allow horizontal scrolling if needed
+                                        border: "1px solid #d1d5db", // Tailwind gray-200
+                                        borderRadius: "0.5rem", // Tailwind rounded-lg
+                                    }}
+                                >
+                                    <table className="min-w-full divide-y divide-gray-200 rounded-2xl">
+                                        <thead className="bg-gray-50 shadow-lg border-2 bg-grey-600 shadow-gray-200 sticky top-0 z-50">
+                                            <tr>
+                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Code</th> */}
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Code</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Short Desc</th>
+                                                {/* <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Group</th> */}
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Size</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Price</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Rent Count</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Date Added</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Last Rented</th>
+                                                <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Last Dry Clean</th>
+                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Status</th> */}
+                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Blocked</th> */}
+                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Contributor</th> */}
+                                                {/* <th className="px-6 py-3 text-center text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Actions</th> */}
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-400 border-2 shadow-lg shadow-gray-200">
+                                            {
+                                                // map the searchedItems array and display each item
+                                                searchedItems.map((item, idx) => (
+                                                    <tr key={item.itemCode} className="hover:bg-gray-50 " >
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-900">{item.itemCode}</td>
+                                                        <td className="px-2 py-2 w-24 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                            <div className="font-medium">{item.itemName}</div>
+                                                            <div className="text-gray-400">{item.itemShortDesc}</div>
+                                                        </td>
+                                                        {/* <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">
+                                                            {item.itemGroupShortDesc}
+                                                        </td> */}
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">{item.itemSize}</td>
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">
+                                                            {item.itemPrice ? `Rs. ${item.itemPrice.toLocaleString()}` : "N/A"}
+                                                        </td>
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">{item.rentCount ? item.rentCount : "N/A"}</td>
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">
+                                                            {item.itemDateAdded
+                                                                ? new Date(item.itemDateAdded).toLocaleDateString("en-GB", {
+                                                                    day: "2-digit",
+                                                                    month: "short",
+                                                                    year: "numeric",
+                                                                }).replace(/ /g, "-") // Converts "15 Jan 2023" → "15-Jan-2023"
+                                                                : "N/A"}
+                                                        </td>
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">{item.lastRented ? item.lastRented : "N/A"}</td>
+                                                        <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">{item.lastDryClean ? item.lastDryClean : "N/A"}</td>
 
-                            <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg flex flex-col items-center">
-                                <h2>Items List here</h2>
-                                {
-                                    // map the searchedItems array and display each item
-                                    searchedItems.map((item, idx) => (
-                                        <div key={item.itemCode} className="p-2 border-b border-[#0a174e] w-full text-left hover:bg-[#f5f7fa] cursor-pointer" onClick={() => handleAddItem(item)}>
-                                            <div className="text-sm font-semibold">{item.itemShortDesc} ({item.itemSize})</div>
-                                            <div className="text-xs text-gray-600">Code: {item.itemCode}</div>
-                                        </div>
-                                    ))
-
-                                }
+                                                    </tr>
+                                                ))
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </Card>
+                            {/* customer purchase history card */}
                             <Card className="mb-2 border-2 border-[#0a174e] bg-white/90 shadow-lg flex flex-col items-center">
                                 <h2>Customer purchase history will be here</h2>
                             </Card>
