@@ -9,6 +9,7 @@ import {
   getCustomerByEmail,
   getCustomerByTele,
   getCustomerByIsBlocked,
+  searchCustomers,
 } from "../../controllers/customers/customerController.js";
 
 const customersRouter = express.Router();
@@ -17,6 +18,7 @@ const customersRouter = express.Router();
 customersRouter.post("/", createCustomer);
 customersRouter.get("/customers/:id", getCustomerById);
 customersRouter.get("/", getAllCustomers);
+customersRouter.get("/search/:query", searchCustomers);
 customersRouter.put("/customers/:id", updateCustomer);
 customersRouter.delete("/customers/:id", deleteCustomer);
 customersRouter.get("/name/:name", getCustomerByName);

@@ -141,3 +141,21 @@ export const getCustomerByIsBlocked = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export async function searchCustomers(req, res) {
+  const searchQuery = req.params.query;
+  try {
+    const customers = await CustomerMaster.find({
+      $or: [
+        { customerName: { $regex: searchQuery, $options: "i" } },
+        { customerEmail: { $regex: searchQuery, $options: "i" } },
+        { customerAddress: { $regex: searchQuery, $options: "i" } },
+        { customerTel1: { $regex: searchQuery, $options: "i" } },
+        { customerTel2: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+    res.json(customers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}

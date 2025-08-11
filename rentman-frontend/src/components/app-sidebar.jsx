@@ -229,20 +229,20 @@ const data = {
       url: "#",
       items: [
         {
-          title: "View Customers",
-          url: "#",
+          title: "Customers Details List",
+          url: "/dashboard/sales/customers/viewcustomers",
         },
         {
-          title: "Add Customers",
-          url: "#",
+          title: "Customers Purchase History",
+          url: "/dashboard/sales/customers/purchasehistory",
           isActive: true,
         },
         {
-          title: "Edit Customers",
+          title: "Blocked Customers List",
           url: "#",
         },
         {
-          title: "Blocked Customers List",
+          title: "Re-Designing",
           url: "#",
         },
         {

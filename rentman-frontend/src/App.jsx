@@ -12,6 +12,9 @@ import GroupMasterPage from './pages/admin/groupMasterPage';
 import EditGroupPage from './pages/admin/editGroupPage.jsx';
 import NewBookingInvoice from './pages/cashier/newBookingInvoice.jsx';
 import { Toaster } from 'react-hot-toast';
+import ViewCustomer from './pages/manager/customer/viewCustomer';
+import PurchaseHistory from './pages/manager/customer/purchaseHistory';
+import AddCustomer from './pages/manager/customer/addCustomer';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -55,6 +58,9 @@ function App() {
               {/* Cashier routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
                 <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
+                <Route path="/dashboard/sales/customers/viewcustomers" element={<ViewCustomer />} />
+                <Route path="/dashboard/sales/customers/addcustomer" element={<AddCustomer />} />
+                <Route path="/dashboard/sales/customers/purchasehistory" element={<PurchaseHistory />} />
                 {/* <Route path="dry-cleaning" element={<DryCleaning />} /> */}
                 {/* <Route path="tailoring" element={<Tailoring />} /> */}
               </Route>
