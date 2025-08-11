@@ -238,11 +238,11 @@ export default function ViewCustomer() {
                                             )}
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.joinedDate ? customer.joinedDate : "N/A"}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerDiscount ? customer.customerDiscount : "N/A"}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.lastPurchasedDate ? customer.lastPurchasedDate : "N/A"}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.lastPurchaseAmount ? customer.lastPurchaseAmount : "N/A"}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.totalPurchaseAmount ? customer.totalPurchaseAmount : "N/A"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerJoinedDate ? customer.customerJoinedDate : "N/A"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerDiscountPercentage}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerLastPurchasedDate ? customer.customerLastPurchasedDate : "N/A"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerLastPurchaseAmount ? customer.customerLastPurchaseAmount : "N/A"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerTotalPurchaseAmount ? customer.customerTotalPurchaseAmount : "N/A"}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.customerTotalPurchaseCount ? customer.customerTotalPurchaseCount : "N/A"}</td>
                                         <td className="px-6 py-4 ">
                                             <div className="flex space-x-4">

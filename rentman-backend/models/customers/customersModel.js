@@ -14,11 +14,11 @@ const customerSchema = new mongoose.Schema({
   customerTel2: { type: String },
   customerLastPurchaseDate: { type: Date },
   customerLastPurchaseInvoice: { type: String },
-  customerJoinedDate: { type: Date },
+  customerJoinedDate: { type: Date, required: true, default: Date.now },
   customerLastPurchaseAmount: { type: Number },
   customerTotalPurchaseAmount: { type: Number },
   customerTotalPurchaseCount: { type: Number },
-  customerDiscountPercentage: { type: Number },
+  customerDiscountPercentage: { type: Number, default: 0 },
   isBlocked: { type: Boolean, default: false },
 });
 // Replace the pre('save') hook with this:
