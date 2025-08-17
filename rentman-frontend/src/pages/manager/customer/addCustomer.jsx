@@ -43,6 +43,7 @@ const statusOptions = ["Available", "Rented", "DryClean", "Blocked"]
 export default function AddCustomer() {
     const navigate = useNavigate()
     const inputRef = useRef(null);
+    const [customersList, setCustomersList] = useState([]);
     const [formData, setFormData] = useState({
         // itemCode: "",
         customerName: "",
@@ -51,7 +52,7 @@ export default function AddCustomer() {
         customerTel1: "",
         customerTel2: "",
         customerJoinedDate: new Date(),
-        customerDiscountPercentage: "",
+        customerDiscountPercentage: "0",
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -61,6 +62,23 @@ export default function AddCustomer() {
     //         inputRef.current.focus();
     //     }
     // }, []);
+
+    useEffect(() => {
+        // Fetch existing customers list on component mount
+        const fetchCustomers = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/customers`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setCustomersList(response.data);
+            } catch (error) {
+                console.error("Error fetching customers:", error);
+            }
+        };
+        fetchCustomers();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type } = e.target
@@ -119,11 +137,23 @@ export default function AddCustomer() {
                 },
                 config
             );
-            toast.success("Customer added successfully!");
-            navigate("/dashboard/sales/customers");
+            // toast.success("Customer added successfully!");
+            Swal.fire({
+                title: "Success",
+                text: "Customer added successfully!",
+                icon: "success",
+                confirmButtonText: "OK",
+            });
+            navigate("/dashboard/sales/customers/viewcustomers");
         } catch (error) {
             console.error("Error adding customer:", error);
-            Swal.error("Failed to add customer. Please try again.");
+            Swal.fire({
+                title: "Error",
+                text: "Failed to add customer. Please try again.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            // Swal.error("Failed to add customer. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -132,17 +162,19 @@ export default function AddCustomer() {
     return (
         <div className="container mx-auto py-8">
             <Card >
-                <CardHeader className="bg-blue-300 text-white relative">
-                    <CardTitle className="text-2xl font-bold">Add New Customer</CardTitle>
-                    <CardDescription>
-                        Fill out the form below to add a new customer to the system. All fields marked with * are required.
-                    </CardDescription>
-                    <div className="flex justify-end items-center">
+                <CardHeader className="bg-blue-300 text-white">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
+                        <div>
+                            <CardTitle className="text-2xl font-bold">Add New Customer</CardTitle>
+                            <CardDescription>
+                                Fill out the form below to add a new customer to the system. All fields marked with * are required.
+                            </CardDescription>
+                        </div>
                         <Link
                             to="/dashboard/sales/customers/viewcustomers"
-                            className="absolute flex px-4 py-2 right-2 top-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            className="flex px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors items-center mt-2 md:mt-0"
                         >
-                            <FaEye className="mr-2" /> Add New Item
+                            <FaEye className="mr-2" /> View Customers
                         </Link>
                     </div>
                 </CardHeader>
@@ -154,7 +186,7 @@ export default function AddCustomer() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Left Column */}
                             <div className="space-y-4">
-                                <div className="space-y-2">
+                                {/* <div className="space-y-2">
                                     <Label htmlFor="customerId">Customer ID *</Label>
                                     <Input
                                         id="customerId"
@@ -166,7 +198,7 @@ export default function AddCustomer() {
                                         onChange={handleChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
 
                                 <div className="space-y-2">
                                     <Label htmlFor="customerName">Name in Full *</Label>
@@ -215,7 +247,6 @@ export default function AddCustomer() {
                                         name="customerTel2"
                                         value={formData.customerTel2}
                                         onChange={handleChange}
-                                        required
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -226,35 +257,78 @@ export default function AddCustomer() {
                                         name="customerJoinedDate"
                                         value={formData.customerJoinedDate}
                                         onChange={handleChange}
-                                        required
+
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="customerDiscountPercentage">Discount %</Label>
                                     <Input
+                                        className={"text-right"}
                                         type="number"
                                         id="customerDiscountPercentage"
                                         name="customerDiscountPercentage"
                                         default="0"
                                         value={formData.customerDiscountPercentage}
                                         onChange={handleChange}
-                                        required
+
                                     />
                                 </div>
                             </div>
 
+
                             {/* Right Column */}
-                            <div className="space-y-4 ml-5">
-                                <div>
-                                    <h2>existing customer list will be displayed here</h2>
+                            <div className="space-y-4 ml-2">
+                                <div className="flex flex-col items-center justify-start h-full border border-dashed border-blue-200 bg-gray-100 rounded-lg ">
+                                    <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Customers List</h2>
+                                    <div className="w-full max-h-96 overflow-y-auto ">
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead>
+                                                <tr>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">ID #</th>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Name</th>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Address & Email</th>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Telephone</th>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Discount</th>
+                                                    <th className="px-2 py-1 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Joined</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-gray-100 divide-y divide-gray-200">
+                                                {customersList.map(customer => (
+                                                    <tr key={customer.customerId}>
+                                                        <td className="px-2 py-1 text-xs whitespace-nowrap">{customer.customerId}</td>
+                                                        <td className="px-2 py-1 text-xs whitespace-nowrap">{customer.customerName}</td>
+                                                        <td className="px-2 py-1 whitespace-nowrap text-sm">
+                                                            <div>
+                                                                {customer.customerAddress}
+                                                                {customer.customerEmail && (
+                                                                    <div className="text-xs text-gray-500 mt-1">
+                                                                        {customer.customerEmail}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2 py-1 whitespace-nowrap text-xs">
+                                                            {customer.customerTel1}
+                                                            {customer.customerTel2 && (
+                                                                <>
+                                                                    {" / "}
+                                                                    {customer.customerTel2}
+                                                                </>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-1 text-xs whitespace-nowrap">{customer?.customerDiscountPercentage}</td>
+                                                        <td className="px-2 py-1 text-xs whitespace-nowrap">{customer?.customerJoined || "N/A"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-
-
                             </div>
-                        </div>
 
-                        {/* Full width field */}
-                        {/* <div className="space-y-2 mb-4">
+                            {/* Full width field */}
+                            {/* <div className="space-y-2 mb-4">
                                     <Label htmlFor="itemRemarks">Remarks</Label>
                                     <Textarea
                                         id="itemRemarks"
@@ -264,19 +338,20 @@ export default function AddCustomer() {
                                         rows={3}
                                     />
                                 </div> */}
-                        {/* </div> */}
+                        </div>
 
                     </CardContent>
 
-                    <CardFooter className="flex justify-end gap-4">
+                    <CardFooter className="flex justify-end gap-4 mt-6">
                         <Button
+                            className={"bg-gray-200 text-gray-800 hover:bg-gray-300 cursor-pointer"}
                             type="button"
                             variant="outline"
                             onClick={() => navigate("/dashboard/customers")}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button className={"bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"} type="submit" disabled={isSubmitting}>
                             {isSubmitting ? "Adding..." : "Add Customer"}
                         </Button>
                     </CardFooter>

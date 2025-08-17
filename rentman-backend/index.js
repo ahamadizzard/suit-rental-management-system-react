@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   if (tokenString != null) {
     const token = tokenString.replace("Bearer ", "");
     // console.log(token);
-    jwt.verify(token, "rentmanager@2025", (err, decoded) => {
+    jwt.verify(token, process.env.JWT_TOKEN_SECRET, (err, decoded) => {
       if (decoded != null) {
         // console.log(decoded);
         req.user = decoded;
