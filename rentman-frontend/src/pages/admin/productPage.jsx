@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import Modal from 'react-modal';
 import { Button } from '@/components/ui/button';
+import Swal from 'sweetalert2';
 
 Modal.setAppElement('#root');
 
@@ -128,27 +129,54 @@ export default function AdminProductPage() {
     };
 
     const handleSaveProduct = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.put(
-                `${import.meta.env.VITE_API_BASE_URL}/api/itemMaster/${selectedProduct.itemCode}`,
-                selectedProduct,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to save the changes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, save it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const token = localStorage.getItem("token");
+                    const response = await axios.put(
+                        `${import.meta.env.VITE_API_BASE_URL}/api/itemMaster/${selectedProduct.itemCode}`,
+                        selectedProduct,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "application/json",
+                            },
+                        }
+                    );
 
-            // toast.success("Product updated successfully!");
-            toast.success('Product updated successfully');
-            setIsEditModalOpen(false);
-            setIsLoading(true); // Refresh data
-        } catch (error) {
-            console.error("Error updating product:", error);
-            toast.error(error.response?.data?.message || "Failed to update product");
-        }
+                    // toast.success("Product updated successfully!");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Product updated successfully!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    setIsEditModalOpen(false);
+                    setIsLoading(true); // Refresh data
+                    setIsEditModalOpen(false);
+                    setIsLoading(true); // Refresh data
+                } catch (error) {
+                    console.error("Error updating product:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to update product. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        });
+
+
     };
 
     useEffect(() => {
@@ -380,7 +408,7 @@ export default function AdminProductPage() {
                                         <div className="space-y-4">
                                             {/* Basic Information Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
-                                                <h3 className="font-semibold text-lg mb-1 text-gray-700 border-b pb-1">Basic Information</h3>
+                                                <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Basic Information</h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-500">Item Code</p>
@@ -413,7 +441,7 @@ export default function AdminProductPage() {
 
                                             {/* Status Information Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
-                                                <h3 className="font-semibold text-lg mb-1 text-gray-700 border-b pb-1">Status Information</h3>
+                                                <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Status Information</h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-500">Current Status</p>
@@ -450,7 +478,7 @@ export default function AdminProductPage() {
 
                                             {/* Material Information Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
-                                                <h3 className="font-semibold text-lg mb-1 text-gray-700 border-b pb-1">Material Information</h3>
+                                                <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Material Information</h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-500">Material Type</p>
@@ -469,7 +497,7 @@ export default function AdminProductPage() {
 
                                             {/* Dates Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
-                                                <h3 className="font-semibold text-lg mb-1 text-gray-700 border-b pb-1">Dates</h3>
+                                                <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Dates</h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-500">Date Added</p>
@@ -500,7 +528,7 @@ export default function AdminProductPage() {
 
                                             {/* Additional Information Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
-                                                <h3 className="font-semibold text-lg mb-1 text-gray-700 border-b pb-1">Additional Information</h3>
+                                                <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Additional Information</h3>
                                                 <div className="grid grid-cols-3 gap-4">
 
                                                     <div>
@@ -529,13 +557,13 @@ export default function AdminProductPage() {
                                                 setIsEditModalOpen(true)
                                             }
                                             }
-                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors cursor-pointer"
                                         >
                                             Edit This Product
                                         </Button>
                                         <Button
                                             onClick={() => setIsViewModalOpen(false)}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
                                         >
                                             Close
                                         </Button>
@@ -821,43 +849,43 @@ export default function AdminProductPage() {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50 shadow-lg border-2 bg-grey-600 shadow-gray-200 sticky top-0 z-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Code</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Short Name</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Group</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Size</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Price</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Rent Count</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Date Added</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Last Rented</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Last Dry Clean</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Blocked</th>
-                                        <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Contributor</th>
-                                        <th className="px-6 py-3 text-center text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Actions</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Code</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Short Name</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Group</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Size</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Price</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Rent Count</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Date Added</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Last Rented</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Last Dry Clean</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Blocked</th>
+                                        <th className="px-3 py-1 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Contributor</th>
+                                        <th className="px-3 py-1 text-center text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-400 border-2 shadow-lg shadow-gray-200">
                                     {filteredProducts.length > 0 ? (
                                         filteredProducts.map((product) => (
                                             <tr key={product.itemCode} className="hover:bg-gray-50 " >
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.itemCode}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">{product.itemCode}</td>
+                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     <div className="font-medium">{product.itemName}</div>
                                                     <div className="text-gray-400">{product.itemShortName}</div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     {product.itemGroupShortDesc}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.itemSize}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.itemSize}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     {/* {product.itemPrice?.toLocaleString('en-US', {
                                                         style: 'currency',
                                                         currency: 'SLR'
                                                     })} */}
                                                     {product.itemPrice ? `Rs. ${product.itemPrice.toLocaleString()}` : "N/A"}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.rentCount ? product.rentCount : "N/A"}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.rentCount ? product.rentCount : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     {product.itemDateAdded
                                                         ? new Date(product.itemDateAdded).toLocaleDateString("en-GB", {
                                                             day: "2-digit",
@@ -866,15 +894,15 @@ export default function AdminProductPage() {
                                                         }).replace(/ /g, "-") // Converts "15 Jan 2023" → "15-Jan-2023"
                                                         : "N/A"}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.lastRented ? product.lastRented : "N/A"}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.lastDryClean ? product.lastDryClean : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.lastRented ? product.lastRented : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.lastDryClean ? product.lastDryClean : "N/A"}</td>
 
-                                                < td className="px-6 py-4 whitespace-nowrap">
+                                                < td className="px-3 py-1 whitespace-nowrap">
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  ${getStatusBadge(product.itemStatus)}`}>
                                                         {product.itemStatus}
                                                     </span>
                                                 </td>
-                                                <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${product.isBlocked ? "text-red-600" : "text-gray-500"}`}>
+                                                <td className={`px-3 py-1 whitespace-nowrap text-sm font-medium ${product.isBlocked ? "text-red-600" : "text-gray-500"}`}>
                                                     {product.isBlocked ? (
                                                         <span className="inline-flex items-center">
                                                             <svg className="w-3 h-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -891,8 +919,8 @@ export default function AdminProductPage() {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td>
-                                                <td className="px-6 py-4 ">
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td>
+                                                <td className="px-3 py-3 ">
                                                     <div className="flex space-x-4">
                                                         <button
                                                             onClick={() => handleView(product)}
@@ -921,7 +949,7 @@ export default function AdminProductPage() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">
+                                            <td colSpan="7" className="px-3 py-1 text-center text-sm text-gray-500">
                                                 No products found
                                             </td>
                                         </tr>

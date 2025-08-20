@@ -51,8 +51,8 @@ export const getCustomerById = async (req, res) => {
 // update customer
 export const updateCustomer = async (req, res) => {
   try {
-    const customer = await CustomerMaster.findByIdAndUpdate(
-      req.params.id,
+    const customer = await CustomerMaster.findOneAndUpdate(
+      { customerId: req.params.id },
       req.body,
       { new: true }
     );
@@ -68,7 +68,9 @@ export const updateCustomer = async (req, res) => {
 // delete customer
 export const deleteCustomer = async (req, res) => {
   try {
-    const customer = await CustomerMaster.findByIdAndDelete(req.params.id);
+    const customer = await CustomerMaster.findOneAndDelete({
+      customerId: req.params.id,
+    });
     if (!customer) {
       return res.status(404).json({ error: "Customer not found" });
     }
@@ -77,6 +79,18 @@ export const deleteCustomer = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// export const deleteCustomer = async (req, res) => {
+//   try {
+//     const customer = await CustomerMaster.findByIdAndDelete(req.params.id);
+//     if (!customer) {
+//       return res.status(404).json({ error: "Customer not found" });
+//     }
+//     res.status(200).json({ message: "Customer deleted successfully" });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 // get customer by name
 export const getCustomerByName = async (req, res) => {

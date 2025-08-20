@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { format } from "date-fns"
@@ -34,6 +34,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import { FaEye, FaPlus } from "react-icons/fa"
 
 const statusOptions = ["Available", "Rented", "DryClean", "Blocked"]
 
@@ -170,11 +171,17 @@ export default function AddProduct() {
     return (
         <div className="container mx-auto py-8">
             <Card >
-                <CardHeader className="bg-blue-300 text-white">
+                <CardHeader className="h-[70px] bg-blue-300 text-white flex justify-between items-center mb-6 pt-1 px-4">
                     <CardTitle className="text-2xl font-bold">Add New Product</CardTitle>
-                    <CardDescription>
+                    {/* <CardDescription>
                         Fill out the form below to add a new product to the inventory
-                    </CardDescription>
+                    </CardDescription> */}
+                    <Link
+                        to="/dashboard/itemmaster"
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        <FaEye className="mr-2 cursor-pointer" /> View Items
+                    </Link>
                 </CardHeader>
 
                 <Separator className="mb-6" />

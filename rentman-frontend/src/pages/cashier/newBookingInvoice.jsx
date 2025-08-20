@@ -116,6 +116,7 @@ export default function SalesInvoicePage() {
             customerId: '',
             customerName: '',
             customerAddress: '',
+            invoiceDate: "",
             customerTel1: '',
             customerTel2: '',
             deliveryDate: new Date().toISOString().split('T')[0],
@@ -380,6 +381,7 @@ export default function SalesInvoicePage() {
             ...selectedItems,
             {
                 ...selectedItemDetails,
+                invoiceDate: parseDate('invoiceDate'),
                 amount: parseFloat(itemPrice),
                 alteration: alteration || '',
                 group: selectedGroup,
@@ -490,14 +492,14 @@ export default function SalesInvoicePage() {
             const invoiceData = {
                 ...data,
                 invoiceNo: invoiceNumber,
-                invoiceDate: new Date(),
+                invoiceDate: invoiceDate ? new Date() : null,
                 bookingStatus,
                 createdOn: new Date(),
                 modifiedOn: new Date()
             };
             const salesInvoiceDetails = selectedItems.map(item => ({
                 invoiceNo: invoiceNumber,
-                invoiceDate: new Date(),
+                invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
                 itemCode: item.itemCode,
                 group: item.group,
                 alteration: item.alteration,

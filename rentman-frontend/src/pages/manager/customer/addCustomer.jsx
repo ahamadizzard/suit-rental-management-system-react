@@ -112,51 +112,70 @@ export default function AddCustomer() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        {
+            Swal.fire({
+                title: "Add Customer",
+                text: "Are you sure you want to add this customer?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Yes, add it!",
+                cancelButtonText: "No, cancel",
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        // Check if item code exists
+                        const exists = await checkCustomerIdExists(formData.customerId);
+                        if (exists) {
+                            // toast.error("Item code already exists. Please use a different code.");
+                            Swal.error("CustomerId already exists. Please use a different code.");
+                            setIsSubmitting(false);
+                            return;
+                        }
+                        const token = localStorage.getItem("token");
+                        const config = {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        };
+                        const response = await axios.post(
+                            import.meta.env.VITE_API_BASE_URL + "/api/customers",
+                            {
+                                ...formData,
+                                // itemSize: Number(formData.itemSize),
+                                // itemPrice: Number(formData.itemPrice)
+                            },
+                            config
+                        );
+                        // toast.success("Customer added successfully!");
+                        Swal.fire({
+                            title: "Success",
+                            text: "Customer added successfully!",
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        });
+                        navigate("/dashboard/sales/customers/viewcustomers");
+                    } catch (error) {
+                        console.error("Error adding customer:", error);
+                        Swal.fire({
+                            title: "Error",
+                            text: "Failed to add customer. Please try again.",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                        // Swal.error("Failed to add customer. Please try again.");
+                    } finally {
+                        setIsSubmitting(false);
+                    }
 
-        try {
-            // Check if item code exists
-            const exists = await checkCustomerIdExists(formData.customerId);
-            if (exists) {
-                // toast.error("Item code already exists. Please use a different code.");
-                Swal.error("CustomerId already exists. Please use a different code.");
-                setIsSubmitting(false);
-                return;
-            }
-            const token = localStorage.getItem("token");
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            };
-            const response = await axios.post(
-                import.meta.env.VITE_API_BASE_URL + "/api/customers",
-                {
-                    ...formData,
-                    // itemSize: Number(formData.itemSize),
-                    // itemPrice: Number(formData.itemPrice)
-                },
-                config
-            );
-            // toast.success("Customer added successfully!");
-            Swal.fire({
-                title: "Success",
-                text: "Customer added successfully!",
-                icon: "success",
-                confirmButtonText: "OK",
-            });
-            navigate("/dashboard/sales/customers/viewcustomers");
-        } catch (error) {
-            console.error("Error adding customer:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Failed to add customer. Please try again.",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            // Swal.error("Failed to add customer. Please try again.");
-        } finally {
-            setIsSubmitting(false);
+                } else {
+                    setIsSubmitting(false);
+                }
+            })
         }
+
+
+
+
     }
 
     return (
@@ -352,7 +371,9 @@ export default function AddCustomer() {
                             Cancel
                         </Button>
                         <Button className={"bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"} type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Adding..." : "Add Customer"}
+                            {
+                                isSubmitting ? "Adding..." : "Add Customer"
+                            }
                         </Button>
                     </CardFooter>
                 </form>

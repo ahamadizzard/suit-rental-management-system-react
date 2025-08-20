@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import Swal from 'sweetalert2';
+import { Switch } from "@/components/ui/switch"
 
 
 Modal.setAppElement('#root');
@@ -22,6 +23,20 @@ export default function ViewCustomer() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteCustomerId, setDeleteCustomerId] = useState(null);
+
+    // Helper to fetch full customer list (reusable so we can call it after edits)
+    const fetchAllCustomers = async () => {
+        try {
+            setIsLoading(true);
+            const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers/');
+            setCustomers(response.data);
+        } catch (err) {
+            console.error('Failed to fetch customers', err);
+            setCustomers([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Load Customer Data
     // useEffect(() => {
@@ -48,10 +63,9 @@ export default function ViewCustomer() {
             if (searchQuery.length > 0) {
                 try {
                     const response = await axios.get(
-                        import.meta.env.VITE_API_BASE_URL + '/api/customers/search/' + searchQuery
-                    )
+                        `${import.meta.env.VITE_API_BASE_URL}/api/customers/search/${encodeURIComponent(searchQuery)}`
+                    );
                     setCustomers(response.data);
-
                 } catch (error) {
                     setError(error.response?.data?.message || "Failed to search products");
                     setCustomers([]); // Clear products on error
@@ -60,16 +74,11 @@ export default function ViewCustomer() {
                     setIsLoading(false);
                 }
             } else {
-                axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers/')
-                    .then((response) => {
-                        setCustomers(response.data)
-                        setIsLoading(false)
-                    })
-                    .catch((error) => {
-                        console.log(error)
-                    })
+                // use helper to fetch full list
+                await fetchAllCustomers();
             }
         };
+
         // Add debouncing (500ms delay)
         const debounceTimer = setTimeout(() => {
             setIsLoading(true);
@@ -240,7 +249,8 @@ export default function ViewCustomer() {
                 </div>
             ) : (
                 <div className="w-full  bg-white rounded-lg shadow-md overflow-x-auto">
-                    {/* Edit modal */}
+
+                    {/* Update modal */}
                     <Modal
                         isOpen={isEditModalOpen}
                         onAfterOpen={() => { }}
@@ -380,6 +390,36 @@ export default function ViewCustomer() {
                                         }}
                                     />
                                 </div>
+                                <div className='space-y-2 flex flex-row gap-4 items-center'>
+                                    <label className="inline-flex items-center">
+                                        <span className="ml-2 text-gray-700 font-medium mt-3">Customer Status: </span>
+                                    </label>
+
+                                    {/* Custom toggle: thumb turns red when blocked and green when unblocked. */}
+                                    <div className="flex items-center gap-3 mt-2">
+                                        <button
+                                            type="button"
+                                            role="switch"
+                                            aria-checked={customers[selectedCustomer]?.isBlocked || false}
+                                            onClick={() => {
+                                                const updated = [...customers];
+                                                const current = !!updated[selectedCustomer]?.isBlocked;
+                                                updated[selectedCustomer] = {
+                                                    ...updated[selectedCustomer],
+                                                    isBlocked: !current
+                                                };
+                                                setCustomers(updated);
+                                            }}
+                                            className={`relative inline-flex items-center h-7 w-14 rounded-full transition-colors focus:outline-none ${customers[selectedCustomer]?.isBlocked ? 'bg-red-100' : 'bg-green-100'}`}
+                                        >
+                                            <span className={`absolute left-1 top-1 h-5 w-5 rounded-full transform transition-transform ${customers[selectedCustomer]?.isBlocked ? 'translate-x-7 bg-red-600' : 'translate-x-0 bg-green-600'}`}></span>
+                                        </button>
+
+                                        <span className={`text-sm font-medium ${customers[selectedCustomer]?.isBlocked ? 'text-red-600' : 'text-green-600'}`}>
+                                            {customers[selectedCustomer]?.isBlocked ? 'blocked' : 'unblocked'}
+                                        </span>
+                                    </div>
+                                </div>
 
                                 {/* Action Buttons */}
                                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
@@ -397,42 +437,44 @@ export default function ViewCustomer() {
                                                     try {
                                                         const token = localStorage.getItem('token');
                                                         const customer = customers[selectedCustomer];
-                                                        await axios.put(
-                                                            `${import.meta.env.VITE_API_BASE_URL}/api/customers/${customer.customerId}`,
+                                                        const updateResponse = await axios.put(
+                                                            import.meta.env.VITE_API_BASE_URL + "/api/customers/customers/" + customer.customerId,
                                                             customer,
                                                             { headers: { Authorization: `Bearer ${token}` } }
                                                         );
-                                                        toast.success('Customer updated successfully!');
-                                                        setIsEditModalOpen(false);
-                                                        // Refresh customer list
-                                                        setIsLoading(true);
-                                                        const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers/');
-                                                        setCustomers(response.data);
+                                                        if (updateResponse.status === 200) {
+                                                            Swal.fire({
+                                                                title: 'Success',
+                                                                text: 'Customer updated successfully!',
+                                                                icon: 'success',
+                                                                confirmButtonText: 'OK'
+                                                            });
+                                                            setIsEditModalOpen(false);
+                                                            // Refresh full list after update
+                                                            await fetchAllCustomers();
+                                                        } else {
+                                                            Swal.fire({
+                                                                title: 'Error',
+                                                                text: 'Failed to update customer. Please try again.',
+                                                                icon: 'error',
+                                                                confirmButtonText: 'OK'
+                                                            })
+                                                            setIsEditModalOpen(false);
+                                                        }
+
+
+
                                                     } catch (error) {
-                                                        toast.error('Failed to update customer.');
+                                                        Swal.fire({
+                                                            title: 'Error',
+                                                            text: 'Failed to update customer. Please try again.',
+                                                            icon: 'error',
+                                                            confirmButtonText: 'OK'
+                                                        })
+                                                        setIsEditModalOpen(false);
                                                     }
                                                 }
                                             });
-                                            // if (window.confirm("Are you sure you want to delete this user?")) {
-                                            //     try {
-                                            //         const token = localStorage.getItem("token");
-                                            //         await axios.delete(
-                                            //             `${import.meta.env.VITE_API_BASE_URL}/api/customers/${customers[selectedCustomer].customerId}`,
-                                            //             { headers: { 'Authorization': `Bearer ${token}` } }
-                                            //         );
-                                            //         // Remove user from local state
-                                            //         const updatedCustomer = customers.filter((_, index) => index !== selectedCustomer);
-                                            //         setCustomers(updatedCustomers);
-                                            //         setIsEditModalOpen(false);
-                                            //     } catch (error) {
-                                            //         Swal.fire({
-                                            //             title: 'Error',
-                                            //             text: 'Failed to delete customer. Please try again.',
-                                            //             icon: 'error',
-                                            //             confirmButtonText: 'OK'
-                                            //         });
-                                            //     }
-                                            // }
                                         }}
                                         className="px-4 py-2 bg-red-600 cursor-pointer hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
                                     >
@@ -559,10 +601,17 @@ export default function ViewCustomer() {
                                                 if (result.isConfirmed) {
                                                     try {
                                                         const token = localStorage.getItem("token");
-                                                        await axios.delete
-                                                            (`${import.meta.env.VITE_API_BASE_URL}/api/customers/${customers.customerId}`,
-                                                                { headers: { 'Authorization': `Bearer ${token}` } }
-                                                            );
+                                                        // prefer explicit deleteCustomerId (actual customerId string), fallback to selected index lookup
+                                                        const idToDelete = deleteCustomerId || customers[selectedCustomer]?.customerId;
+                                                        await axios.delete(
+                                                            `${import.meta.env.VITE_API_BASE_URL}/api/customers/customers/${idToDelete}`,
+                                                            { headers: { 'Authorization': `Bearer ${token}` } }
+                                                        );
+                                                        Swal.fire(
+                                                            'Deleted!',
+                                                            'Your customer has been deleted.',
+                                                            'success',
+                                                        );
                                                         // Remove user from local state
                                                         const updatedCustomer = customers.filter((_, index) => index !== selectedCustomer);
                                                         setCustomers(updatedCustomer);
@@ -589,6 +638,7 @@ export default function ViewCustomer() {
                                             //     }
                                             // }
                                         }}
+
                                         className="px-4 py-2 bg-red-600 cursor-pointer hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
                                     >
                                         Delete Customer
@@ -607,18 +657,18 @@ export default function ViewCustomer() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID#</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Telephone</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Joined Date</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Discount %</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Last Pur.Date</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Last Pur.Amnt</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total Purch Amnt</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total Purch count</th>
-                                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">ID#</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Name</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Address</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Telephone</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Status</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Joined Date</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Discount %</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Last Pur.Date</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Last Pur.Amnt</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Total Purch Amnt</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Total Purch count</th>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-natural uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -700,8 +750,9 @@ export default function ViewCustomer() {
                                                 </button>
                                                 <button
                                                     onClick={() => {
-                                                        // deleteCustomer(customer.customerId);
-                                                        setDeleteCustomerId(index);
+                                                        // store selected index and actual customer id so modal can show data and delete can use the id
+                                                        setSelectedCustomer(index);
+                                                        setDeleteCustomerId(customer.customerId);
                                                         setIsDeleteModalOpen(true);
                                                     }}
                                                     className="text-white bg-red-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-red-200 text-md shadow-lg shadow-red-500/50 hover:scale-110 transition-all duration-200"
