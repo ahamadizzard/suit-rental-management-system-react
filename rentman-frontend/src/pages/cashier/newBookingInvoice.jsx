@@ -114,9 +114,10 @@ export default function SalesInvoicePage() {
     const { register, handleSubmit, watch, setValue } = useForm({
         defaultValues: {
             customerId: '',
+            invoiceDate: new Date().toISOString().split('T')[0],
             customerName: '',
             customerAddress: '',
-            invoiceDate: "",
+            // invoiceDate: "",
             customerTel1: '',
             customerTel2: '',
             deliveryDate: new Date().toISOString().split('T')[0],
@@ -146,6 +147,15 @@ export default function SalesInvoicePage() {
         setValue('netTotal', netTotal);
         setValue('balanceAmount', netTotal - (watch('advancePaid') || 0));
     }, [selectedItems, watch('totalDiscount'), watch('advancePaid')]);
+
+    // Update advancePaid automatically when any payment input changes
+    useEffect(() => {
+        const p1 = Number(watch('payment1')) || 0;
+        const p2 = Number(watch('payment2')) || 0;
+        const p3 = Number(watch('payment3')) || 0;
+        const sum = p1 + p2 + p3;
+        setValue('advancePaid', sum);
+    }, [watch('payment1'), watch('payment2'), watch('payment3')]);
 
     function generateInvoiceNumber() {
         const now = new Date();
@@ -363,7 +373,7 @@ export default function SalesInvoicePage() {
     // Add selected item to table with alteration and price
     const handleAddToTable = () => {
         if (!selectedItemDetails) return;
-        if (!itemPrice || parseFloat(itemPrice) <= 0) {
+        if (!itemPrice || parseFloat(itemPrice) < 0) {
             alert('Please enter a valid price.');
             return;
         }
@@ -381,7 +391,7 @@ export default function SalesInvoicePage() {
             ...selectedItems,
             {
                 ...selectedItemDetails,
-                invoiceDate: parseDate('invoiceDate'),
+                invoiceDate: watch('invoiceDate'),
                 amount: parseFloat(itemPrice),
                 alteration: alteration || '',
                 group: selectedGroup,
@@ -492,14 +502,16 @@ export default function SalesInvoicePage() {
             const invoiceData = {
                 ...data,
                 invoiceNo: invoiceNumber,
-                invoiceDate: invoiceDate ? new Date() : null,
+                // Prefer the selected `date` (from the Popover calendar) when available.
+                invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
                 bookingStatus,
                 createdOn: new Date(),
                 modifiedOn: new Date()
             };
             const salesInvoiceDetails = selectedItems.map(item => ({
                 invoiceNo: invoiceNumber,
-                invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
+                // Use the selected `date` for each invoice detail when available.
+                invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
                 itemCode: item.itemCode,
                 group: item.group,
                 alteration: item.alteration,
@@ -523,10 +535,11 @@ export default function SalesInvoicePage() {
             }
             const dailyTransaction = {
                 transactionId: generateTransactionId(),
-                transactionDate: new Date(),
+                // Use selected date for the transaction date as well.
+                transactionDate: date ? new Date(date) : new Date(),
                 transactionType: 'RENT_BOOKING',
                 invoiceNo: invoiceNumber,
-                creditAmount: data.netTotal,
+                creditAmount: data.advancePaid || 0,
                 customerId: data.customerId,
                 transactionDesc: data.remarks || '',
                 createdOn: new Date()
@@ -581,11 +594,21 @@ export default function SalesInvoicePage() {
                     setValue('deliveryDate', new Date().toISOString().split('T')[0]);
                     setValue('returnDate', new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
                     setValue('totalDiscount', 0);
+                    setValue('payment1', 0);
+                    setValue('payment2', 0);
+                    setValue('payment3', 0);
                     setValue('advancePaid', 0);
                     setValue('depositAmount', 0);
                     setBookingStatus('Pending');
                     // Reset invoice number
                     setInvoiceNumber(generateInvoiceNumber());
+                    // Also clear any visible item input fields (combobox or search input)
+                    setTimeout(() => {
+                        const itemCombo = document.querySelector('input[placeholder="Item..."]');
+                        if (itemCombo) itemCombo.value = '';
+                        const searchInput = document.querySelector('input[placeholder="Search"]');
+                        if (searchInput) searchInput.value = '';
+                    }, 100);
                 } else {
                     return;
                 }
@@ -668,8 +691,9 @@ export default function SalesInvoicePage() {
                                 <Popover open={open} onOpenChange={setOpen}>
                                     <PopoverTrigger asChild>
                                         <Button
+                                            disabled
                                             variant="outline"
-                                            id="date"
+                                            id="invoiceDate"
                                             className="w-48 justify-between font-normal"
                                         >
                                             {date ? formatDate(date) : "Select date"}
@@ -742,6 +766,7 @@ export default function SalesInvoicePage() {
                                     <Label className="text-xs">Item</Label>
                                     <input
                                         type="text"
+                                        id="itemCode"
                                         placeholder="Search"
                                         className="border border-gray-300 rounded-lg py-1 px-1 focus:outline-none focus:border-accent transition duration-200 w-full max-w-xs"
                                         value={searchQuery}
@@ -1054,8 +1079,20 @@ export default function SalesInvoicePage() {
                                         <Input id="netTotal" type="number" readOnly {...register('netTotal', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} />
                                     </div>
                                     <div>
-                                        <Label htmlFor="advancePaid" className="text-xs">Advance</Label>
-                                        <Input id="advancePaid" type="number" {...register('advancePaid', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('depositAmount')?.focus(); } }} />
+                                        <Label htmlFor="payment1" className="text-xs">Payment 1</Label>
+                                        <Input id="payment1" type="number" {...register('payment1', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('payment2')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="payment2" className="text-xs">Payment 2</Label>
+                                        <Input id="payment2" type="number" {...register('payment2', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('payment3')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="payment3" className="text-xs">Payment 3</Label>
+                                        <Input id="payment3" type="number" {...register('payment3', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('advancePaid')?.focus(); } }} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="advancePaid" className="text-xs">Total Paid</Label>
+                                        <Input id="advancePaid" type="number" readOnly {...register('advancePaid', { valueAsNumber: true })} className="h-7 text-xs bg-gray-100" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('depositAmount')?.focus(); } }} />
                                     </div>
                                     <div>
                                         <Label htmlFor="balanceAmount" className="text-xs">Balance</Label>
@@ -1100,8 +1137,9 @@ export default function SalesInvoicePage() {
                             Clear/Cancel
                         </Button>
                         <Button
-                            type="submit"
+                            type="button"
                             ref={saveButtonRef}
+                            onClick={handleSubmit(onSubmit)}
                             disabled={selectedItems.length === 0 || saving}
                             className="h-8 px-6 text-base bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white font-bold border-2 border-[#0a174e] shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none animated-btn"
                             tabIndex={0}

@@ -99,13 +99,19 @@ export default function AdminProductPage() {
     }, []);
 
     // Fetch products on component mount
-    // This will also be triggered when isLoading is set to true
+    // This will also be triggered when isLoading is set to true    
     useEffect(() => {
         if (isLoading) {
             axios.get(import.meta.env.VITE_API_BASE_URL + "/api/itemmaster")
                 .then((res) => {
-                    setProducts(res.data);
-                    setFilteredProducts(res.data);
+                    // sort by itemCode (numeric-aware, case-insensitive)
+                    const sorted = [...res.data].sort((a, b) => {
+                        const A = (a.itemCode ?? '').toString();
+                        const B = (b.itemCode ?? '').toString();
+                        return A.localeCompare(B, undefined, { numeric: true, sensitivity: 'base' });
+                    });
+                    setProducts(sorted);
+                    setFilteredProducts(sorted);
                     setIsLoading(false);
                 })
                 .catch((error) => {
