@@ -15,6 +15,8 @@ import { Toaster } from 'react-hot-toast';
 import ViewCustomer from './pages/manager/customer/viewCustomer';
 import PurchaseHistory from './pages/manager/customer/purchaseHistory';
 import AddCustomer from './pages/manager/customer/addCustomer';
+import ModifyBooking from './pages/cashier/modifyBooking';
+import BookingList from './pages/cashier/bookingList';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -58,6 +60,8 @@ function App() {
               {/* Cashier routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
                 <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
+                <Route path="/dashboard/sales/bookinglist" element={<BookingList />} />
+                <Route path="/dashboard/sales/modifybooking" element={<ModifyBooking />} />
                 <Route path="/dashboard/sales/customers/viewcustomers" element={<ViewCustomer />} />
                 <Route path="/dashboard/sales/customers/addcustomer" element={<AddCustomer />} />
                 <Route path="/dashboard/sales/customers/purchasehistory" element={<PurchaseHistory />} />

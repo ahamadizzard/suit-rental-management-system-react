@@ -8,7 +8,7 @@ import userRouter from "./routes/employee/userRouter.js";
 import cors from "cors";
 import bodyParser from "body-parser";
 import groupMasterRouter from "./routes/inventory/groupMasterRouter.js";
-import salesInvoiceMasterRouter from "./routes/sales/Not Completed/salesInvoiceMasterRouter.js";
+import salesInvoiceMasterRouter from "./routes/sales/salesInvoiceMasterRouter.js";
 import contributorRouter from "./routes/inventory/contributorRouter.js";
 import salesInvoiceDetails from "./routes/sales/salesInvoiceDetailsRouter.js";
 import customersRouter from "./routes/customer/customersRouter.js";

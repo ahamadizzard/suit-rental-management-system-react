@@ -35,8 +35,8 @@ const data = {
           url: "#",
           items: [
             {
-              title: "View Booking",
-              url: "#",
+              title: "Booking List",
+              url: "/dashboard/sales/bookinglist",
               isActive: true,
             },
             {
@@ -46,7 +46,7 @@ const data = {
             },
             {
               title: "Modify Booking",
-              url: "/dashboard/itemmaster/add",
+              url: "/dashboard/sales/modifybooking",
               isActive: true,
             },
             {

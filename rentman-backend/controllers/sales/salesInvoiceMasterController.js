@@ -91,3 +91,57 @@ export async function getLastSalesInvoiceId(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
+
+export async function searchBookings(req, res) {
+  // Accept query via path param (/search/:query) or query string (/search?q=...)
+  const searchQuery = req.params.query || req.query.q || "";
+  // console.log(
+  //   "searchBookings called. pathQuery=",
+  //   req.params.query,
+  //   "queryString=",
+  //   req.query.q
+  // );
+  try {
+    // build flexible OR conditions
+    const orConditions = [
+      { invoiceNo: { $regex: searchQuery, $options: "i" } },
+      { customerName: { $regex: searchQuery, $options: "i" } },
+      { customerTel1: { $regex: searchQuery, $options: "i" } },
+      { customerTel2: { $regex: searchQuery, $options: "i" } },
+      { customerAddress: { $regex: searchQuery, $options: "i" } },
+      { invoiceStatus: { $regex: searchQuery, $options: "i" } },
+    ];
+
+    // If the query looks like a number, also try matching invoiceNo stored as number
+    const maybeNumber = Number(searchQuery);
+    if (!Number.isNaN(maybeNumber)) {
+      orConditions.push({ invoiceNo: maybeNumber });
+      // also try exact-string match for invoiceNo if stored as string
+      orConditions.push({
+        invoiceNo: { $regex: `^${searchQuery}$`, $options: "i" },
+      });
+    }
+
+    // If the query parses as a valid date, search invoiceDate, returnDate and deliveryDate for that day
+    const parsedDate = new Date(searchQuery);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      const start = new Date(parsedDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(parsedDate);
+      end.setHours(23, 59, 59, 999);
+      orConditions.push({ invoiceDate: { $gte: start, $lte: end } });
+      orConditions.push({ returnDate: { $gte: start, $lte: end } });
+      orConditions.push({ deliveryDate: { $gte: start, $lte: end } });
+    }
+
+    // Run the query and let MongoDB sort by invoiceDate (descending)
+    res.set("Cache-Control", "no-store"); // disable caching for debugging
+    const bookings = await SalesInvoiceMaster.find({ $or: orConditions }).sort({
+      invoiceDate: -1,
+    });
+    // console.log("searchBookings returning", bookings.length, "records");
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}

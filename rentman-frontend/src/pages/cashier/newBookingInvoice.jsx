@@ -32,12 +32,12 @@ import {
     ComboboxAnchor,
     ComboboxContent,
     ComboboxEmpty,
-    ComboboxGroup,
-    ComboboxGroupLabel,
+    // ComboboxGroup,
+    // ComboboxGroupLabel,
     ComboboxInput,
     ComboboxItem,
-    ComboboxLabel,
-    ComboboxSeparator,
+    // ComboboxLabel,
+    // ComboboxSeparator,
     ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { ChevronDown, ChevronDownIcon } from "lucide-react";
@@ -62,9 +62,9 @@ export default function SalesInvoicePage() {
     const [items, setItems] = useState([])
     const [selectedItems, setSelectedItems] = useState([])
     const [selectedItem, setSelectedItem] = useState('')
-    const [selectedItemCode, setSelectedItemCode] = useState('');
+    // const [selectedItemCode, setSelectedItemCode] = useState('');
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    // const [searchTerm, setSearchTerm] = useState('');
     const [alteration, setAlteration] = useState('');
     const [itemPrice, setItemPrice] = useState('');
     const [lastAddedItemCode, setLastAddedItemCode] = useState(null);
@@ -94,7 +94,7 @@ export default function SalesInvoicePage() {
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState(new Date());
 
-    const [comboInputValue, setComboInputValue] = useState('');
+    // const [comboInputValue, setComboInputValue] = useState('');
 
     // Keyboard shortcuts: Ctrl+S to save, Esc to close dialog
     useEffect(() => {
