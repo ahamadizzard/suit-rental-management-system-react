@@ -92,37 +92,90 @@ export async function getLastSalesInvoiceId(req, res) {
   }
 }
 
+// export async function searchBookings(req, res) {
+//   // Accept query via path param (/search/:query) or query string (/search?q=...)
+//   const searchQuery = req.params.query || req.query.q || "";
+//   // console.log(
+//   //   "searchBookings called. pathQuery=",
+//   //   req.params.query,
+//   //   "queryString=",
+//   //   req.query.q
+//   // );
+//   try {
+//     // build flexible OR conditions
+//     const orConditions = [
+//       { invoiceNo: { $regex: searchQuery, $options: "i" } },
+//       { customerName: { $regex: searchQuery, $options: "i" } },
+//       { customerTel1: { $regex: searchQuery, $options: "i" } },
+//       { customerTel2: { $regex: searchQuery, $options: "i" } },
+//       { customerAddress: { $regex: searchQuery, $options: "i" } },
+//       { invoiceStatus: { $regex: searchQuery, $options: "i" } },
+//     ];
+
+//     // If the query looks like a number, also try matching invoiceNo stored as number
+//     const maybeNumber = Number(searchQuery);
+//     if (!Number.isNaN(maybeNumber)) {
+//       orConditions.push({ invoiceNo: maybeNumber });
+//       // also try exact-string match for invoiceNo if stored as string
+//       orConditions.push({
+//         invoiceNo: { $regex: `^${searchQuery}$`, $options: "i" },
+//       });
+//     }
+
+//     // If the query parses as a valid date, search invoiceDate, returnDate and deliveryDate for that day
+//     const parsedDate = new Date(searchQuery);
+//     if (!Number.isNaN(parsedDate.getTime())) {
+//       const start = new Date(parsedDate);
+//       start.setHours(0, 0, 0, 0);
+//       const end = new Date(parsedDate);
+//       end.setHours(23, 59, 59, 999);
+//       orConditions.push({ invoiceDate: { $gte: start, $lte: end } });
+//       orConditions.push({ returnDate: { $gte: start, $lte: end } });
+//       orConditions.push({ deliveryDate: { $gte: start, $lte: end } });
+//     }
+
+//     // Run the query and let MongoDB sort by invoiceDate (descending)
+//     // res.set("Cache-Control", "no-store"); // disable caching for debugging
+//     const bookings = await SalesInvoiceMaster.find({ $or: orConditions }).sort({
+//       invoiceDate: -1,
+//     });
+//     // console.log("searchBookings returning", bookings.length, "records");
+//     res.json(bookings);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+// ...existing code...
 export async function searchBookings(req, res) {
-  // Accept query via path param (/search/:query) or query string (/search?q=...)
-  const searchQuery = req.params.query || req.query.q || "";
-  // console.log(
-  //   "searchBookings called. pathQuery=",
-  //   req.params.query,
-  //   "queryString=",
-  //   req.query.q
-  // );
+  const rawQuery = req.params.query || req.query.q || "";
+  const searchQuery = String(rawQuery).trim();
   try {
-    // build flexible OR conditions
+    if (!searchQuery) {
+      return res.json([]); // nothing to search
+    }
+
+    // Escape user input for safe regex usage
+    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const qEsc = escapeRegex(searchQuery);
+
     const orConditions = [
-      { invoiceNo: { $regex: searchQuery, $options: "i" } },
-      { customerName: { $regex: searchQuery, $options: "i" } },
-      { customerTel1: { $regex: searchQuery, $options: "i" } },
-      { customerTel2: { $regex: searchQuery, $options: "i" } },
-      { customerAddress: { $regex: searchQuery, $options: "i" } },
-      { invoiceStatus: { $regex: searchQuery, $options: "i" } },
+      { invoiceNo: { $regex: qEsc, $options: "i" } },
+      { customerName: { $regex: qEsc, $options: "i" } },
+      { customerTel1: { $regex: qEsc, $options: "i" } },
+      { customerTel2: { $regex: qEsc, $options: "i" } },
+      { customerAddress: { $regex: qEsc, $options: "i" } },
+      { invoiceStatus: { $regex: qEsc, $options: "i" } },
+      // also try exact string match for invoiceStatus in case of stored tokens like "returned_partial"
+      { invoiceStatus: searchQuery.toLowerCase() },
     ];
 
-    // If the query looks like a number, also try matching invoiceNo stored as number
     const maybeNumber = Number(searchQuery);
     if (!Number.isNaN(maybeNumber)) {
       orConditions.push({ invoiceNo: maybeNumber });
-      // also try exact-string match for invoiceNo if stored as string
-      orConditions.push({
-        invoiceNo: { $regex: `^${searchQuery}$`, $options: "i" },
-      });
+      orConditions.push({ invoiceNo: { $regex: `^${qEsc}$`, $options: "i" } });
     }
 
-    // If the query parses as a valid date, search invoiceDate, returnDate and deliveryDate for that day
     const parsedDate = new Date(searchQuery);
     if (!Number.isNaN(parsedDate.getTime())) {
       const start = new Date(parsedDate);
@@ -134,14 +187,12 @@ export async function searchBookings(req, res) {
       orConditions.push({ deliveryDate: { $gte: start, $lte: end } });
     }
 
-    // Run the query and let MongoDB sort by invoiceDate (descending)
-    res.set("Cache-Control", "no-store"); // disable caching for debugging
     const bookings = await SalesInvoiceMaster.find({ $or: orConditions }).sort({
       invoiceDate: -1,
     });
-    // console.log("searchBookings returning", bookings.length, "records");
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
+// ...existing code...

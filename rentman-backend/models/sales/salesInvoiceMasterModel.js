@@ -23,7 +23,7 @@ const salesInvoiceMasterSchema = new mongoose.Schema({
   nic1: { type: String },
   nic2: { type: String },
   remarks: { type: String },
-  invoiceStatus: { type: String, default: "booked" }, // booked, delivered, returned, cancelled
+  invoiceStatus: { type: String, default: "booked" }, // booked, delivered, returned, cancelled, returned_partial, returned_overdue, returned_issues
   isDelivered: { type: Boolean, default: false },
   createdOn: { type: Date, default: Date.now },
   modifiedOn: { type: Date },

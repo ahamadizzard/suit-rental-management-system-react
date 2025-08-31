@@ -269,6 +269,7 @@ export default function AddProduct() {
                                         id="itemSize"
                                         name="itemSize"
                                         type="number"
+                                        className="text-end"
                                         value={formData.itemSize}
                                         onChange={handleChange}
                                         required
@@ -394,13 +395,14 @@ export default function AddProduct() {
 
                     <CardFooter className="flex justify-end gap-4">
                         <Button
+                            className="cursor-pointer"
                             type="button"
                             variant="outline"
                             onClick={() => navigate("/dashboard/itemmaster")}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
                             {isSubmitting ? "Adding..." : "Add Product"}
                         </Button>
                     </CardFooter>

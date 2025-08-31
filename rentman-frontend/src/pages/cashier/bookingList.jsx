@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import { Switch } from "@/components/ui/switch"
+import { Badge } from '@/components/ui/badge'
 
 
 Modal.setAppElement('#root');
@@ -205,6 +206,17 @@ export default function BookingList() {
         //         }
         //     }
         // });
+    };
+
+    // Map invoiceStatus text to Badge variant
+    const getStatusVariant = (status) => {
+        const s = (status || '').toString().toLowerCase();
+        if (!s) return 'default';
+        if (s.includes('cancel')) return 'destructive';
+        if (s.includes('deliver')) return 'default';
+        if (s.includes('return')) return 'outline';
+        // booked / other
+        return 'secondary';
     };
 
     return (
@@ -461,7 +473,11 @@ export default function BookingList() {
                                             </div>
                                         </td>
 
-                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{booking.invoiceStatus}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">
+                                            <Badge variant={getStatusVariant(booking.invoiceStatus)}>
+                                                {booking.invoiceStatus || 'N/A'}
+                                            </Badge>
+                                        </td>
 
 
 
