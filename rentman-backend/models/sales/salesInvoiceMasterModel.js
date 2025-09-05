@@ -27,19 +27,6 @@ const salesInvoiceMasterSchema = new mongoose.Schema({
   isDelivered: { type: Boolean, default: false },
   createdOn: { type: Date, default: Date.now },
   modifiedOn: { type: Date },
-  // items: [
-  //   {
-  //     itemCode: { type: String, required: true },
-  //     itemShortName: { type: String },
-  //     itemDescription: { type: String },
-  //     itemSize: { type: String },
-  //     deliveryDate: { type: Date, required: true },
-  //     returnDate: { type: Date, required: true },
-  //     amount: { type: Number, default: 0 },
-  //     alterations: { type: String },
-  //     isCompleted: { type: Boolean, default: false },
-  //   },
-  // ],
 });
 const SalesInvoiceMaster = mongoose.model(
   "salesinvoicemaster",

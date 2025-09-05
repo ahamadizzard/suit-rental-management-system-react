@@ -61,7 +61,7 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
                 <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
                 <Route path="/dashboard/sales/bookinglist" element={<BookingList />} />
-                <Route path="/dashboard/sales/modifybooking" element={<ModifyBooking />} />
+                <Route path="/dashboard/sales/modifybooking/:invoiceNo" element={<ModifyBooking />} />
                 <Route path="/dashboard/sales/customers/viewcustomers" element={<ViewCustomer />} />
                 <Route path="/dashboard/sales/customers/addcustomer" element={<AddCustomer />} />
                 <Route path="/dashboard/sales/customers/purchasehistory" element={<PurchaseHistory />} />

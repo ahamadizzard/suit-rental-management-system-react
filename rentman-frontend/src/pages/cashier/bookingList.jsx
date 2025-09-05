@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { FaEdit, FaEye, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import { Switch } from "@/components/ui/switch"
@@ -25,6 +25,7 @@ export default function BookingList() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteBookingId, setDeleteBookingId] = useState(null);
 
+    const navigate = useNavigate()
     // Helper to fetch full Booking list (reusable so we can call it after edits)
     const fetchAllBookings = async () => {
         try {
@@ -491,9 +492,9 @@ export default function BookingList() {
                                                     <FaEye /> View
                                                 </button>
                                                 <button
+                                                    key={index}
                                                     onClick={() => {
-                                                        setSelectedBooking(index);
-                                                        setIsEditModalOpen(true);
+                                                        navigate(`/dashboard/sales/modifybooking/${booking.invoiceNo}`);
                                                     }}
                                                     className="text-white bg-green-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-green-200 text-md shadow-lg shadow-green-500/50 hover:scale-110 transition-all duration-200"
                                                     title="Edit"

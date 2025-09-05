@@ -127,3 +127,14 @@ export async function getBookingsByBookingDateRangeAndItemId(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+// get items by invoice number
+export async function getItemsByInvoiceNo(req, res) {
+  try {
+    const { invoiceNo } = req.params;
+    const items = await SalesInvoiceDetails.find({ invoiceNo });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

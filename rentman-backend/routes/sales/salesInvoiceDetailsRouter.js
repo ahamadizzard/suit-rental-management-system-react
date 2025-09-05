@@ -9,6 +9,7 @@ import {
   getBookingsByBookingStatus,
   getBookingsByCustomerId,
   getBookingsByItemId,
+  getItemsByInvoiceNo,
   updateBooking,
 } from "../../controllers/sales/salesInvoiceDetailsController.js";
 
@@ -22,6 +23,7 @@ salesInvoiceDetailsRouter.get("/", getBookings);
 salesInvoiceDetailsRouter.get("/:id", getBookingById);
 salesInvoiceDetailsRouter.get("/customer/:customerId", getBookingsByCustomerId);
 salesInvoiceDetailsRouter.get("/item/:itemId", getBookingsByItemId);
+salesInvoiceDetailsRouter.get("/:invoiceNo/items", getItemsByInvoiceNo);
 salesInvoiceDetailsRouter.get(
   "/status/:bookingStatus",
   getBookingsByBookingStatus

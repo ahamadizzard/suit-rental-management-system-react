@@ -15,6 +15,7 @@ import customersRouter from "./routes/customer/customersRouter.js";
 import dailyTransactionsRouter from "./routes/sales/dailyTransactionsRouter.js";
 import salesInvoiceDetailsRouter from "./routes/sales/salesInvoiceDetailsRouter.js";
 import batchBookingRouter from "./routes/sales/batchBookingRouter.js";
+import updateBookingRouter from "./routes/sales/updateBookingRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -61,6 +62,7 @@ app.use("/api/contributor", contributorRouter);
 app.use("/api/users", userRouter);
 
 app.use("/api/salesinvoice", salesInvoiceMasterRouter);
+app.use("/api/salesinvoice/updateBooking", updateBookingRouter);
 app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);
 app.use("/api/dailytransactions", dailyTransactionsRouter);
 app.use("/api/customers", customersRouter);

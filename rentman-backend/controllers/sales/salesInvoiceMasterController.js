@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 // import SalesInvoice from "../../models/sales/salesInvoiceModel.js";
 import SalesInvoiceMaster from "../../models/sales/salesInvoiceMasterModel.js";
+import SalesInvoiceDetails from "../../models/sales/salesInvoiceDetailsModel.js";
 
 // Export an async function to get all sales invoices
 export async function getSalesInvoice(req, res) {
@@ -196,3 +198,50 @@ export async function searchBookings(req, res) {
   }
 }
 // ...existing code...
+// delete the data salesInvoicemaster model and salesInvoicedetails model where the invoiceNo is the same. if one failed then other should not be deleted
+
+export async function deleteSalesInvoiceAndDetails(req, res) {
+  const invoiceNo = req.params.invoiceNo;
+  if (!invoiceNo)
+    return res.status(400).json({ error: "invoiceNo is required" });
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    // Delete the master record first
+    const deletedSalesInvoiceMaster = await SalesInvoiceMaster.findOneAndDelete(
+      { invoiceNo },
+      { session }
+    );
+    if (!deletedSalesInvoiceMaster) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({
+        error: `SalesInvoiceMaster with invoiceNo ${invoiceNo} not found`,
+      });
+    }
+
+    // Delete related details
+    const deletedSalesInvoiceDetails = await SalesInvoiceDetails.deleteMany(
+      { invoiceNo },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      message: `Deleted Sales Invoice Master and details with invoiceNo ${invoiceNo}`,
+      deletedSalesInvoiceMaster,
+      deletedDetailsCount: deletedSalesInvoiceDetails.deletedCount,
+    });
+  } catch (error) {
+    try {
+      await session.abortTransaction();
+    } catch (e) {
+      /* ignore */
+    }
+    session.endSession();
+    res.status(500).json({ error: error.message });
+  }
+}

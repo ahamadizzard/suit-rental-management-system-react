@@ -30,14 +30,3 @@ export async function batchBookingSave(req, res) {
     res.status(500).json({ message: "Batch save failed", error: err.message });
   }
 }
-// Note: Ensure that the models SalesInvoice, SalesInvoiceDetail, and DailyTransaction are correctly defined in their respective files.
-// This function assumes that the request body contains an object with `invoice`, `invoiceDetails`,
-// and `dailyTransaction` properties, where `invoiceDetails` is an array of invoice detail objects.
-// Adjust the model imports and structure as per your actual schema definitions.
-// Make sure to handle the session properly to avoid memory leaks or uncommitted transactions.
-// Also, ensure that the necessary error handling and validation are in place for production use.
-// This code is designed to handle batch booking operations, saving an invoice, its details, and a daily transaction in a single transaction.
-// It uses Mongoose sessions to ensure that all operations are atomic, meaning either all succeed or none do, maintaining data integrity.
-// This is particularly useful in scenarios where you want to ensure that related data is consistently saved together, such as in financial transactions or booking systems.
-// Make sure to test this function thoroughly, especially in scenarios where one of the saves might fail, to ensure that the transaction rolls back correctly and no partial data is left in the database.
-// Also, consider adding validation for the incoming data to ensure that it meets the requirements of your application before attempting to save it to the database.

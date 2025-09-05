@@ -6,6 +6,7 @@ import { FaSearch, FaEdit, FaTrash, FaPlus, FaEye } from 'react-icons/fa';
 import Modal from 'react-modal';
 import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
+import { Eye } from 'lucide-react';
 
 Modal.setAppElement('#root');
 
@@ -27,6 +28,12 @@ export default function AdminProductPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    // Bookings (salesInvoiceDetails) for the selected item
+    const [selectedBookings, setSelectedBookings] = useState([]);
+    const [loadingBookings, setLoadingBookings] = useState(false);
+    // Single booking view
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
     // Fetch groups on component mount
     useEffect(() => {
@@ -49,7 +56,6 @@ export default function AdminProductPage() {
 
                 const data = response.data;
 
-                // Check if data is an array
                 if (Array.isArray(data)) {
                     const sortedGroups = data.sort((a, b) =>
                         (a.groupShortName || '').localeCompare(b.groupShortName || '')
@@ -57,7 +63,7 @@ export default function AdminProductPage() {
 
                     setGroups(sortedGroups);
                 } else {
-                    // If data is not an array, handle accordingly
+                    // If data is not an array, ensure groups is an empty array
                     setGroups([]);
                 }
             } catch (error) {
@@ -195,7 +201,11 @@ export default function AdminProductPage() {
 
     const handleView = (product) => {
         setSelectedProduct(product);
+        // clear previous bookings while new ones load
+        setSelectedBookings([]);
         setIsViewModalOpen(true);
+        // load bookings for this item
+        fetchBookingsForItem(product?.itemCode);
     };
 
     const handleModify = (product) => {
@@ -203,10 +213,39 @@ export default function AdminProductPage() {
         setIsEditModalOpen(true);
     };
 
+    const openBookingModal = (booking) => {
+        setSelectedBooking(booking);
+        setIsBookingModalOpen(true);
+    };
+
+    const closeBookingModal = () => {
+        setIsBookingModalOpen(false);
+        setSelectedBooking(null);
+    };
+
     const confirmDelete = (product) => {
         setSelectedProduct(product);
         setIsDeleteModalOpen(true);
     };
+
+    // Fetch bookings for an item code from salesInvoiceDetails
+    async function fetchBookingsForItem(itemCode) {
+        if (!itemCode) return;
+        try {
+            setLoadingBookings(true);
+            const token = localStorage.getItem('token');
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_BASE_URL}/api/salesinvoicedetails/item/${encodeURIComponent(itemCode)}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setSelectedBookings(Array.isArray(res.data) ? res.data : []);
+        } catch (err) {
+            console.error('Error fetching bookings for item:', itemCode, err);
+            setSelectedBookings([]);
+        } finally {
+            setLoadingBookings(false);
+        }
+    }
 
     const modalStyles = {
         overlay: {
@@ -231,7 +270,8 @@ export default function AdminProductPage() {
             maxWidth: '500px',
             width: '90%',
             margin: '0 auto',
-            overflow: 'hidden',
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch',
             position: 'relative',
             inset: 'unset',
             transform: 'none'
@@ -363,7 +403,11 @@ export default function AdminProductPage() {
                             {/* View Product Modal */}
                             <Modal
                                 isOpen={isViewModalOpen}
-                                onRequestClose={() => setIsViewModalOpen(false)}
+                                onRequestClose={() => {
+                                    setIsViewModalOpen(false);
+                                    setSelectedBookings([]);
+                                    setLoadingBookings(false);
+                                }}
                                 style={{
                                     overlay: {
                                         backgroundColor: 'rgba(57, 62, 70, 0.75)',
@@ -393,15 +437,16 @@ export default function AdminProductPage() {
                                         inset: 'unset',
                                         transform: 'none',
                                         maxHeight: '90vh',
-                                        overflow: 'hidden'
+                                        overflow: 'auto',
+                                        WebkitOverflowScrolling: 'touch'
                                     }
                                 }}
                                 ariaHideApp={false}
                             >
                                 {/* <div className="p-6 w-full h-full "> */}
-                                <div className="p-6 overflow-y-auto flex-1">
+                                <div className="p-6 overflow-y-auto flex-1" style={{ maxHeight: '78vh' }}>
                                     <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-4 z-10">
-                                        <h2 className="text-2xl font-bold text-gray-800">Product Details - {selectedProduct?.itemName}</h2>
+                                        <h2 className="text-2xl font-bold text-gray-800">Product Details for - <span className='text-blue-700'> {selectedProduct?.itemCode} - {selectedProduct?.itemName}</span></h2>
                                         <button
                                             onClick={() => setIsViewModalOpen(false)}
                                             className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -412,6 +457,60 @@ export default function AdminProductPage() {
 
                                     {selectedProduct && (
                                         <div className="space-y-4">
+                                            {/* Bookings Section (from salesInvoiceDetails) */}
+                                            <div className="bg-red-50 p-1 rounded-lg">
+                                                <h3 className="font-bold text-lg mb-1 text-red-900 border-b pb-1">Bookings</h3>
+                                                {loadingBookings ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                                                        <p className="text-sm text-gray-500">Loading bookings...</p>
+                                                    </div>
+                                                ) : selectedBookings && selectedBookings.length > 0 ? (
+                                                    <div className="overflow-x-auto">
+                                                        <table className="min-w-full text-sm text-left text-gray-700">
+                                                            <thead className='text-red-900'>
+                                                                <tr>
+                                                                    <th className="px-2 py-1">Invoice #</th>
+                                                                    <th className="px-2 py-1">Invoice Date</th>
+                                                                    <th className="px-2 py-1">Delivery</th>
+                                                                    <th className="px-2 py-1">Return</th>
+                                                                    <th className="px-2 py-1">Status</th>
+                                                                    <th className="px-2 py-1">Amount</th>
+                                                                    <th className="px-2 py-1">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className='text-blue-800 font-semibold'>
+                                                                {selectedBookings.map((b) => (
+                                                                    <tr
+                                                                        key={b._id || `${b.invoiceNo}-${b.itemCode}`}
+                                                                        className="border-t hover:bg-gray-100"
+                                                                    // onClick={() => openBookingModal(b)}
+                                                                    // title={`Open booking ${b.invoiceNo}`}
+                                                                    >
+                                                                        <td className="px-2 py-1">{b.invoiceNo}</td>
+                                                                        <td className="px-2 py-1">{b.invoiceDate ? new Date(b.invoiceDate).toLocaleDateString() : 'N/A'}</td>
+                                                                        <td className="px-2 py-1">{b.deliveryDate ? new Date(b.deliveryDate).toLocaleDateString() : 'N/A'}</td>
+                                                                        <td className="px-2 py-1">{b.returnDate ? new Date(b.returnDate).toLocaleDateString() : 'N/A'}</td>
+                                                                        <td className="px-2 py-1">{b.bookingStatus || 'N/A'}</td>
+                                                                        <td className="px-2 py-1">{b.amount != null ? `Rs. ${b.amount.toLocaleString()}` : 'N/A'}</td>
+                                                                        <td className="px-2 py-1">
+                                                                            <button
+                                                                                onClick={() => openBookingModal(b)}
+                                                                                className='flex flex-row gap-2 items-center text-blue-500 border border-blue-500 hover:bg-blue-700 hover:text-white font-bold py-1 px-2 rounded'
+                                                                            >
+                                                                                <Eye /> View
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500">No bookings found for this item.</p>
+                                                )}
+                                            </div>
+
                                             {/* Basic Information Section */}
                                             <div className="bg-gray-50 p-1 rounded-lg">
                                                 <h3 className="font-bold text-lg mb-1 text-gray-700 border-b pb-1">Basic Information</h3>
@@ -553,6 +652,7 @@ export default function AdminProductPage() {
                                                     </p>
                                                 </div>
                                             </div>
+
                                         </div>
                                     )}
 
@@ -560,6 +660,8 @@ export default function AdminProductPage() {
                                         <Button
                                             onClick={() => {
                                                 setIsViewModalOpen(false)
+                                                setSelectedBookings([]);
+                                                setLoadingBookings(false);
                                                 setIsEditModalOpen(true)
                                             }
                                             }
@@ -568,12 +670,67 @@ export default function AdminProductPage() {
                                             Edit This Product
                                         </Button>
                                         <Button
-                                            onClick={() => setIsViewModalOpen(false)}
+                                            onClick={() => { setIsViewModalOpen(false); setSelectedBookings([]); setLoadingBookings(false); }}
                                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
                                         >
                                             Close
                                         </Button>
                                     </div>
+                                </div>
+                            </Modal>
+                            {/* Booking Details Modal (single booking) */}
+                            <Modal
+                                isOpen={isBookingModalOpen}
+                                onRequestClose={closeBookingModal}
+                                style={modalStyles}
+                                ariaHideApp={false}
+                            >
+                                <div className="p-6" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-xl font-bold text-gray-800">Booking Details for <br /> <span className='text-red-700'>{selectedProduct?.itemCode}-{selectedProduct?.itemName}</span></h2>
+                                        <button onClick={closeBookingModal} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                                    </div>
+
+                                    {selectedBooking ? (
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-sm text-gray-500">Invoice #</p>
+                                                <p className="text-gray-900 font-semibold">{selectedBooking.invoiceNo}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Invoice Date</p>
+                                                <p className="text-gray-900">{selectedBooking.invoiceDate ? new Date(selectedBooking.invoiceDate).toLocaleString() : 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Delivery Date</p>
+                                                <p className="text-gray-900">{selectedBooking.deliveryDate ? new Date(selectedBooking.deliveryDate).toLocaleString() : 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Return Date</p>
+                                                <p className="text-gray-900">{selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleString() : 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Status</p>
+                                                <p className="text-gray-900">{selectedBooking.bookingStatus || 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Amount</p>
+                                                <p className="text-gray-900">{selectedBooking.amount != null ? `Rs. ${selectedBooking.amount.toLocaleString()}` : 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Item Code</p>
+                                                <p className="text-gray-900">{selectedBooking.itemCode || 'N/A'}</p>
+                                            </div>
+                                            <div className="mt-4 flex justify-end">
+                                                <button onClick={closeBookingModal} className="px-4 py-2 bg-blue-600 text-white rounded-md">Close</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                                            <p className="text-sm text-gray-500">Loading...</p>
+                                        </div>
+                                    )}
                                 </div>
                             </Modal>
                             {/* Edit Product Modal */}
