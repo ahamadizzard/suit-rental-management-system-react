@@ -513,6 +513,8 @@ export default function SalesInvoicePage() {
                 // Use the selected `date` for each invoice detail when available.
                 invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
                 itemCode: item.itemCode,
+                itemShortName: item.itemShortDesc,
+                itemSize: item.itemSize,
                 group: item.group,
                 alteration: item.alteration,
                 amount: item.amount,
@@ -639,7 +641,7 @@ export default function SalesInvoicePage() {
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoicedetails/item/${itemCode}`);
             // Expecting an array of bookings
-            console.log('Bookings for item:', itemCode, res.data);
+            // console.log('Bookings for item:', itemCode, res.data);
             return res.data && Array.isArray(res.data) && res.data.length > 0 ? res.data : null;
 
         } catch (err) {
@@ -666,6 +668,9 @@ export default function SalesInvoicePage() {
     return (
         <div className="min-h-screen" style={{ background: "var(--color-bg-gradient)", minHeight: '100vh' }}>
             {/* Modern Header with Navy/Red Branding */}
+            <div className='flex items-center justify-center py-2 bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-500 shadow-md mb-4'>
+                <h2 className='text-3xl font-extrabold tracking-wide drop-shadow text-blue-600'>New Bookings</h2>
+            </div>
             <div className="mb-4">
                 <Card className="h-[90px] flex justify-center shadow-xl border-2" style={{ borderColor: "var(--color-navy)", background: "var(--color-bg-gradient)" }}>
                     {/* Decorative navy/red bar */}
@@ -1114,9 +1119,13 @@ export default function SalesInvoicePage() {
                                             <SelectValue placeholder="Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Pending">Pending</SelectItem>
-                                            <SelectItem value="Completed">Completed</SelectItem>
-                                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                            <SelectItem value="booked">Booked</SelectItem>
+                                            <SelectItem value="delivered">Delivered</SelectItem>
+                                            <SelectItem value="returned">Returned</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                            <SelectItem value="return_partial">Returned Partial</SelectItem>
+                                            <SelectItem value="return_overdue">Returned Overdue</SelectItem>
+                                            <SelectItem value="return_issue">Returned w/Issues</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

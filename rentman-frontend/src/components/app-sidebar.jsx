@@ -45,8 +45,8 @@ const data = {
               isActive: true,
             },
             {
-              title: "Modify Booking",
-              url: "/dashboard/sales/modifybooking",
+              title: "Item Adjustment",
+              url: "#",
               isActive: true,
             },
             {
