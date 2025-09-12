@@ -94,6 +94,8 @@ export default function SalesInvoicePage() {
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState(new Date());
 
+    const [totalDiscount, setTotalDiscount] = useState(0);
+
     // const [comboInputValue, setComboInputValue] = useState('');
 
     // Keyboard shortcuts: Ctrl+S to save, Esc to close dialog
@@ -143,6 +145,7 @@ export default function SalesInvoicePage() {
         const subtotal = selectedItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
         const discount = watch('totalDiscount') || 0;
         const netTotal = subtotal - discount;
+        setTotalDiscount(discount);
         setValue('totalAmount', subtotal);
         setValue('netTotal', netTotal);
         setValue('balanceAmount', netTotal - (watch('advancePaid') || 0));
@@ -424,6 +427,7 @@ export default function SalesInvoicePage() {
                 amount: parseFloat(itemPrice),
                 alteration: alteration || '',
                 group: selectedGroup,
+                totalDiscount: totalDiscount,
                 deliveryDate: watch('deliveryDate'),
                 returnDate: watch('returnDate'),
                 isCompleted: false

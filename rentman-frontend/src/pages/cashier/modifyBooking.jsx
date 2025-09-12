@@ -85,7 +85,7 @@ export default function ModifyBooking() {
     const [selectedGroup, setSelectedGroup] = useState('')
 
     const [showRemoveDialog, setShowRemoveDialog] = useState({ open: false, itemCode: null });
-    const [bookingStatus, setBookingStatus] = useState('Pending');
+    const [invoiceStatus, setInvoiceStatus] = useState('Booked');
 
     const [itemBookingInfo, setItemBookingInfo] = useState(null);
     const [showBookingConflict, setShowBookingConflict] = useState(false);
@@ -105,6 +105,7 @@ export default function ModifyBooking() {
         async function loadData() {
             try {
                 // Load invoice master and details
+                console.log("Loading invoiceNo: ", invoiceNo);
                 const resMaster = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoice/${encodeURIComponent(invoiceNo)}`);
                 const resItems = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoicedetails/${encodeURIComponent(invoiceNo)}/items`);
                 // Load customers and groups
@@ -114,7 +115,7 @@ export default function ModifyBooking() {
                 setGroups(gRes.data || []);
                 // Set form values
                 const master = resMaster.data;
-                setSelectedCustomer('customerId', master.customerId || "");
+                setSelectedCustomer(master.customerId || "");
                 setValue('invoiceNo', master.invoiceNo || "");
                 setValue('invoiceDate', master.invoiceDate ? master.invoiceDate.split('T')[0] : "");
                 setInvoiceNumber(master.invoiceNo || "");
@@ -129,16 +130,20 @@ export default function ModifyBooking() {
                 setValue('remarks', master.remarks || "");
                 setValue('deliveryDate', master.deliveryDate ? master.deliveryDate.split('T')[0] : "");
                 setValue('returnDate', master.returnDate ? master.returnDate.split('T')[0] : "");
-                setValue('totalDiscount', master.discount || 0);
+                setValue('totalDiscount', master.totalDiscount || 0);
+                setValue('payment1', master.payment1 || 0);
+                setValue('payment2', master.payment3 || 0);
+                setValue('payment3', master.payment2 || 0);
                 setValue('advancePaid', master.advancePaid || 0);
                 setValue('balanceAmount', master.balanceAmount || 0);
                 setValue('depositAmount', master.depositAmount || 0);
-                setBookingStatus(master.bookingStatus || 'Pending');
+                setInvoiceStatus(master.invoiceStatus || 'Booked');
                 setDate(master.invoiceDate ? new Date(master.invoiceDate) : new Date());
                 setLastAdvancePaid(master.advancePaid || 0);
                 // Items
                 setSelectedItems(resItems.data || []);
-                // console.log(resItems.data)
+                console.log("Master Data: ", master)
+                console.log("Details Data: ", resItems.data)
             } catch (err) {
                 setError(err.response?.data?.message || err.message);
             } finally {
@@ -1035,9 +1040,9 @@ export default function ModifyBooking() {
                                         </div>
                                     </div> */}
                                     {/* ...existing form fields... */}
-                                    <div className="w-[150px] h-[45px]">
+                                    {/* <div className="w-[150px] h-[45px]">
                                         <Label className="text-xs">Customer List</Label>
-                                        <Combobox value={selectedCustomer} onValueChange={handleCustomerSelect} >
+                                        <Combobox value={selectedCustomer} onValueChange={handleCustomerSelect}>
                                             <ComboboxAnchor>
                                                 <ComboboxInput placeholder="Customer..." className="h-7 text-xs" />
                                                 <ComboboxTrigger>
@@ -1053,8 +1058,51 @@ export default function ModifyBooking() {
                                                 ))}
                                             </ComboboxContent>
                                         </Combobox>
-                                    </div>
+
+                                    </div> */}
+
                                     <div>
+                                        <Label htmlFor="customerId" className="text-xs">Customer ID</Label>
+                                        <Input id="customerId" {...register('customerId')} className="h-7 text-xs" readOnly />
+                                    </div>
+
+                                    {/* Customer Name */}
+                                    <div>
+                                        <Label htmlFor="customerName" className="text-xs">Name</Label>
+                                        <Input id="customerName" {...register('customerName')} className="h-07 text-xs" />
+                                    </div>
+
+                                    {/* Address */}
+                                    <div className="col-span-2">
+                                        <Label htmlFor="customerAddress" className="text-xs">Address</Label>
+                                        <Textarea id="customerAddress" {...register('customerAddress')} className="text-xs min-h-[32px]" />
+                                    </div>
+
+                                    {/* Tel 1 */}
+                                    <div>
+                                        <Label htmlFor="customerTel1" className="text-xs">Tel 1</Label>
+                                        <Input id="customerTel1" {...register('customerTel1')} className="h-7 text-xs" />
+                                    </div>
+
+                                    {/* Tel 2 */}
+                                    <div>
+                                        <Label htmlFor="customerTel2" className="text-xs">Tel 2</Label>
+                                        <Input id="customerTel2" {...register('customerTel2')} className="h-7 text-xs" />
+                                    </div>
+
+                                    {/* NIC 1 */}
+                                    <div>
+                                        <Label htmlFor="nic1" className="text-xs">NIC 1</Label>
+                                        <Input id="nic1" {...register('nic1')} className="h-7 text-xs" />
+                                    </div>
+
+                                    {/* NIC 2 */}
+                                    <div>
+                                        <Label htmlFor="nic2" className="text-xs">NIC 2</Label>
+                                        <Input id="nic2" {...register('nic2')} className="h-7 text-xs" />
+                                    </div>
+
+                                    {/* <div>
                                         <Label htmlFor="customerName" className="text-xs">Name</Label>
                                         <Input id="customerName" {...register('customerName')} className="h-10 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerAddress')?.focus(); } }} />
                                     </div>
@@ -1077,7 +1125,7 @@ export default function ModifyBooking() {
                                     <div>
                                         <Label htmlFor="nic2" className="text-xs">NIC 2</Label>
                                         <Input id="nic2" {...register('nic2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('deliveryDate')?.focus(); } }} />
-                                    </div>
+                                    </div> */}
                                     <div>
                                         <Label htmlFor="deliveryDate" className="text-xs">Delivery</Label>
                                         <Input
@@ -1161,8 +1209,8 @@ export default function ModifyBooking() {
                                     <Textarea id="remarks" {...register('remarks')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('bookingStatus')?.focus(); } }} />
                                 </div>
                                 <div className="mt-2">
-                                    <Label htmlFor="bookingStatus" className="text-xs">Booking Status</Label>
-                                    <Select id="bookingStatus" value={bookingStatus} onValueChange={setBookingStatus}>
+                                    <Label htmlFor="invoiceStatus" className="text-xs">Invoice Status</Label>
+                                    <Select id="invoiceStatus" value={invoiceStatus} onValueChange={setInvoiceStatus}>
                                         <SelectTrigger className="h-7 text-xs" tabIndex={0}>
                                             <SelectValue placeholder="Status" />
                                         </SelectTrigger>

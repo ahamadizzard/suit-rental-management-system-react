@@ -16,14 +16,15 @@ export async function getSalesInvoice(req, res) {
   }
 }
 // Export an async function to get a sales invoice by ID
-export async function getSalesInvoiceById(req, res) {
-  const invoiceId = req.params.invoiceId;
+export async function getSalesInvoiceMasterByInvoiceNo(req, res) {
+  const invoiceNo = req.params.invoiceNo;
   try {
-    const salesInvoice = await SalesInvoiceMaster.findOne({
-      invoiceId: invoiceId,
+    const salesInvoiceMaster = await SalesInvoiceMaster.findOne({
+      invoiceNo: invoiceNo,
     });
-    if (!salesInvoice) return res.status(404).send("Sales Invoice not found");
-    res.status(200).json(salesInvoice);
+    if (!salesInvoiceMaster)
+      return res.status(404).send("Sales Invoice not found");
+    res.status(200).json(salesInvoiceMaster);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
