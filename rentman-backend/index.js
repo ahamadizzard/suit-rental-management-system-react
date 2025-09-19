@@ -55,18 +55,34 @@ app.use((req, res, next) => {
 //connecting to the database
 connectDB();
 
+// app.use("/api/itemmaster", itemMasterRouter);
+// app.use("/api/groupmaster", groupMasterRouter);
+// app.use("/api/contributor", contributorRouter);
+// app.use("/api/batchbooking", batchBookingRouter);
+// app.use("/api/users", userRouter);
+
+// app.use("/api/salesinvoice", salesInvoiceMasterRouter);
+// app.use("/api/salesinvoice/updateBooking", updateBookingRouter);
+// app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);
+// app.use("/api/dailytransactions", dailyTransactionsRouter);
+// app.use("/api/customers", customersRouter);
+
+// this is the best order to avoid conflict in routes
+// 1️⃣ Specific routers first
+app.use("/api/salesinvoice/updateBooking", updateBookingRouter);
+
+// 2️⃣ Other specific routers
+app.use("/api/batchbooking", batchBookingRouter);
 app.use("/api/itemmaster", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
 app.use("/api/contributor", contributorRouter);
-
 app.use("/api/users", userRouter);
-
-app.use("/api/salesinvoice", salesInvoiceMasterRouter);
-app.use("/api/salesinvoice/updateBooking", updateBookingRouter);
 app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);
 app.use("/api/dailytransactions", dailyTransactionsRouter);
 app.use("/api/customers", customersRouter);
-app.use("/api/batchbooking", batchBookingRouter);
+
+// 3️⃣ Generic routers last
+app.use("/api/salesinvoice", salesInvoiceMasterRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

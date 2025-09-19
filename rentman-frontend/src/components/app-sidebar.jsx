@@ -401,11 +401,11 @@ export function AppSidebar({ ...props }) {
                                   </SidebarMenuSubButton>
                                 </CollapsibleTrigger>
                                 <CollapsibleContent>
-                                  <SidebarMenuSub>
+                                  <SidebarMenuSub >
                                     {subItem.items.map((subSubItem) => (
-                                      <SidebarMenuSubItem key={subSubItem.title}>
+                                      <SidebarMenuSubItem key={subSubItem.title} >
                                         <SidebarMenuSubButton asChild isActive={subSubItem.isActive}>
-                                          <Link to={subSubItem.url}>{subSubItem.title}</Link>
+                                          <Link to={subSubItem.url}  >{subSubItem.title}</Link>
                                         </SidebarMenuSubButton>
                                       </SidebarMenuSubItem>
                                     ))}
@@ -413,7 +413,7 @@ export function AppSidebar({ ...props }) {
                                 </CollapsibleContent>
                               </Collapsible>
                             ) : (
-                              <SidebarMenuSubButton asChild isActive={subItem.isActive}>
+                              <SidebarMenuSubButton asChild isActive={subItem.isActive} >
                                 <Link to={subItem.url}>{subItem.title}</Link>
                               </SidebarMenuSubButton>
                             )}

@@ -135,39 +135,8 @@ export default function BookingList() {
         }
     };
 
-    const handleDelete = () => {
-        if (!selectedBooking) return;
-        // console.log("Deleting product message from modal screen:", productToDelete);
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
-
-        axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/batchbooking/${selectedBooking.invoiceNo}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(() => {
-                Swal.fire({
-                    title: 'Success',
-                    text: 'Booking deleted successfully',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });
-                setIsDeleteModalOpen(false);
-                fetchAllBookings(); // Refresh the bookings list
-            })
-            .catch((error) => {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Error deleting booking: ' + error.message,
-                    icon: 'error',
-                    autoClose: 5000,
-                    confirmButtonText: 'OK'
-                });
-                setIsLoading(false);
-            });
-    };
-
     const confirmDelete = (booking) => {
-        setSelectedBooking(booking);
+        setSelectedProduct(booking);
         setIsDeleteModalOpen(true);
     };
 
@@ -176,35 +145,85 @@ export default function BookingList() {
         setIsViewModalOpen(true);
     };
 
+
     const closeModal = () => {
         setIsViewModalOpen(false);
         setSelectedBooking(null);
     };
 
+    // SweetAlert2 Edit Handler
+    const handleModify = (booking) => {
+        // Swal.fire({
+        //     title: '<strong>Edit Customer</strong>',
+        //     color: '#000',
+        //     background: '#fff',
+        //     html: `
+        //     <div style="display: flex; flex-direction: column; align-items: stretch; gap:0;">
+        //         <label class="swal2-label" style="margin-bottom: 12px;">Please fill in the customer details for customer ID: ${customer.customerId}</label>
+
+        //         <label class="font-bold" >Name</label>
+        //         <input id="swal-input1" class="swal2-input" placeholder="Name"  defaultValue="${customer.customerName || ''}" />
+        //         <label class="font-bold" >Address</label>
+        //         <input id="swal-input2" class="swal2-input" placeholder="Address" defaultValue="${customer.customerAddress || ''}" />
+        //         <label class="font-bold" style="margin-bottom:2px;">Email</label>
+        //         <input id="swal-input3" class="swal2-input" placeholder="Email" style="margin-bottom:5px;" defaultValue="${customer.customerEmail || ''}" />
+        //         <label class="font-bold" style="margin-bottom:2px;">Telephone 1</label>
+        //         <input id="swal-input4" class="swal2-input" placeholder="Telephone 1" style="margin-bottom:5px;" defaultValue="${customer.customerTel1 || ''}" />
+        //         <label class="font-bold" style="margin-bottom:2px;">Telephone 2</label>
+        //         <input id="swal-input5" class="swal2-input" placeholder="Telephone 2" style="margin-bottom:5px;" defaultValue="${customer.customerTel2 || ''}" />
+        //         <label class="font-bold" style="margin-bottom:2px;">Joined Date</label>
+        //         <input id="swal-input6" class="swal2-input" placeholder="Joined Date" style="margin-bottom:5px;" defaultValue="${customer.customerJoinedDate ? moment(customer.customerJoinedDate).format('YYYY-MM-DD') : ''}" type="date" />
+        //         <label class="font-bold" style="margin-bottom:2px;">Discount Percentage</label>
+        //         <input id="swal-input7" class="swal2-input" placeholder="Discount %" style="margin-bottom:5px;" type="number" defaultValue="${customer.customerDiscountPercentage || '0'}" />
+        //     </div>
+        //     `,
+        //     focusConfirm: false,
+        //     showCancelButton: true,
+        //     confirmButtonText: 'Update',
+        //     preConfirm: () => {
+        //         return {
+        //             customerName: document.getElementById('swal-input1').value,
+        //             customerAddress: document.getElementById('swal-input2').value,
+        //             customerEmail: document.getElementById('swal-input3').value,
+        //             customerTel1: document.getElementById('swal-input4').value,
+        //             customerTel2: document.getElementById('swal-input5').value,
+        //             customerJoinedDate: document.getElementById('swal-input6').value,
+        //             customerDiscountPercentage: document.getElementById('swal-input7').value,
+        //         };
+        //     }
+        // }).then(async (result) => {
+        //     if (result.isConfirmed) {
+        //         try {
+        //             const token = localStorage.getItem('token');
+        //             await axios.put(
+        //                 `${import.meta.env.VITE_API_BASE_URL}/api/customers/${customer.customerId}`,
+        //                 result.value,
+        //                 { headers: { Authorization: `Bearer ${token}` } }
+        //             );
+        //             toast.success('Customer updated successfully!');
+        //             // Refresh customer list
+        //             setIsLoading(true);
+        //             const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers/');
+        //             setCustomers(response.data);
+        //             Swal.fire('Success', 'Customer updated successfully!', 'success');
+        //             setIsLoading(false);
+        //         } catch (error) {
+        //             Swal.fire('Error', 'Failed to update customer. Please try again.', 'error');
+        //         }
+        //     }
+        // });
+    };
+
     // Map invoiceStatus text to Badge variant
     const getStatusVariant = (status) => {
         const s = (status || '').toString().toLowerCase();
-
-        switch (s) {
-            case 'booked':
-                return 'secondary';       // e.g., gray / neutral
-            case 'delivered':
-                return 'default';         // e.g., green / success
-            case 'returned':
-                return 'outline';         // e.g., blue / info
-            case 'cancelled':
-                return 'destructive';     // e.g., red / danger
-            case 'return_partial':
-                return 'warning';         // e.g., yellow / partial
-            case 'return_overdue':
-                return 'destructive';     // e.g., red / overdue
-            case 'return_issue':
-                return 'destructive';     // e.g., red / issue
-            default:
-                return 'secondary';       // fallback / neutral
-        }
+        if (!s) return 'default';
+        if (s.includes('cancel')) return 'destructive';
+        if (s.includes('deliver')) return 'default';
+        if (s.includes('return')) return 'outline';
+        // booked / other
+        return 'secondary';
     };
-
 
     return (
         <div className="flex flex-col items-center w-full px-4 py-8">
@@ -298,92 +317,80 @@ export default function BookingList() {
                     {/* delete modal */}
                     <Modal
                         isOpen={isDeleteModalOpen}
+                        onAfterOpen={() => { }}
                         onRequestClose={() => setIsDeleteModalOpen(false)}
-                        className="modal"
                         shouldCloseOnOverlayClick={true}
-                        contentLabel="Confirm Deletion"
-                        overlayClassName="modal-overlay"
-                        style={modalStyles}
-                        ariaHideApp={false} // Prevent warning about app element
+                        contentLabel="Delete Booking Confirmation"
+                        style={{
+                            overlay: {
+                                backgroundColor: 'rgba(57, 62, 70, 0.75)',
+                                backdropFilter: 'blur(4px)'
+                            },
+                            content: {
+                                backgroundColor: 'var(--color-secondary)',
+                                border: 'none',
+                                borderRadius: '12px',
+                                padding: '0',
+                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                                maxWidth: '600px',
+                                width: '90%',
+                                margin: 'auto',
+                                overflow: 'hidden'
+                            }
+                        }}
                     >
-                        <div className="p-8 w-full">
-                            <div className="flex flex-col items-center mb-6">
-                                {/* Warning icon */}
-                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-10 w-10 text-red-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        />
-                                    </svg>
-                                </div>
 
-                                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Confirm Deletion</h2>
-                                <p className="text-gray-600 text-center">
-                                    <span className="text-lg font-bold text-red-700 mb-4 flex items-center justify-center gap-2">
-                                        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                        Are you sure you want to delete this booking?
-                                    </span>
-                                    <div className="bg-white border-2 border-red-200 rounded-2xl shadow-lg p-6 mt-2 mb-2 w-full max-w-md mx-auto flex flex-col items-center">
-                                        <div className="w-full">
-                                            {/* Invoice No */}
-                                            <div className="flex flex-row items-center mb-3 w-full">
-                                                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2a4 4 0 118 0v2m-4-6v.01" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Invoice No:</span>
-                                                <span className="text-blue-700 font-bold w-60 text-left text-lg ml-6">{selectedBooking?.invoiceNo}</span>
-                                            </div>
-                                            <div className="border-t border-gray-200 w-full my-2"></div>
-                                            {/* Customer Name */}
-                                            <div className="flex flex-row items-center mb-3 w-full">
-                                                <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Customer Name:</span>
-                                                <span className="text-gray-800 font-bold w-60 text-left ml-6">{selectedBooking?.customerName}</span>
-                                            </div>
-                                            <div className="border-t border-gray-200 w-full my-2"></div>
-                                            {/* Customer Address */}
-                                            <div className="flex flex-row items-center mb-3 w-full">
-                                                <svg className="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M17 8V6a4 4 0 00-8 0v2m8 0a4 4 0 01-8 0m8 0v2a4 4 0 01-8 0V8" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Customer Address:</span>
-                                                <span className="text-gray-800 text-left w-60 font-bold ml-6">{selectedBooking?.customerAddress}</span>
-                                            </div>
-                                            <div className="border-t border-gray-200 w-full my-2"></div>
-                                            {/* Invoice Total */}
-                                            <div className="flex flex-row items-center mb-1 w-full">
-                                                <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 0C7.582 4 4 7.582 4 12c0 4.418 3.582 8 8 8s8-3.582 8-8c0-4.418-3.582-8-8-8z" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Invoice Total:</span>
-                                                <span className="text-green-700 font-bold w-60 text-left ml-6">{selectedBooking?.netTotal}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-red-600 font-bold mt-4 text-center text-base flex items-center justify-center gap-2">
-                                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414A7 7 0 1116.95 7.05z" /></svg>
-                                        This action cannot be undone.
-                                    </span>
-                                </p>
-
-                            </div>
-
-                            <div className="flex justify-end space-x-4">
+                        <div className="p-6">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800">Delete Booking</h2>
+                                {/* x button to close */}
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-300 cursor-pointer transition-colors duration-200"
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Booking Details Grid */}
+                            <div className="mb-4">
+                                <p className="text-gray-700">Are you sure you want to delete booking with Inv. No: <span className="font-bold">{deleteBookingId}</span>? This action cannot be undone.</p>
+
+
+
+
+
+                            </div>
+                            <div className="flex justify-end space-x-4">
+
+
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={handleDelete}
-                                    className="px-6 py-2 bg-red-700 text-white rounded-md hover:bg-red-500 cursor-pointer transition-colors duration-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                                >
-                                    Delete
-                                </button>
+                                    onClick={async () => {
+                                        try {
+                                            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoice/${deleteBookingId}`);
+                                            toast.success('Booking deleted successfully!');
+                                            // Refresh booking list
+                                            await fetchAllBookings();
+                                        } catch (error) {
+                                            toast.error('Failed to delete booking. Please try again.');
+                                        }
+                                        setIsDeleteModalOpen(false);
+                                    }}
+                                    className="px-4 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+                                ></button>
+                                Delete
+
+
                             </div>
                         </div>
                     </Modal>
@@ -508,7 +515,7 @@ export default function BookingList() {
 
                                         <td className="px-2 py-1 whitespace-nowrap text-sm">
                                             <Badge variant={getStatusVariant(booking.invoiceStatus)}>
-                                                {booking.invoiceStatus ? booking.invoiceStatus.charAt(0).toUpperCase() + booking.invoiceStatus.slice(1) : 'N/A'}
+                                                {booking.invoiceStatus || 'N/A'}
                                             </Badge>
                                         </td>
 

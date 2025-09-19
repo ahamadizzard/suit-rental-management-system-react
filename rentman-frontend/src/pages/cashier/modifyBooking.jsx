@@ -1,4 +1,3 @@
-// "use client"
 import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
@@ -26,15 +25,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import {
-    Combobox,
-    ComboboxAnchor,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxTrigger,
-} from "@/components/ui/combobox";
 import { ChevronDown, ChevronDownIcon } from "lucide-react";
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
@@ -61,9 +51,9 @@ export default function ModifyBooking() {
     const [items, setItems] = useState([])
     const [selectedItems, setSelectedItems] = useState([])
     const [selectedItem, setSelectedItem] = useState('')
-    // const [selectedItemCode, setSelectedItemCode] = useState('');
+
     const [selectedItemDetails, setSelectedItemDetails] = useState(null);
-    // const [searchTerm, setSearchTerm] = useState('');
+
     const [alteration, setAlteration] = useState('');
     const [itemPrice, setItemPrice] = useState('');
     const [lastAddedItemCode, setLastAddedItemCode] = useState(null);
@@ -96,7 +86,7 @@ export default function ModifyBooking() {
 
     const [lastAdvancePaid, setLastAdvancePaid] = useState(0);
 
-    // const [comboInputValue, setComboInputValue] = useState('');
+    const [bookingStatus, setBookingStatus] = useState('booked');
 
     // Load invoice data and customers
     const { register, handleSubmit, watch, setValue, getValues, reset } = useForm();
@@ -167,33 +157,6 @@ export default function ModifyBooking() {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [showRemoveDialog]);
-
-    // const { register, handleSubmit, watch, setValue } = useForm({
-    //     defaultValues: {
-    //         customerId: '',
-    //         invoiceDate: new Date().toISOString().split('T')[0],
-    //         customerName: '',
-    //         customerAddress: '',
-    //         // invoiceDate: "",
-    //         customerTel1: '',
-    //         customerTel2: '',
-    //         deliveryDate: new Date().toISOString().split('T')[0],
-    //         returnDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    //         totalAmount: 0,
-    //         totalDiscount: 0,
-    //         netTotal: 0,
-    //         payment1: 0,
-    //         payment2: 0,
-    //         payment3: 0,
-    //         advancePaid: 0,
-    //         balanceAmount: 0,
-    //         depositTaken: '',
-    //         depositAmount: 0,
-    //         nic1: '',
-    //         nic2: '',
-    //         remarks: ''
-    //     }
-    // })
 
     // Calculate totals automatically
     useEffect(() => {
@@ -312,43 +275,6 @@ export default function ModifyBooking() {
         return () => clearTimeout(debounceTimer); // Cleanup on unmount or query change
     }, [searchQuery]);
 
-    // // Load customer details when ID changes
-    // useEffect(() => {
-    //     const customerId = watch('customerId')
-    //     if (customerId && customerId.length > 0) {
-    //         const fetchCustomer = async () => {
-    //             try {
-    //                 const response = await axios.get(`/api/customers/${customerId}`)
-    //                 setCustomers(response.data)
-    //                 setValue('customerName', response.data.name)
-    //                 setValue('customerAddress', response.data.address)
-    //                 setValue('customerTel1', response.data.phone1)
-    //                 setValue('customerTel2', response.data.phone2)
-    //             } catch (error) {
-    //                 console.error('Error fetching customer:', error)
-    //             }
-    //         }
-    //         fetchCustomer()
-    //     }
-    // }, [watch('customerId')])
-
-    // Handle item selection
-    // const handleItemSelect = (item) => {
-    //     const existingItem = selectedItems.find(i => i.itemCode === item.itemCode)
-
-    //     if (!existingItem) {
-    //         setSelectedItems([...selectedItems, {
-    //             ...item,
-    //             amount: item.itemPrice,
-    //             deliveryDate: watch('deliveryDate'),
-    //             returnDate: watch('returnDate'),
-    //             alterations: '',
-    //             isCompleted: false
-    //         }])
-    //     }
-    //     calculateTotals()
-    // }
-
     // handle customer combobox select
     const handleCustomerSelect = (customerId) => {
         // check if the customer is blocked
@@ -362,6 +288,11 @@ export default function ModifyBooking() {
             setValue('customerAddress', '');
             setValue('customerTel1', '');
             setValue('customerTel2', '');
+            setValue('nic1', '');
+            setValue('nic2', '');
+            setValue('remarks', '');
+            setValue('deliveryDate', new Date().toISOString().split('T')[0]);
+            setValue('returnDate', new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
             setTimeout(() => {
                 const combo = document.querySelector('input[placeholder="Customer..."]');
                 if (combo) combo.value = '';
@@ -414,18 +345,6 @@ export default function ModifyBooking() {
             if (amountInputRef.current) amountInputRef.current.focus();
         });
     };
-
-    // // Handle Item Selection in the combobox
-    // const handleComboBoxItemSelect = (itemCode) => {
-    //     setSelectedItem(itemCode); // set combobox value
-    //     const selectedItemObj = items.find(item => item.itemCode === itemCode);
-    //     setSelectedItemDetails(selectedItemObj);
-    //     setItemPrice(selectedItemObj?.itemPrice || '');
-    //     setAlteration('');
-    //     setTimeout(() => {
-    //         if (amountInputRef.current) amountInputRef.current.focus();
-    //     }, 300);
-    // };
 
     // Add selected item to table with alteration and price
     const handleAddToTable = () => {
@@ -554,68 +473,111 @@ export default function ModifyBooking() {
     // Actual save logic (called after confirmation)
     const handleConfirmedSave = async () => {
         setSaving(true);
+        setError(null);
         try {
-            const data = pendingFormData;
-            const invoiceData = {
-                ...data,
-                invoiceNo: invoiceNumber,
-                // Prefer the selected `date` (from the Popover calendar) when available.
-                invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
-                bookingStatus,
-                createdOn: new Date(),
-                modifiedOn: new Date()
+            // Prepare master and details data
+            const masterData = {
+                ...pendingFormData,
+                invoiceStatus: invoiceStatus // Save selected invoice status
             };
-            const salesInvoiceDetails = selectedItems.map(item => ({
-                invoiceNo: invoiceNumber,
-                // Use the selected `date` for each invoice detail when available.
-                invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
+            const detailsData = selectedItems.map(item => ({
+                invoiceNo: invoiceNo,
+                invoiceDate: item.invoiceDate,
                 itemCode: item.itemCode,
+                itemShortName: item.itemShortDesc,
+                itemSize: item.itemSize,
                 group: item.group,
                 alteration: item.alteration,
                 amount: item.amount,
                 deliveryDate: item.deliveryDate,
                 returnDate: item.returnDate,
-                bookingStatus,
-                customerId: data.customerId,
-                createdOn: new Date(),
+                bookingStatus: invoiceStatus, // Save selected invoice status to details
+                customerId: masterData.customerId,
+                createdOn: item.invoiceDate,
                 modifiedOn: new Date()
             }));
-            function generateTransactionId() {
-                const now = new Date();
-                const day = String(now.getDate()).padStart(2, '0');
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const year = now.getFullYear();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                return `TXN${year}${month}${day}${hours}${minutes}${seconds}`;
+
+            // Compare old and new advancePaid value
+            const oldPaid = lastAdvancePaid || 0;
+            const newPaid = Number(masterData.advancePaid) || 0;
+            const paidDiff = newPaid - oldPaid;
+
+            if (paidDiff === 0) {
+                // No change in advance, update only master and details
+                try {
+                    await axios.put(
+                        `${import.meta.env.VITE_API_BASE_URL}/api/salesinvoice/updateBooking/${encodeURIComponent(invoiceNo)}`,
+                        {
+                            masterData,
+                            detailsData,
+                        }
+                    );
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Booking updated successfully!',
+                        icon: 'success',
+                        timer: 5000,
+                        confirmButtonText: 'OK'
+                    });
+                } catch (error) {
+                    setError(error.response?.data?.error || 'Failed to update booking');
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Failed to update booking: ' + (error.response?.data?.error ? (': ' + error.response.data.error) : ''),
+                        icon: 'error',
+                        timer: 5000,
+                        confirmButtonText: 'OK'
+                    });
+                } finally {
+                    navigate('/dashboard/sales/bookinglist')
+                }
+            } else {
+                // Advance changed, update master/details and insert daily transaction
+                try {
+                    await axios.put(
+                        `${import.meta.env.VITE_API_BASE_URL}/api/salesinvoice/updateBooking/with-transaction/${encodeURIComponent(invoiceNo)}`,
+                        {
+                            masterData,
+                            detailsData,
+                            transactionData: {
+                                transactionId: `${invoiceNo}-${Date.now()}`,
+                                invoiceNo,
+                                transactionDate: new Date(), // Use current date
+                                transactionType: "RENT_BOOKING_UPDATE",
+                                transactionDesc: "Booking Advance updated",
+                                creditAmount: updatedMaster.netTotal,
+                                debitAmount: 0,
+                            },
+                        }
+                    );
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Booking and transaction updated successfully!',
+                        icon: 'success',
+                        timer: 5000,
+                        confirmButtonText: 'OK'
+                    });
+                } catch (error) {
+                    setError(error.response?.data?.error || 'Failed to update booking and transaction');
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Failed to update booking and transaction: ' + (error.response?.data?.error ? (': ' + error.response.data.error) : ''),
+                        icon: 'error',
+                        timer: 5000,
+                        confirmButtonText: 'OK'
+                    });
+                } finally {
+                    navigate('/dashboard/sales/bookinglist')
+                }
             }
-            const dailyTransaction = {
-                transactionId: generateTransactionId(),
-                // Use selected date for the transaction date as well.
-                transactionDate: date ? new Date(date) : new Date(),
-                transactionType: 'RENT_BOOKING',
-                invoiceNo: invoiceNumber,
-                creditAmount: data.advancePaid || 0,
-                customerId: data.customerId,
-                transactionDesc: data.remarks || '',
-                createdOn: new Date()
-            };
-            await axios.post(import.meta.env.VITE_API_BASE_URL + '/api/batchbooking/batch', {
-                invoice: invoiceData,
-                invoiceDetails: salesInvoiceDetails,
-                dailyTransaction
-            });
-            toast.success('Invoice, bookings, and daily transaction saved successfully!');
-            // Reset form and items
-            handleClearInvoice();
-        } catch (error) {
-            console.error('Error saving invoice or bookings:', error);
-            alert('Failed to save invoice or bookings');
-        } finally {
+
             setSaving(false);
             setShowConfirmDialog(false);
             setPendingFormData(null);
+            navigate('/dashboard/sales/bookinglist')
+        } catch (err) {
+            setSaving(false);
+            setError(err?.response?.data?.error || 'Failed to update booking');
         }
     };
 
@@ -641,7 +603,7 @@ export default function ModifyBooking() {
                     setSelectedGroup('');
                     setSelectedCustomer('');
                     setValue('invoiceNo', '')
-                    setValue('invoiceDate', date.now())
+                    setValue('invoiceDate', new Date().toISOString().split('T')[0]);
                     setValue('customerId', '');
                     setValue('customerName', '');
                     setValue('customerAddress', '');
@@ -658,7 +620,7 @@ export default function ModifyBooking() {
                     setValue('payment3', 0);
                     setValue('advancePaid', 0);
                     setValue('depositAmount', 0);
-                    setBookingStatus('Pending');
+                    setBookingStatus('booked');
                     // Reset invoice number
                     setInvoiceNumber(generateInvoiceNumber());
                     // Also clear any visible item input fields (combobox or search input)
@@ -673,24 +635,6 @@ export default function ModifyBooking() {
                 }
             }
         );
-
-        // const confirmClear = window.confirm('Are you sure you want to clear the invoice? This will remove all items and customer details.');
-        // if (!confirmClear) return;
-
-        // setSelectedItems([]);
-        // setInvoiceNumber(generateInvoiceNumber());
-        // setValue('customerId', '');
-        // setValue('customerName', '');
-        // setValue('customerAddress', '');
-        // setValue('customerTel1', '');
-        // setValue('customerTel2', '');
-        // setValue('nic1', '');
-        // setValue('nic2', '');
-        // setValue('remarks', '');
-        // setValue('totalDiscount', 0);
-        // setValue('advancePaid', 0);
-        // setValue('depositAmount', 0);
-        // setBookingStatus('Pending');
     };
 
     // Helper: fetch bookings for an item
@@ -812,28 +756,7 @@ export default function ModifyBooking() {
                                         }
                                         }
                                     />
-                                    {/* <Combobox value={selectedItem} onValueChange={handleComboBoxItemSelect} onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleComboBoxItemSelect(selectedItem);
-                                        }
-                                    }}
-                                    >
-                                        <ComboboxAnchor>
-                                            <ComboboxInput placeholder="Item..." className="h-7 text-xs" />
-                                            <ComboboxTrigger>
-                                                <ChevronDown className="h-3 w-3" />
-                                            </ComboboxTrigger>
-                                        </ComboboxAnchor>
-                                        <ComboboxContent>
-                                            <ComboboxEmpty>No items</ComboboxEmpty>
-                                            {items.map((item) => (
-                                                <ComboboxItem key={item.itemCode} value={item.itemCode}>
-                                                    {item.itemCode}
-                                                    {/* - {item.itemShortDesc} - {item.itemSize} */}
-                                    {/* </ComboboxItem> */}
-                                    {/* ))} */}
-                                    {/* </ComboboxContent> */}
-                                    {/* </Combobox> */}
+
                                 </div>
                                 {/* Item Name */}
                                 <div className="w-[100px]">
@@ -1007,60 +930,6 @@ export default function ModifyBooking() {
                             </CardHeader>
                             <CardContent className="py-2 px-4">
                                 <div className="grid grid-cols-2 gap-1">
-                                    {/* <div className="col-span-2 mb-2">
-                                        <div className="flex flex-row gap-6 items-center">
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">Customer ID:</span>
-                                                <span className="ml-2 text-xs">{getValues('customerId') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">Name:</span>
-                                                <span className="ml-2 text-xs">{getValues('customerName') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">Address:</span>
-                                                <span className="ml-2 text-xs">{getValues('customerAddress') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">Tel 1:</span>
-                                                <span className="ml-2 text-xs">{getValues('customerTel1') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">Tel 2:</span>
-                                                <span className="ml-2 text-xs">{getValues('customerTel2') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">NIC 1:</span>
-                                                <span className="ml-2 text-xs">{getValues('nic1') || '-'}</span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-xs text-[var(--color-navy)]">NIC 2:</span>
-                                                <span className="ml-2 text-xs">{getValues('nic2') || '-'}</span>
-                                            </div>
-                                        </div>
-                                    </div> */}
-                                    {/* ...existing form fields... */}
-                                    {/* <div className="w-[150px] h-[45px]">
-                                        <Label className="text-xs">Customer List</Label>
-                                        <Combobox value={selectedCustomer} onValueChange={handleCustomerSelect}>
-                                            <ComboboxAnchor>
-                                                <ComboboxInput placeholder="Customer..." className="h-7 text-xs" />
-                                                <ComboboxTrigger>
-                                                    <ChevronDown className="h-3 w-3" />
-                                                </ComboboxTrigger>
-                                            </ComboboxAnchor>
-                                            <ComboboxContent>
-                                                <ComboboxEmpty>No customers</ComboboxEmpty>
-                                                {customers.map((customer) => (
-                                                    <ComboboxItem key={customer.customerId} value={customer.customerId}>
-                                                        {customer.customerId} - {customer.customerName}
-                                                    </ComboboxItem>
-                                                ))}
-                                            </ComboboxContent>
-                                        </Combobox>
-
-                                    </div> */}
-
                                     <div>
                                         <Label htmlFor="customerId" className="text-xs">Customer ID</Label>
                                         <Input id="customerId" {...register('customerId')} className="h-7 text-xs" readOnly />
@@ -1102,30 +971,6 @@ export default function ModifyBooking() {
                                         <Input id="nic2" {...register('nic2')} className="h-7 text-xs" />
                                     </div>
 
-                                    {/* <div>
-                                        <Label htmlFor="customerName" className="text-xs">Name</Label>
-                                        <Input id="customerName" {...register('customerName')} className="h-10 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerAddress')?.focus(); } }} />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Label htmlFor="customerAddress" className="text-xs">Address</Label>
-                                        <Textarea id="customerAddress" {...register('customerAddress')} className="text-xs min-h-[32px]" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel1')?.focus(); } }} />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="customerTel1" className="text-xs">Tel 1</Label>
-                                        <Input id="customerTel1" {...register('customerTel1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('customerTel2')?.focus(); } }} />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="customerTel2" className="text-xs">Tel 2</Label>
-                                        <Input id="customerTel2" {...register('customerTel2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic1')?.focus(); } }} />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="nic1" className="text-xs">NIC 1</Label>
-                                        <Input id="nic1" {...register('nic1')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nic2')?.focus(); } }} />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="nic2" className="text-xs">NIC 2</Label>
-                                        <Input id="nic2" {...register('nic2')} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('deliveryDate')?.focus(); } }} />
-                                    </div> */}
                                     <div>
                                         <Label htmlFor="deliveryDate" className="text-xs">Delivery</Label>
                                         <Input
@@ -1248,12 +1093,12 @@ export default function ModifyBooking() {
                             disabled={selectedItems.length === 0 || saving}
                             className="h-8 px-6 text-base bg-gradient-to-r from-[#0a174e] to-[#d7263d] hover:from-[#d7263d] hover:to-[#0a174e] text-white font-bold border-2 border-[#0a174e] shadow focus:ring-2 focus:ring-[#d7263d] focus:outline-none animated-btn"
                             tabIndex={0}
-                            aria-label="Save Invoice (Ctrl+S)"
+                            aria-label="Update Invoice (Ctrl+S)"
                         >
                             {saving ? (
                                 <span className="flex items-center gap-2"><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>Saving...</span>
                             ) : (
-                                <span className="flex items-center gap-2"><svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#0a174e" /><path d="M8 12h8" stroke="#fff" strokeWidth="2" /></svg>Save Invoice</span>
+                                <span className="flex items-center gap-2"><svg className="inline-block mr-1" width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#0a174e" /><path d="M8 12h8" stroke="#fff" strokeWidth="2" /></svg>Update Invoice</span>
                             )}
                         </Button>
                     </div>
@@ -1319,7 +1164,6 @@ export default function ModifyBooking() {
                         <div className="grid grid-cols-1 gap-2">
                             {/* Item list card */}
                             <Card className="mb-2 border-2 border-[#0a174e] p-2 bg-white/90 shadow-lg flex flex-col items-start animate-fade-in">
-                                {/* <h2>Items List here</h2> */}
                                 <div className="w-[780px] max-w-full"
                                     style={{
                                         maxHeight: "350px", // or any height you want
@@ -1332,20 +1176,14 @@ export default function ModifyBooking() {
                                     <table className="min-w-full divide-y divide-gray-200 rounded-2xl">
                                         <thead className="bg-gray-50 shadow-lg border-2 bg-grey-600 shadow-gray-200 sticky top-0 z-50">
                                             <tr>
-                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Code</th> */}
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Code</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Short Desc</th>
-                                                {/* <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Group</th> */}
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Size</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Price</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Rent Count</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Date Added</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Last Rented</th>
                                                 <th className="px-2 py-2 w-20 text-left text-xs font-medium border-3 bg-gray-200 text-gray-900 uppercase tracking-wider">Last Dry Clean</th>
-                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Status</th> */}
-                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Blocked</th> */}
-                                                {/* <th className="px-6 py-3 text-left text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Contributor</th> */}
-                                                {/* <th className="px-6 py-3 text-center text-xs border-3 bg-gray-200 font-medium text-gray-900 uppercase tracking-wider">Actions</th> */}
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-400 border-2 shadow-lg shadow-gray-200">
@@ -1358,9 +1196,6 @@ export default function ModifyBooking() {
                                                             <div className="font-medium">{item.itemName}</div>
                                                             <div className="text-gray-400">{item.itemShortDesc}</div>
                                                         </td>
-                                                        {/* <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">
-                                                            {item.itemGroupShortDesc}
-                                                        </td> */}
                                                         <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">{item.itemSize}</td>
                                                         <td className="px-2 py-2 w-20 whitespace-nowrap text-sm font-medium text-gray-500">
                                                             {item.itemPrice ? `Rs. ${item.itemPrice.toLocaleString()}` : "N/A"}
