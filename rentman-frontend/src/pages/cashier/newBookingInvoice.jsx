@@ -380,7 +380,12 @@ export default function SalesInvoicePage() {
             alert('Please enter a valid price.');
             return;
         }
-        if (selectedItems.find(i => i.itemCode === selectedItemDetails.itemCode)) {
+        // Prevent adding duplicates except for special codes 99991-99999
+        const code = Number(selectedItemDetails.itemCode);
+        if (
+            !(code >= 99991 && code <= 99999) &&
+            selectedItems.find(i => i.itemCode === selectedItemDetails.itemCode)
+        ) {
             alert('This item is already added.');
             return;
         }
@@ -877,7 +882,7 @@ export default function SalesInvoicePage() {
                                 {selectedItems.length > 0 ? (
                                     selectedItems.map((item, idx) => (
                                         <TableRow
-                                            key={item.itemCode}
+                                            key={item.itemCode + '-' + idx}
                                             className={
                                                 (item.itemCode === lastAddedItemCode ? 'bg-gradient-to-r from-green-100 to-green-50 ' : '') +
                                                 'hover:bg-gradient-to-r hover:from-[#e5e9f7] hover:to-[#f5f7fa] focus-within:bg-blue-100 transition-colors duration-100'

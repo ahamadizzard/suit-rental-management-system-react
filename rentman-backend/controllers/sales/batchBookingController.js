@@ -14,6 +14,27 @@ export async function batchBookingSave(req, res) {
     const invoiceDoc = new SalesInvoiceMaster(invoice);
     await invoiceDoc.save({ session });
 
+    // Backend validation: block duplicate itemCodes except for 99991-99999
+    const allowedMultiCodes = [
+      99991, 99992, 99993, 99994, 99995, 99996, 99997, 99998, 99999,
+    ];
+    const codeCount = {};
+    for (const detail of invoiceDetails) {
+      const code = Number(detail.itemCode);
+      if (!allowedMultiCodes.includes(code)) {
+        const key = `${detail.invoiceNo}_${detail.itemCode}`;
+        codeCount[key] = (codeCount[key] || 0) + 1;
+        if (codeCount[key] > 1) {
+          await session.abortTransaction();
+          session.endSession();
+          return res
+            .status(400)
+            .json({
+              message: `Duplicate itemCode ${detail.itemCode} not allowed for invoiceNo ${detail.invoiceNo}`,
+            });
+        }
+      }
+    }
     // Save invoice details (array)
     await SalesInvoiceDetail.insertMany(invoiceDetails, { session });
 

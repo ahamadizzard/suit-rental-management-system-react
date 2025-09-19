@@ -149,7 +149,8 @@ export default function BookingList() {
                     title: 'Success',
                     text: 'Booking deleted successfully',
                     icon: 'success',
-                    confirmButtonText: 'OK'
+                    timer: 3000,
+                    showConfirmButton: false
                 });
                 setIsDeleteModalOpen(false);
                 fetchAllBookings(); // Refresh the bookings list
@@ -159,8 +160,8 @@ export default function BookingList() {
                     title: 'Error',
                     text: 'Error deleting booking: ' + error.message,
                     icon: 'error',
-                    autoClose: 5000,
-                    confirmButtonText: 'OK'
+                    timer: 3000,
+                    showConfirmButton: false
                 });
                 setIsLoading(false);
             });

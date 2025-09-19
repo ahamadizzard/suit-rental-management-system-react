@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import SalesInvoiceMaster from "../../models/sales/salesInvoiceMasterModel.js";
 import SalesInvoiceDetails from "../../models/sales/salesInvoiceDetailsModel.js";
+import DailyTransaction from "../../models/sales/dailyTransactionModel.js";
 
 export const updateBooking = async (req, res) => {
   const session = await mongoose.startSession();
@@ -37,6 +38,25 @@ export const updateBooking = async (req, res) => {
 
     // ✅ If detailsData provided, replace old details
     if (detailsData && detailsData.length > 0) {
+      // Backend validation: block duplicate itemCodes except for 99991-99999
+      const allowedMultiCodes = [
+        99991, 99992, 99993, 99994, 99995, 99996, 99997, 99998, 99999,
+      ];
+      const codeCount = {};
+      for (const detail of detailsData) {
+        const code = Number(detail.itemCode);
+        if (!allowedMultiCodes.includes(code)) {
+          const key = `${invoiceNo}_${detail.itemCode}`;
+          codeCount[key] = (codeCount[key] || 0) + 1;
+          if (codeCount[key] > 1) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+              error: `Duplicate itemCode ${detail.itemCode} not allowed for invoiceNo ${invoiceNo}`,
+            });
+          }
+        }
+      }
       // Delete old details
       await SalesInvoiceDetails.deleteMany({ invoiceNo }, { session });
 
@@ -113,6 +133,25 @@ export const updateBookingWithDailyTransaction = async (req, res) => {
 
     // ✅ If detailsData provided, replace old details
     if (detailsData && detailsData.length > 0) {
+      // Backend validation: block duplicate itemCodes except for 99991-99999
+      const allowedMultiCodes = [
+        99991, 99992, 99993, 99994, 99995, 99996, 99997, 99998, 99999,
+      ];
+      const codeCount = {};
+      for (const detail of detailsData) {
+        const code = Number(detail.itemCode);
+        if (!allowedMultiCodes.includes(code)) {
+          const key = `${invoiceNo}_${detail.itemCode}`;
+          codeCount[key] = (codeCount[key] || 0) + 1;
+          if (codeCount[key] > 1) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+              error: `Duplicate itemCode ${detail.itemCode} not allowed for invoiceNo ${invoiceNo}`,
+            });
+          }
+        }
+      }
       // Delete old details
       await SalesInvoiceDetails.deleteMany({ invoiceNo }, { session });
 
@@ -138,17 +177,30 @@ export const updateBookingWithDailyTransaction = async (req, res) => {
     }
 
     // ✅ Add a new daily transaction
-    transactionData = {
-      transactionId: `${invoiceNo}-${Date.now()}`, // or use a UUID
+    // Find previous advancePaid value
+    const prevMaster = await SalesInvoiceMaster.findOne({ invoiceNo }).session(
+      session
+    );
+    const oldAdvance = prevMaster ? Number(prevMaster.advancePaid) || 0 : 0;
+    const newAdvance = Number(updatedMaster.advancePaid) || 0;
+    const advanceDiff = newAdvance - oldAdvance;
+
+    // Use transactionId from frontend if provided
+    let transactionId =
+      transactionData && transactionData.transactionId
+        ? transactionData.transactionId
+        : `${invoiceNo}-${Date.now()}`;
+
+    const txnData = {
+      transactionId,
       invoiceNo,
-      transactionDate: updatedMaster.invoiceDate,
-      transactionType: "RENT_BOOKING_UPDATE", // or other type as needed
+      transactionDate: new Date(),
+      transactionType: "RENT_BOOKING_UPDATE",
       transactionDesc: "Booking Advance updated",
-      creditAmount: updatedMaster.netTotal, // or appropriate amount
+      creditAmount: advanceDiff,
       debitAmount: 0,
     };
-
-    await DailyTransaction.create([transactionData], { session });
+    await DailyTransaction.create([txnData], { session });
 
     // ✅ Commit transaction
     await session.commitTransaction();

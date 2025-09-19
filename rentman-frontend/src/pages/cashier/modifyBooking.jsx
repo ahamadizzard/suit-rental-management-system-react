@@ -122,8 +122,8 @@ export default function ModifyBooking() {
                 setValue('returnDate', master.returnDate ? master.returnDate.split('T')[0] : "");
                 setValue('totalDiscount', master.totalDiscount || 0);
                 setValue('payment1', master.payment1 || 0);
-                setValue('payment2', master.payment3 || 0);
-                setValue('payment3', master.payment2 || 0);
+                setValue('payment2', master.payment2 || 0);
+                setValue('payment3', master.payment3 || 0);
                 setValue('advancePaid', master.advancePaid || 0);
                 setValue('balanceAmount', master.balanceAmount || 0);
                 setValue('depositAmount', master.depositAmount || 0);
@@ -132,8 +132,8 @@ export default function ModifyBooking() {
                 setLastAdvancePaid(master.advancePaid || 0);
                 // Items
                 setSelectedItems(resItems.data || []);
-                console.log("Master Data: ", master)
-                console.log("Details Data: ", resItems.data)
+                // console.log("Master Data: ", master)
+                // console.log("Details Data: ", resItems.data)
             } catch (err) {
                 setError(err.response?.data?.message || err.message);
             } finally {
@@ -353,7 +353,12 @@ export default function ModifyBooking() {
             alert('Please enter a valid price.');
             return;
         }
-        if (selectedItems.find(i => i.itemCode === selectedItemDetails.itemCode)) {
+        // Prevent adding duplicates except for special codes 99991-99999
+        const code = Number(selectedItemDetails.itemCode);
+        if (
+            !(code >= 99991 && code <= 99999) &&
+            selectedItems.find(i => i.itemCode === selectedItemDetails.itemCode)
+        ) {
             alert('This item is already added.');
             return;
         }
@@ -470,6 +475,17 @@ export default function ModifyBooking() {
         setShowConfirmDialog(true);
     };
 
+    function generateTransactionId() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return `TXN${year}${month}${day}${hours}${minutes}${seconds}`;
+    }
+
     // Actual save logic (called after confirmation)
     const handleConfirmedSave = async () => {
         setSaving(true);
@@ -525,7 +541,7 @@ export default function ModifyBooking() {
                         title: 'Error',
                         text: 'Failed to update booking: ' + (error.response?.data?.error ? (': ' + error.response.data.error) : ''),
                         icon: 'error',
-                        timer: 5000,
+                        // timer: 5000,
                         confirmButtonText: 'OK'
                     });
                 } finally {
@@ -540,12 +556,13 @@ export default function ModifyBooking() {
                             masterData,
                             detailsData,
                             transactionData: {
-                                transactionId: `${invoiceNo}-${Date.now()}`,
+                                // transactionId: `${invoiceNo}-${Date.now()}`,
+                                transactionId: generateTransactionId(),
                                 invoiceNo,
                                 transactionDate: new Date(), // Use current date
                                 transactionType: "RENT_BOOKING_UPDATE",
                                 transactionDesc: "Booking Advance updated",
-                                creditAmount: updatedMaster.netTotal,
+                                creditAmount: paidDiff,
                                 debitAmount: 0,
                             },
                         }
@@ -563,7 +580,7 @@ export default function ModifyBooking() {
                         title: 'Error',
                         text: 'Failed to update booking and transaction: ' + (error.response?.data?.error ? (': ' + error.response.data.error) : ''),
                         icon: 'error',
-                        timer: 5000,
+                        // timer: 5000,
                         confirmButtonText: 'OK'
                     });
                 } finally {
@@ -821,7 +838,7 @@ export default function ModifyBooking() {
                                 {selectedItems.length > 0 ? (
                                     selectedItems.map((item, idx) => (
                                         <TableRow
-                                            key={item.itemCode}
+                                            key={item.itemCode + '-' + idx}
                                             className={
                                                 (item.itemCode === lastAddedItemCode ? 'bg-gradient-to-r from-green-100 to-green-50 ' : '') +
                                                 'hover:bg-gradient-to-r hover:from-[#e5e9f7] hover:to-[#f5f7fa] focus-within:bg-blue-100 transition-colors duration-100'
@@ -1030,11 +1047,11 @@ export default function ModifyBooking() {
                                     </div>
                                     <div>
                                         <Label htmlFor="payment2" className="text-xs">Payment 2</Label>
-                                        <Input id="payment2" type="number" {...register('payment2', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('payment3')?.focus(); } }} />
+                                        <Input id="payment2" type="number" {...register('payment2', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('advancePaid')?.focus(); } }} />
                                     </div>
                                     <div>
                                         <Label htmlFor="payment3" className="text-xs">Payment 3</Label>
-                                        <Input id="payment3" type="number" {...register('payment3', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('advancePaid')?.focus(); } }} />
+                                        <Input id="payment3" type="number" {...register('payment3', { valueAsNumber: true })} className="h-7 text-xs" tabIndex={0} />
                                     </div>
                                     <div>
                                         <Label htmlFor="advancePaid" className="text-xs">Total Paid</Label>
