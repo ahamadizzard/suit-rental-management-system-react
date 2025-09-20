@@ -1,33 +1,35 @@
 :root {
-  --color-navy: #1976d2; /* Lighter blue (Material UI blue) */
-  --color-navy-dark: #1565c0;
-  --color-navy-light: #64b5f6; /* Sky blue */
-  --color-sky: #e3f2fd; /* Very light blue */
-  --color-red: #ff5252; /* Lighter, vibrant red */
-  --color-red-dark: #d32f2f;
-  --color-red-light: #ff8a80;
+  /* Colors from login.jsx gradient: from-blue-500 via-purple-500 to-pink-500 */
+  --color-blue: #3b82f6; /* Tailwind blue-500 */
+  --color-purple: #a21caf; /* Tailwind purple-700 */
+  --color-purple-light: #c084fc; /* Tailwind purple-400 */
+  --color-pink: #ec4899; /* Tailwind pink-500 */
+  --color-pink-light: #f9a8d4; /* Tailwind pink-300 */
   --color-bg-gradient: linear-gradient(
-    135deg,
-    #e3f2fd 0%,
-    #64b5f6 60%,
-    #ff8a80 100%
+    90deg,
+    #3b82f6 0%,
+    #a21caf 50%,
+    #ec4899 100%
   );
-  --color-bg-gradient-alt: linear-gradient(90deg, #64b5f6 60%, #ff8a80 100%);
-  --color-bg-light: #f5f7fa;
-  --color-bg-lighter: #e5e9f7;
+  --color-bg-gradient-alt: linear-gradient(
+    135deg,
+    #3b82f6 0%,
+    #a21caf 60%,
+    #ec4899 100%
+  );
+  --color-bg-light: #f3f4f6; /* Tailwind gray-100 */
+  --color-bg-lighter: #f9fafb; /* Tailwind gray-50 */
   --color-white: #fff;
   --color-black: #000;
 
-  --melon: #fec5bbff;
-  --pale-dogwood: #fcd5ceff;
-  --misty-rose: #fae1ddff;
-  --seashell: #f8edebff;
-  --platinum: #e8e8e4ff;
-  --platinum-2: #d8e2dcff;
-  --linen: #ece4dbff;
-  --champagne-pink: #ffe5d9ff;
-  --apricot: #ffd7baff;
-  --peach: #fec89aff;
+  /* Accent colors for buttons, borders, etc. */
+  --color-accent: #a21caf; /* purple */
+  --color-accent-hover: #7c1fa6; /* darker purple */
+  --color-accent-light: #c084fc; /* light purple */
+  --color-danger: #ec4899; /* pink */
+  --color-danger-light: #f9a8d4; /* light pink */
+  --color-info: #3b82f6; /* blue */
+  --color-info-light: #93c5fd; /* light blue */
 }
 
 /* Example usage:
