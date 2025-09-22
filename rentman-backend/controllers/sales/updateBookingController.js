@@ -178,12 +178,12 @@ export const updateBookingWithDailyTransaction = async (req, res) => {
 
     // ✅ Add a new daily transaction
     // Find previous advancePaid value
-    const prevMaster = await SalesInvoiceMaster.findOne({ invoiceNo }).session(
-      session
-    );
-    const oldAdvance = prevMaster ? Number(prevMaster.advancePaid) || 0 : 0;
-    const newAdvance = Number(updatedMaster.advancePaid) || 0;
-    const advanceDiff = newAdvance - oldAdvance;
+    // const prevMaster = await SalesInvoiceMaster.findOne({ invoiceNo }).session(
+    //   session
+    // );
+    // const oldAdvance = prevMaster ? Number(prevMaster.advancePaid) || 0 : 0;
+    // const newAdvance = Number(updatedMaster.advancePaid) || 0;
+    // const advanceDiff = newAdvance - oldAdvance;
 
     // Use transactionId from frontend if provided
     let transactionId =
@@ -197,7 +197,7 @@ export const updateBookingWithDailyTransaction = async (req, res) => {
       transactionDate: new Date(),
       transactionType: "RENT_BOOKING_UPDATE",
       transactionDesc: "Booking Advance updated",
-      creditAmount: advanceDiff,
+      creditAmount: transactionData.advanceDiff || 10, // Use advanceDiff from frontend
       debitAmount: 0,
     };
     await DailyTransaction.create([txnData], { session });

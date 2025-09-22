@@ -85,7 +85,7 @@ export default function SalesInvoicePage() {
     const [selectedGroup, setSelectedGroup] = useState('')
 
     const [showRemoveDialog, setShowRemoveDialog] = useState({ open: false, itemCode: null });
-    const [bookingStatus, setBookingStatus] = useState('Pending');
+    const [bookingStatus, setBookingStatus] = useState("booked");
 
     const [itemBookingInfo, setItemBookingInfo] = useState(null);
     const [showBookingConflict, setShowBookingConflict] = useState(false);
@@ -513,7 +513,7 @@ export default function SalesInvoicePage() {
                 invoiceNo: invoiceNumber,
                 // Prefer the selected `date` (from the Popover calendar) when available.
                 invoiceDate: date ? new Date(date) : (data.invoiceDate ? new Date(data.invoiceDate) : new Date()),
-                bookingStatus,
+                invoiceStatus: bookingStatus,
                 createdOn: new Date(),
                 modifiedOn: new Date()
             };
@@ -552,7 +552,7 @@ export default function SalesInvoicePage() {
                 invoiceNo: invoiceNumber,
                 creditAmount: data.advancePaid || 0,
                 customerId: data.customerId,
-                transactionDesc: data.remarks || '',
+                transactionDesc: "Rent booking - Invoice " + invoiceNumber,
                 createdOn: new Date()
             };
             await axios.post(import.meta.env.VITE_API_BASE_URL + '/api/batchbooking/batch', {
@@ -1123,7 +1123,7 @@ export default function SalesInvoicePage() {
                                 </div>
                                 <div className="mt-2">
                                     <Label htmlFor="bookingStatus" className="text-xs">Booking Status</Label>
-                                    <Select id="bookingStatus" value={bookingStatus} onValueChange={setBookingStatus}>
+                                    <Select id="bookingStatus" value={bookingStatus} onValueChange={setBookingStatus} defaultValue="booked">
                                         <SelectTrigger className="h-7 text-xs" tabIndex={0}>
                                             <SelectValue placeholder="Status" />
                                         </SelectTrigger>

@@ -17,6 +17,7 @@ import PurchaseHistory from './pages/manager/customer/purchaseHistory';
 import AddCustomer from './pages/manager/customer/addCustomer';
 import ModifyBooking from './pages/cashier/modifyBooking';
 import BookingList from './pages/cashier/bookingList';
+import DailyTransaction from './pages/cashier/dailyTransaction';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'cashier']} />}>
                 <Route path="/dashboard/sales/newbooking" element={<NewBookingInvoice />} />
                 <Route path="/dashboard/sales/bookinglist" element={<BookingList />} />
+                <Route path="/dashboard/sales/dalytransaction" element={<DailyTransaction />} />
                 <Route path="/dashboard/sales/modifybooking/:invoiceNo" element={<ModifyBooking />} />
                 <Route path="/dashboard/sales/customers/viewcustomers" element={<ViewCustomer />} />
                 <Route path="/dashboard/sales/customers/addcustomer" element={<AddCustomer />} />

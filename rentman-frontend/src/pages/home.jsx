@@ -1,5 +1,6 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Legend } from "recharts";
+import Transaction from "../pages/cashier/dailyTransaction.jsx";
 
 export default function Home() {
     // Mock data for dashboard summary
@@ -31,7 +32,7 @@ export default function Home() {
     return (
         <div style={{ padding: "2rem" }}>
             <h1>Dashboard</h1>
-            <div style={{ display: "flex", gap: "2rem", marginBottom: "2rem" }}>
+            <div className="flex justify-center" style={{ display: "flex", gap: "2rem", marginBottom: "2rem" }}>
                 <div style={{ background: "#f5f5f5", padding: "1rem", borderRadius: 8, minWidth: 180 }}>
                     <h3>Total Sales</h3>
                     <p style={{ fontSize: 24, fontWeight: "bold" }}>₹{summary.totalSales.toLocaleString()}</p>
@@ -47,6 +48,8 @@ export default function Home() {
                 </div>
             </div>
 
+            <hr style={{ marginBottom: "2rem" }} />
+
             <div style={{ display: "flex", gap: "2rem", marginBottom: "2rem" }}>
                 <div style={{ flex: 1, background: "#fff", padding: 16, borderRadius: 8, boxShadow: "0 2px 8px #eee" }}>
                     <h2>Fast Moving Items (Bar Chart)</h2>
@@ -59,9 +62,16 @@ export default function Home() {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-                <div style={{ flex: 1, background: "#fff", padding: 16, borderRadius: 8, boxShadow: "0 2px 8px #eee" }}>
-                    <h2>Sales Trend (Line Chart)</h2>
-                    <ResponsiveContainer width="100%" height={250}>
+                <div className="max-w-4xl" style={{ flex: 1, background: "#fff", padding: 16, borderRadius: 8, boxShadow: "0 2px 8px #eee" }}>
+                    <ResponsiveContainer className="w-full h-[350px]">
+                        <div className="flex flex-col justify-center items-center">
+                            <h2 className="text-xl sticky font-bold text-blue-600">Daily Transaction Summary</h2>
+                            <div className="w-full flex-1 overflow-y-auto">
+                                <Transaction />
+                            </div>
+                        </div>
+                    </ResponsiveContainer>
+                    {/* <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={salesData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" />
@@ -70,10 +80,10 @@ export default function Home() {
                             <Legend />
                             <Line type="monotone" dataKey="sales" stroke="#82ca9d" strokeWidth={2} />
                         </LineChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer> */}
                 </div>
             </div>
-
+            <hr style={{ marginBottom: "2rem" }} />
             <div style={{ marginBottom: "2rem" }}>
                 <h2>Fast Moving Items</h2>
                 <ul>
@@ -106,6 +116,6 @@ export default function Home() {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }

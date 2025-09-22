@@ -1,5 +1,5 @@
 import DailyTransaction from "../../models/sales/dailyTransactionModel.js";
-
+// import dayjs from "dayjs";
 // Add daily transaction
 export const addDailyTransaction = async (req, res) => {
   const {
@@ -35,6 +35,17 @@ export const getDailyTransactions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get all transactions
+// export const getAllTransactions = async (req, res) => {
+//   try {
+//     const transactions = await DailyTransaction.find().sort({ transactionDate: -1 });
+//     res.status(200).json(transactions);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 // Get daily transaction by ID
 export const getDailyTransactionById = async (req, res) => {
@@ -127,6 +138,29 @@ export const getDailyTransactionsByAmountRange = async (req, res) => {
     });
     res.status(200).json(dailyTransactions);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// get daily transactions by date
+export const getDailyTransactionsByDate = async (req, res) => {
+  const { date } = req.params; // expecting "YYYY-MM-DD"
+  try {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    // console.log("Fetching transactions from", start, "to", end);
+
+    const dailyTransactions = await DailyTransaction.find({
+      transactionDate: { $gte: start, $lte: end },
+    }).sort({ transactionDate: 1 });
+
+    res.status(200).json(dailyTransactions);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };

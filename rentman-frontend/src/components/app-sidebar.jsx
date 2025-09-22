@@ -45,8 +45,8 @@ const data = {
               isActive: true,
             },
             {
-              title: "Item Adjustment",
-              url: "#",
+              title: "Daily Transaction",
+              url: "/dashboard/sales/dalytransaction",
               isActive: true,
             },
             {

@@ -557,11 +557,12 @@ export default function ModifyBooking() {
                             detailsData,
                             transactionData: {
                                 // transactionId: `${invoiceNo}-${Date.now()}`,
+                                advanceDiff,
                                 transactionId: generateTransactionId(),
                                 invoiceNo,
                                 transactionDate: new Date(), // Use current date
                                 transactionType: "RENT_BOOKING_UPDATE",
-                                transactionDesc: "Booking Advance updated",
+                                transactionDesc: "Booking Advance updated for" + invoiceNo,
                                 creditAmount: paidDiff,
                                 debitAmount: 0,
                             },
