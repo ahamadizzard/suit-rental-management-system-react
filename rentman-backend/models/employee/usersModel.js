@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employees" },
   email: {
     type: String,
     required: true,
@@ -21,9 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    required: true,
-    // enum: ["admin", "cashier", "manger"],
-    // default: "cashier",
+    enum: ["admin", "manager", "cashier"],
     default: "cashier",
   },
   isBlocked: {

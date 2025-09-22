@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const salesInvoiceMasterSchema = new mongoose.Schema({
+const postedSalesInvoiceMasterSchema = new mongoose.Schema({
   invoiceNo: { type: String, required: true, unique: true },
   invoiceDate: { type: Date, required: true },
   customerId: { type: String, default: "01" },
@@ -39,10 +39,18 @@ const salesInvoiceMasterSchema = new mongoose.Schema({
   isDelivered: { type: Boolean, default: false },
   createdOn: { type: Date, default: Date.now },
   modifiedOn: { type: Date },
+  postedDate: { type: Date, default: Date.now() },
+  postedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UsersModel",
+    required: true,
+  },
+
+  // postedBy:{type:String} // manager ID
 });
-const SalesInvoiceMaster = mongoose.model(
-  "salesinvoicemaster",
-  salesInvoiceMasterSchema
+const PostedSalesInvoiceMaster = mongoose.model(
+  "postedsalesinvoicemaster",
+  postedSalesInvoiceMasterSchema
 );
 
-export default SalesInvoiceMaster;
+export default PostedSalesInvoiceMaster;

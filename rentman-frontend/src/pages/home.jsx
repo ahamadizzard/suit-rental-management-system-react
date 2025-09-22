@@ -71,16 +71,6 @@ export default function Home() {
                             </div>
                         </div>
                     </ResponsiveContainer>
-                    {/* <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={salesData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="sales" stroke="#82ca9d" strokeWidth={2} />
-                        </LineChart>
-                    </ResponsiveContainer> */}
                 </div>
             </div>
             <hr style={{ marginBottom: "2rem" }} />

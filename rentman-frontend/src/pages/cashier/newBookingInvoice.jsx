@@ -560,9 +560,13 @@ export default function SalesInvoicePage() {
                 invoiceDetails: salesInvoiceDetails,
                 dailyTransaction
             });
-            toast.success('Invoice, bookings, and daily transaction saved successfully!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Invoice, bookings, and daily transaction saved successfully!'
+            });
             // Reset form and items
-            handleClearInvoice();
+            setSelectedItems([]);
         } catch (error) {
             console.error('Error saving invoice or bookings:', error);
             alert('Failed to save invoice or bookings');
@@ -570,6 +574,7 @@ export default function SalesInvoicePage() {
             setSaving(false);
             setShowConfirmDialog(false);
             setPendingFormData(null);
+            navigate('/dashboard/sales/bookinglist')
         }
     };
 
