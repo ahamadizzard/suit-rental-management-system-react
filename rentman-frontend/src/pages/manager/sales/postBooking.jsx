@@ -1,12 +1,11 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import { FaEdit, FaEye, FaPlus, FaSearch, FaTrash } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { FaSearch, FaTrash } from 'react-icons/fa';
+import { FaBoxArchive } from "react-icons/fa6";
+import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import Swal from 'sweetalert2';
-import { Switch } from "@/components/ui/switch"
 import { Badge } from '@/components/ui/badge'
 
 
@@ -18,12 +17,12 @@ export default function PostBooking() {
     // const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBooking, setSelectedBooking] = useState(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    // const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [error, setError] = useState(null);
+    // const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deleteBookingId, setDeleteBookingId] = useState(null);
+    // const [deleteBookingId, setDeleteBookingId] = useState(null);
 
     const navigate = useNavigate()
     // Helper to fetch full Booking list (reusable so we can call it after edits)
@@ -39,26 +38,6 @@ export default function PostBooking() {
             setIsLoading(false);
         }
     };
-
-    // Load Customer Data
-    // useEffect(() => {
-    //     const fetchCustomers = async () => {
-    //         try {
-    //             setIsLoading(true);
-    //             const token = localStorage.getItem('token');
-    //             const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers');
-    //             setCustomers(response.data);
-    //             // console.log("Customer Data: ", response.data);
-    //         } catch (error) {
-    //             toast.error("Error fetching customers: " + error.message);
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     };
-    //     fetchCustomers();
-    // }, []);
-    // console.log("Customer Data: ", customers);
-    // Filter customers by search term
 
     useEffect(() => {
         const searchBookings = async () => {
@@ -89,21 +68,6 @@ export default function PostBooking() {
 
         return () => clearTimeout(debounceTimer); // Cleanup on unmount or query change
     }, [searchQuery]); // Add searchQuery as dependency
-
-    // useEffect(() => {
-    //     if (!searchTerm) {
-    //         setFilteredCustomers(customers);
-    //     } else {
-    //         setFilteredCustomers(
-    //             customers.filter(c =>
-    //                 c.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //                 c.customerAddress?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //                 c.customerTel1.toLowerCase().includes(searchTerm.toLowerCase()) & " " +
-    //                 c.customerTel2.toLowerCase().includes(searchTerm.toLowerCase())
-    //             )
-    //         );
-    //     }
-    // }, [searchTerm, customers]);
 
     const modalStyles = {
         overlay: {
@@ -167,18 +131,183 @@ export default function PostBooking() {
             });
     };
 
+    const handlePosting = async (booking, { setBookings, onPosted } = {}) => {
+        if (!booking) return;
+        console.log("Posting booking: ", booking);
+        const steps = [
+            "Copy invoice to Posted collection",
+            "Update ItemMaster counts & last rented",
+            "Update Customer last purchase fields",
+            "Delete active invoice & details",
+            "Commit transaction"
+        ];
+
+        const stepHtml = steps
+            .map(
+                (s, i) => `
+    <div id="step-${i}" style="margin:6px 0; display:flex; align-items:center;">
+      <div id="icon-${i}" style="width:26px; text-align:center">•</div>
+      <div style="margin-left:8px; white-space:nowrap">${s}</div>
+    </div>`
+            )
+            .join("");
+
+        const html = `
+    <div id="posting-steps">${stepHtml}</div>
+    <div id="posting-error" style="color:red; margin-top:8px; display:none;"></div>
+  `;
+
+        Swal.fire({
+            title: `Posting invoice ${booking.invoiceNo}`,
+            html,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+                // noop - we'll control DOM in didOpen
+            },
+            didOpen: () => {
+                const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+                const container = Swal.getHtmlContainer();
+
+                const updateIcon = (index, icon, color) => {
+                    const iconEl = container.querySelector(`#icon-${index}`);
+                    const stepEl = container.querySelector(`#step-${index}`);
+                    if (iconEl) iconEl.textContent = icon;
+                    if (stepEl) stepEl.style.color = color || "inherit";
+                };
+
+                const setError = (msg) => {
+                    const errEl = container.querySelector("#posting-error");
+                    if (errEl) {
+                        errEl.style.display = "block";
+                        errEl.textContent = msg;
+                    }
+                };
+
+                // Flags shared between animation and network logic
+                let serverSuccess = false;
+                let serverError = null;
+                let currentStep = -1;
+
+                // start server request (single API that does the transaction)
+                const serverPromise = axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/postbooking/${booking.invoiceNo}`);
+
+                // animate steps while backend runs
+                (async () => {
+                    const stepDelay = 1500; // ms per step (adjust)
+                    for (let i = 0; i < steps.length; i++) {
+                        currentStep = i;
+                        // mark in-progress
+                        updateIcon(i, "⏳", "#0b61ff");
+                        // wait some time to show progress
+                        await sleep(stepDelay);
+
+                        // if server already errored -> mark this step failed and stop
+                        if (serverError) {
+                            updateIcon(i, "❌", "red");
+                            setError(serverErrorMessage(serverError));
+                            return;
+                        }
+
+                        // if server already succeeded -> mark this step and the rest as done
+                        if (serverSuccess) {
+                            updateIcon(i, "✅", "green");
+                            for (let j = i + 1; j < steps.length; j++) updateIcon(j, "✅", "green");
+                            return;
+                        }
+
+                        // normal progression: mark done and continue
+                        updateIcon(i, "✅", "green");
+                    }
+                    // animation finished; wait for server if it's still pending
+                })();
+
+                // await server result and update final UI
+                serverPromise
+                    .then((res) => {
+                        serverSuccess = true;
+
+                        // mark all steps done immediately
+                        for (let i = 0; i < steps.length; i++) updateIcon(i, "✅", "green");
+
+                        // show success title/icon then close
+                        Swal.update({ title: "Posted successfully", icon: "success" });
+                        setTimeout(() => {
+                            Swal.close();
+                            // update local UI state: remove booking from list if setBookings provided
+                            if (typeof setBookings === "function") {
+                                setBookings((prev) => prev.filter((b) => b.invoiceNo !== booking.invoiceNo));
+                            }
+                            // optional callback
+                            if (typeof onPosted === "function") onPosted(booking);
+                        }, 800);
+                    })
+                    .catch((err) => {
+                        serverError = err;
+                        // show which step failed (best-effort: the currentStep where animation was)
+                        if (currentStep >= 0) updateIcon(currentStep, "❌", "red");
+                        Swal.update({ title: "Posting failed", icon: "error" });
+                        setError(serverErrorMessage(err));
+                    });
+
+                function serverErrorMessage(err) {
+                    // friendly error text extraction
+                    return err?.response?.data?.message || err?.message || "Unknown server error";
+                }
+            }
+        });
+    };
+
+    // const handlePosting = async (booking) => {
+    //     if (!booking) return;
+    //     try {
+    //         setIsLoading(true);
+
+    //         const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/postbooking/${booking.invoiceNo}`);
+
+    //         if (response.data.success) {
+    //             Swal.fire({
+    //                 title: 'Success',
+    //                 text: response.data.message || 'Booking posted successfully',
+    //                 icon: 'success',
+    //                 timer: 3000,
+    //                 showConfirmButton: false
+    //             })
+    //             fetchAllBookings(); // Refresh the bookings list
+    //         } else {
+    //             Swal.fire({
+    //                 title: 'Error',
+    //                 text: response.data.message || 'Failed to post booking',
+    //                 icon: 'error',
+    //                 timer: 3000,
+    //                 showConfirmButton: false
+    //             });
+    //         }
+    //     } catch (error) {
+    //         Swal.fire({
+    //             title: 'Error',
+    //             text: error.response?.data?.message || 'Failed to post booking',
+    //             icon: 'error',
+    //             timer: 3000,
+    //             showConfirmButton: false
+    //         });
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
     const confirmDelete = (booking) => {
         setSelectedBooking(booking);
         setIsDeleteModalOpen(true);
     };
 
-    const handleView = (booking) => {
-        setSelectedBooking(booking);
-        setIsViewModalOpen(true);
-    };
+    // const handleView = (booking) => {
+    //     setSelectedBooking(booking);
+    //     setIsViewModalOpen(true);
+    // };
 
     const closeModal = () => {
-        setIsViewModalOpen(false);
+        // setIsViewModalOpen(false);
         setSelectedBooking(null);
     };
 
@@ -213,18 +342,15 @@ export default function PostBooking() {
                 <div className="flex items-center justify-between gap-4 bg-white rounded-2xl shadow-lg border border-blue-100 px-8 py-6">
 
                     <div className="flex flex-col">
-                        {/* <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-3 shadow-md">
-                            <FaEye className="w-8 h-8" />
-                        </span> */}
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Booking List</h1>
-                        <span className="text-sm text-gray-500 mt-1">View and manage all all the bookings</span>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Booking List to Post</h1>
+                        <span className="text-sm text-gray-500 mt-1">Use this page to post the completed bookings</span>
                     </div>
-                    <Link
+                    {/* <Link
                         to="/dashboard/sales/newbooking"
                         className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
                         <FaPlus className="mr-2" /> Create a new booking
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
             <div className="flex items-center mb-6 w-full max-w-xl">
@@ -249,52 +375,6 @@ export default function PostBooking() {
                 </div>
             ) : (
                 <div className="w-full  bg-white rounded-lg shadow-md overflow-x-auto">
-
-                    {/* Update modal */}
-                    <Modal
-                        isOpen={isEditModalOpen}
-                        onAfterOpen={() => { }}
-                        onRequestClose={() => setIsEditModalOpen(false)}
-                        shouldCloseOnOverlayClick={true}
-                        contentLabel="Booking Edit Modal"
-                        style={{
-                            overlay: {
-                                backgroundColor: 'rgba(57, 62, 70, 0.75)',
-                                backdropFilter: 'blur(4px)'
-                            },
-                            content: {
-                                backgroundColor: 'var(--color-secondary)',
-                                border: 'none',
-                                borderRadius: '12px',
-                                padding: '0',
-                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-                                maxWidth: '800px',
-                                width: '90%',
-                                margin: 'auto',
-                                overflow: 'hidden'
-                            }
-                        }}
-                    >
-
-                        <div className="p-6">
-                            {/* Modal Header */}
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">Booking Details</h2>
-                                <button
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="text-gray-500 hover:text-gray-700"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Booking Details Grid */}
-
-                        </div>
-                    </Modal>
-
 
                     {/* delete modal */}
                     <Modal
@@ -518,22 +598,32 @@ export default function PostBooking() {
                                         <td className="px-2 py-1 ">
                                             <div className="flex space-x-4">
                                                 <button
-                                                    onClick={() => handlePosting(booking)}
+                                                    // onClick={() => handlePosting(booking)}
+                                                    onClick={() => {
+                                                        Swal.fire({
+                                                            title: 'Are you sure?',
+                                                            text: "You are about to post this booking. This action cannot be undone.",
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonColor: '#3085d6',
+                                                            cancelButtonColor: '#d33',
+                                                        }
+                                                        ).then((result) => {
+                                                            if (result.isConfirmed) {
+                                                                // navigate(`/dashboard/sales/postbooking/${booking.invoiceNo}`);
+                                                                handlePosting(booking, { onPosted: () => fetchAllBookings() });
+
+                                                            }
+                                                        })
+                                                    }
+                                                    }
+                                                    disabled={isLoading}
                                                     className="text-white bg-blue-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-blue-200 text-md shadow-lg shadow-blue-500/50 hover:scale-110 transition-all duration-200"
                                                     title="View"
                                                 >
-                                                    <FaEye /> Post Booking
+                                                    <FaBoxArchive /> {isLoading ? "Posting..." : "Post Booking"}
                                                 </button>
-                                                <button
-                                                    key={index}
-                                                    onClick={() => {
-                                                        navigate(`/dashboard/sales/modifybooking/${booking.invoiceNo}`);
-                                                    }}
-                                                    className="text-white bg-green-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-green-200 text-md shadow-lg shadow-green-500/50 hover:scale-110 transition-all duration-200"
-                                                    title="Edit"
-                                                >
-                                                    <FaEdit /> Edit
-                                                </button>
+
                                                 <button
                                                     onClick={() => confirmDelete(booking)}
                                                     className="text-white bg-red-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-red-200 text-md shadow-lg shadow-red-500/50 hover:scale-110 transition-all duration-200"
@@ -549,38 +639,9 @@ export default function PostBooking() {
                         </tbody>
                     </table>
                 </div>
-            )}
-
-            {/* View Modal */}
-            <Modal
-                isOpen={isModalOpen}
-                onRequestClose={closeModal}
-                style={modalStyles}
-                contentLabel="View a Booking"
-            >
-                <div className="p-6">
-                    <h2 className="text-xl font-bold mb-4">Booking Details</h2>
-                    {/* {selectedBooking ? ( */}
-                    <div className="space-y-2">
-                        {/* <div><span className="font-semibold">Name:</span> {selectedCustomer.name}</div> */}
-                        {/* <div><span className="font-semibold">Email:</span> {selectedCustomer.email}</div> */}
-                        {/* <div><span className="font-semibold">Phone:</span> {selectedCustomer.phone}</div> */}
-                        {/* Add more fields as needed */}
-                    </div>
-                    {/* ) : (
-                        <div>No customer selected.</div>
-                    )} */}
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
-                            onClick={closeModal}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </Modal>
-        </div>
+            )
+            }
+        </div >
     );
 }
 

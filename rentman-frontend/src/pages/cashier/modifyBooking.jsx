@@ -95,7 +95,7 @@ export default function ModifyBooking() {
         async function loadData() {
             try {
                 // Load invoice master and details
-                console.log("Loading invoiceNo: ", invoiceNo);
+                // console.log("Loading invoiceNo: ", invoiceNo);
                 const resMaster = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoice/${encodeURIComponent(invoiceNo)}`);
                 const resItems = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/salesinvoicedetails/${encodeURIComponent(invoiceNo)}/items`);
                 // Load customers and groups
@@ -516,9 +516,9 @@ export default function ModifyBooking() {
             // Compare old and new advancePaid value
             const oldPaid = lastAdvancePaid || 0;
             const newPaid = Number(masterData.advancePaid) || 0;
-            const paidDiff = newPaid - oldPaid;
+            const advanceDiff = newPaid - oldPaid;
 
-            if (paidDiff === 0) {
+            if (advanceDiff === 0) {
                 // No change in advance, update only master and details
                 try {
                     await axios.put(
@@ -556,14 +556,13 @@ export default function ModifyBooking() {
                             masterData,
                             detailsData,
                             transactionData: {
-                                // transactionId: `${invoiceNo}-${Date.now()}`,
                                 advanceDiff,
                                 transactionId: generateTransactionId(),
                                 invoiceNo,
                                 transactionDate: new Date(), // Use current date
                                 transactionType: "RENT_BOOKING_UPDATE",
-                                transactionDesc: "Booking Advance updated for" + invoiceNo,
-                                creditAmount: paidDiff,
+                                transactionDesc: "Booking Advance updated for: " + invoiceNo,
+                                creditAmount: advanceDiff,
                                 debitAmount: 0,
                             },
                         }

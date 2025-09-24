@@ -76,7 +76,7 @@ app.use("/api/salesinvoice/updateBooking", updateBookingRouter);
 app.use("/api/batchbooking", batchBookingRouter);
 app.use("/api/itemmaster", itemMasterRouter);
 app.use("/api/groupmaster", groupMasterRouter);
-app.use("api/postbooking", postBookingRouter);
+app.use("/api/postbooking", postBookingRouter);
 app.use("/api/contributor", contributorRouter);
 app.use("/api/users", userRouter);
 app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);

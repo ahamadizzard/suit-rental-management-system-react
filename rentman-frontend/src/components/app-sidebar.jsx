@@ -63,12 +63,12 @@ const data = {
           ]
         },
         {
-          title: "Dry Clean",
+          title: "Maintenance",
           url: "#",
           items: [
             {
-              title: "View Dry Clean",
-              url: "#",
+              title: "Post Bookings",
+              url: "/dashboard/sales/postbooking",
               isActive: true,
             },
             {

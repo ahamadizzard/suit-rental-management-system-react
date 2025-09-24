@@ -7,6 +7,7 @@ import Modal from 'react-modal';
 import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
 import { Eye } from 'lucide-react';
+import moment from 'moment';
 
 Modal.setAppElement('#root');
 
@@ -1034,7 +1035,7 @@ export default function AdminProductPage() {
                                                 <td className="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">{product.itemCode}</td>
                                                 <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     <div className="font-medium">{product.itemName}</div>
-                                                    <div className="text-gray-400">{product.itemShortName}</div>
+                                                    <div className="text-gray-400">{product.itemShortDesc}</div>
                                                 </td>
                                                 <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     {product.itemGroupShortDesc}
@@ -1047,7 +1048,7 @@ export default function AdminProductPage() {
                                                     })} */}
                                                     {product.itemPrice ? `Rs. ${product.itemPrice.toLocaleString()}` : "N/A"}
                                                 </td>
-                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.rentCount ? product.rentCount : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.itemRentCount ? product.itemRentCount : "N/A"}</td>
                                                 <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
                                                     {product.itemDateAdded
                                                         ? new Date(product.itemDateAdded).toLocaleDateString("en-GB", {
@@ -1057,8 +1058,8 @@ export default function AdminProductPage() {
                                                         }).replace(/ /g, "-") // Converts "15 Jan 2023" → "15-Jan-2023"
                                                         : "N/A"}
                                                 </td>
-                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.lastRented ? product.lastRented : "N/A"}</td>
-                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.lastDryClean ? product.lastDryClean : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.itemLastRented ? moment(product.itemLastRented).format("DD-MMM-YYYY") : "N/A"}</td>
+                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.itemLastDryClean ? moment(product.itemLastDryClean).format("DD-MMM-YYYY") : "N/A"}</td>
 
                                                 < td className="px-3 py-1 whitespace-nowrap">
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  ${getStatusBadge(product.itemStatus)}`}>
@@ -1082,7 +1083,7 @@ export default function AdminProductPage() {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td>
+                                                {/* <td className="px-3 py-1 whitespace-nowrap text-sm text-gray-500">{product.contributor ? product.contributor : "N/A"}</td> */}
                                                 <td className="px-3 py-3 ">
                                                     <div className="flex space-x-4">
                                                         <button

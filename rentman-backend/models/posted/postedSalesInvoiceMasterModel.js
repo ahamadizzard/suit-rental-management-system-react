@@ -43,7 +43,7 @@ const postedSalesInvoiceMasterSchema = new mongoose.Schema({
   postedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UsersModel",
-    required: true,
+    // required: true,
   },
 
   // postedBy:{type:String} // manager ID
