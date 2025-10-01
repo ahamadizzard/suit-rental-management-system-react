@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
@@ -9,8 +9,16 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isFocused, setIsFocused] = useState({ email: false, password: false });
+    const emailRef = useRef(null);
 
     const navigate = useNavigate();
+
+    //setting focus on email input on component mount
+    useEffect(() => {
+        if (emailRef.current) {
+            emailRef.current.focus();
+        }
+    }, []);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -83,7 +91,9 @@ export default function Login() {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    onFocus={() => setIsFocused({ ...isFocused, email: true })}
+                                    ref={emailRef}
+                                    placeholder="Enter your email"
+                                    // onFocus={() => setIsFocused({ ...isFocused, email: true })}
                                     onBlur={() => setIsFocused({ ...isFocused, email: false })}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                                     required

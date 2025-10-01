@@ -19,6 +19,8 @@ import ModifyBooking from './pages/cashier/modifyBooking';
 import BookingList from './pages/cashier/bookingList';
 import DailyTransaction from './pages/cashier/dailyTransaction';
 import PostBooking from './pages/manager/sales/postBooking';
+import AddDryClean from './pages/manager/inventory/addDryClean';
+import DryCleanList from './pages/manager/inventory/dryCleanList';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -51,8 +53,11 @@ function App() {
               {/* Manager routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
                 <Route path="/dashboard/itemmaster" element={<AdminProductPage />} />
+                <Route path="/dashboard/dryclean" element={<DryCleanList />} />
                 <Route path="/dashboard/sales/postbooking" element={<PostBooking />} />
                 <Route path="/dashboard/itemmaster/add" element={<AddProductPage />} />
+                <Route path="/dashboard/dryclean/add" element={<AddDryClean />} />
+
                 <Route path="/dashboard/groupmaster/add" element={<AddGroupPage />} />
                 <Route path="/dashboard/groupmaster" element={<GroupMasterPage />} />
                 <Route path="/dashboard/groupmaster/editgroup/:groupId" element={<EditGroupPage />} />

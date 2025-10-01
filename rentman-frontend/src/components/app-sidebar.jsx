@@ -128,13 +128,13 @@ const data = {
           url: "#",
           items: [
             {
-              title: "View Dry Clean",
-              url: "#",
+              title: "Dry Clean List",
+              url: "/dashboard/dryclean",
               isActive: true,
             },
             {
               title: "Add Dry Clean",
-              url: "#",
+              url: "/dashboard/dryclean/add",
               isActive: true,
             }
 

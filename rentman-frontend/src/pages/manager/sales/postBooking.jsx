@@ -258,44 +258,6 @@ export default function PostBooking() {
         });
     };
 
-    // const handlePosting = async (booking) => {
-    //     if (!booking) return;
-    //     try {
-    //         setIsLoading(true);
-
-    //         const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/postbooking/${booking.invoiceNo}`);
-
-    //         if (response.data.success) {
-    //             Swal.fire({
-    //                 title: 'Success',
-    //                 text: response.data.message || 'Booking posted successfully',
-    //                 icon: 'success',
-    //                 timer: 3000,
-    //                 showConfirmButton: false
-    //             })
-    //             fetchAllBookings(); // Refresh the bookings list
-    //         } else {
-    //             Swal.fire({
-    //                 title: 'Error',
-    //                 text: response.data.message || 'Failed to post booking',
-    //                 icon: 'error',
-    //                 timer: 3000,
-    //                 showConfirmButton: false
-    //             });
-    //         }
-    //     } catch (error) {
-    //         Swal.fire({
-    //             title: 'Error',
-    //             text: error.response?.data?.message || 'Failed to post booking',
-    //             icon: 'error',
-    //             timer: 3000,
-    //             showConfirmButton: false
-    //         });
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
     const confirmDelete = (booking) => {
         setSelectedBooking(booking);
         setIsDeleteModalOpen(true);
