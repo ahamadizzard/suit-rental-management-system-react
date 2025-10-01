@@ -427,7 +427,7 @@ export default function AddDryClean() {
                     }
                     disabled={isLoading}
                     className="mt-4 mr-4 bg-green-600 text-white px-4 py-2 cursor-pointer rounded"
-                    title="View"
+                    title="Save"
                 // className="mt-4 mr-4 bg-green-600 text-white px-4 py-2 cursor-pointer rounded"
                 >
                     Save All

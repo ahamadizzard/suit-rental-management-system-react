@@ -45,7 +45,7 @@ export default function DryCleanList() {
     };
 
 
-
+    // search functionality with debounce
     useEffect(() => {
         const searchDrycleans = async () => {
             if (searchQuery.length > 0) {
@@ -109,11 +109,10 @@ export default function DryCleanList() {
 
     const handleDelete = () => {
         if (!selectedDryclean) return;
-        // console.log("Deleting product message from modal screen:", productToDelete);
         setIsLoading(true);
         const token = localStorage.getItem('token');
 
-        axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/batchbooking/${selectedDryclean.drycleanId}`, {
+        axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/dryclean/by-drycleanid/${selectedDryclean.drycleanId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(() => {
@@ -125,7 +124,7 @@ export default function DryCleanList() {
                     showConfirmButton: false
                 });
                 setIsDeleteModalOpen(false);
-                fetchAllDrycleans(); // Refresh the bookings list
+                fetchAllDrycleans();
             })
             .catch((error) => {
                 Swal.fire({
@@ -135,13 +134,40 @@ export default function DryCleanList() {
                     timer: 3000,
                     showConfirmButton: false
                 });
+            })
+            .finally(() => {
                 setIsLoading(false);
             });
     };
 
+
     const confirmDelete = (dryclean) => {
         setSelectedDryclean(dryclean);
         setIsDeleteModalOpen(true);
+    };
+
+    const handlePosting = async (drycleanId) => {
+        try {
+            const response = await axios.put(
+                `${import.meta.env.VITE_API_BASE_URL}/api/itemmaster/post-dryclean/${drycleanId}`
+            );
+            Swal.fire({
+                title: 'Success',
+                text: response.data.message || "Posted successfully!",
+                icon: 'success',
+                timer: 3000,
+            })
+            // alert(response.data.message || "Posted successfully!");
+            // Optionally refresh dryclean list here
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: error.response?.data?.message || error.message,
+                icon: 'error',
+                // timer: 3000,
+            })
+            // alert("Failed to post: " + (error.response?.data?.message || error.message));
+        }
     };
 
     const handleView = (dryclean) => {
@@ -154,31 +180,6 @@ export default function DryCleanList() {
         setSelectedDryclean(null);
     };
 
-    // Map invoiceStatus text to Badge variant
-    // const getStatusVariant = (status) => {
-    //     const s = (status || '').toString().toLowerCase();
-
-    //     switch (s) {
-    //         case 'booked':
-    //             return 'secondary';       // e.g., gray / neutral
-    //         case 'delivered':
-    //             return 'default';         // e.g., green / success
-    //         case 'returned':
-    //             return 'outline';         // e.g., blue / info
-    //         case 'cancelled':
-    //             return 'destructive';     // e.g., red / danger
-    //         case 'return_partial':
-    //             return 'warning';         // e.g., yellow / partial
-    //         case 'return_overdue':
-    //             return 'destructive';     // e.g., red / overdue
-    //         case 'return_issue':
-    //             return 'destructive';     // e.g., red / issue
-    //         default:
-    //             return 'secondary';       // fallback / neutral
-    //     }
-    // };
-
-
     return (
         <div className="flex flex-col items-center w-full px-4 py-8">
             <div className="w-full mb-8">
@@ -188,11 +189,11 @@ export default function DryCleanList() {
                         {/* <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-3 shadow-md">
                             <FaEye className="w-8 h-8" />
                         </span> */}
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Booking List</h1>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Dryclean List</h1>
                         <span className="text-sm text-gray-500 mt-1">View and manage all all the drycleans</span>
                     </div>
                     <Link
-                        to="/dashboard/dryclean/newdryclean"
+                        to="/dashboard/dryclean/add"
                         className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
                         <FaPlus className="mr-2" /> Create a new dryclean
@@ -219,8 +220,12 @@ export default function DryCleanList() {
                 <div className="flex justify-center items-center h-32">
                     <span className="text-lg text-gray-500">Loading drycleans...</span>
                 </div>
+            ) : drycleans.length === 0 ? (
+                <div className="flex flex-col border-2 bg-gray-100 rounded-xl items-center justify-center h-64 w-full">
+                    <span className="text-2xl font-semibold text-gray-400">No records to display</span>
+                </div>
             ) : (
-                <div className="w-full  bg-white rounded-lg shadow-md overflow-x-auto">
+                <div className="w-full bg-white rounded-lg shadow-md overflow-x-auto">
 
                     {/* Update modal */}
                     <Modal
@@ -314,26 +319,6 @@ export default function DryCleanList() {
                                                 <span className="text-blue-700 font-bold w-60 text-left text-lg ml-6">{selectedDryclean?.drycleanId}</span>
                                             </div>
                                             <div className="border-t border-gray-200 w-full my-2"></div>
-                                            {/* Customer Name */}
-                                            {/* <div className="flex flex-row items-center mb-3 w-full">
-                                                <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Customer Name:</span>
-                                                <span className="text-gray-800 font-bold w-60 text-left ml-6">{selectedBooking?.customerName}</span>
-                                            </div>
-                                            <div className="border-t border-gray-200 w-full my-2"></div> */}
-                                            {/* Customer Address */}
-                                            {/* <div className="flex flex-row items-center mb-3 w-full">
-                                                <svg className="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M17 8V6a4 4 0 00-8 0v2m8 0a4 4 0 01-8 0m8 0v2a4 4 0 01-8 0V8" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Customer Address:</span>
-                                                <span className="text-gray-800 text-left w-60 font-bold ml-6">{selectedBooking?.customerAddress}</span>
-                                            </div>
-                                            <div className="border-t border-gray-200 w-full my-2"></div> */}
-                                            {/* Invoice Total */}
-                                            {/* <div className="flex flex-row items-center mb-1 w-full">
-                                                <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 0C7.582 4 4 7.582 4 12c0 4.418 3.582 8 8 8s8-3.582 8-8c0-4.418-3.582-8-8-8z" /></svg>
-                                                <span className="font-bold text-gray-700 w-60 text-left">Invoice Total:</span>
-                                                <span className="text-green-700 font-bold w-60 text-left ml-6">{selectedBooking?.netTotal}</span>
-                                            </div> */}
                                         </div>
                                     </div>
                                     <span className="text-red-600 font-bold mt-4 text-center text-base flex items-center justify-center gap-2">
@@ -364,12 +349,14 @@ export default function DryCleanList() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">DrycleanId & Dryclean Date</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Dryclean ID & Dryclean Date</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Group</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">ItemCode</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Short Description</th>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-natural uppercase">Item Size</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Item RentCount</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Item Master Posted</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Actions</th>
 
                             </tr>
                         </thead>
@@ -380,40 +367,73 @@ export default function DryCleanList() {
                                 </tr>
                             ) : (
                                 drycleans.map((dryclean, index) => (
-                                    // customers.map((customer, idx) => (
                                     <tr key={index}>
                                         <td className="px-2 py-1 whitespace-nowrap font-semibold text-blue-700 text-sm">
                                             <div>
-                                                {dryclean.drycleanId}
-                                                {dryclean.drycleanDate && (
+                                                {dryclean?.drycleanId}
+                                                {dryclean?.drycleanDate && (
                                                     <div className="text-xs text-gray-500 mt-1">
-                                                        {dryclean.drycleanDate ? moment(dryclean.drycleanDate).format("DD-MMM-YYYY") : "N/A"}
+                                                        {dryclean?.drycleanDate ? moment(dryclean?.drycleanDate).format("DD-MMM-YYYY") : "N/A"}
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-1 py-1 whitespace-nowrap font-semibold text-blue-700 text-sm">
                                             <div>
-                                                {dryclean.itemGroupShortDesc}
+                                                {dryclean?.itemGroupShortDesc}
                                             </div>
                                         </td>
-                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean.itemCode}</td>
-                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean.itemShortDesc}</td>
-                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean.itemSize}</td>
-                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean.itemRentCount}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemCode}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemShortDesc}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemSize}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemRentCount}</td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">
+                                            {dryclean?.itemMasterPosted ? (
+                                                <Badge variant="success" className="bg-green-100 text-green-800 border-green-300">
+                                                    Posted
+                                                </Badge>
+                                            ) : (
+                                                <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-300">
+                                                    Not Posted
+                                                </Badge>
+                                            )}
+                                        </td>
 
 
 
                                         <td className="px-2 py-1 ">
                                             <div className="flex space-x-4">
                                                 <button
-                                                    onClick={() => handleView(dryclean)}
+                                                    onClick={() => {
+                                                        // if (selectedDryclean.length === 0) {
+                                                        //     Swal.fire({
+                                                        //         icon: 'warning',
+                                                        //         title: 'No items to save',
+                                                        //     });
+                                                        //     return;
+                                                        // }
+                                                        Swal.fire({
+                                                            title: 'Are you sure?',
+                                                            text: "Are you sure you want to post this to Item Master?",
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonColor: '#3085d6',
+                                                            cancelButtonColor: '#d33',
+                                                        }
+                                                        ).then((result) => {
+                                                            if (result.isConfirmed) {
+                                                                handlePosting(dryclean.drycleanId);
+                                                            }
+                                                        })
+                                                    }
+                                                    }
+                                                    disabled={isLoading}
                                                     className="text-white bg-blue-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-blue-200 text-md shadow-lg shadow-blue-500/50 hover:scale-110 transition-all duration-200"
-                                                    title="View"
+                                                    title="Posting"
                                                 >
-                                                    <FaEye /> View
+                                                    <FaEye /> Post to Item Master
                                                 </button>
-                                                <button
+                                                {/* <button
                                                     key={index}
                                                     onClick={() => {
                                                         navigate(`/dashboard/sales/modifybooking/${dryclean.drycleanId}`);
@@ -422,7 +442,7 @@ export default function DryCleanList() {
                                                     title="Edit"
                                                 >
                                                     <FaEdit /> Edit
-                                                </button>
+                                                </button> */}
                                                 <button
                                                     onClick={() => confirmDelete(dryclean)}
                                                     className="text-white bg-red-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-red-200 text-md shadow-lg shadow-red-500/50 hover:scale-110 transition-all duration-200"
@@ -445,7 +465,7 @@ export default function DryCleanList() {
                 isOpen={isModalOpen}
                 onRequestClose={closeModal}
                 style={modalStyles}
-                contentLabel="View a Booking"
+                contentLabel="View dryclean Details"
             >
                 <div className="p-6">
                     <h2 className="text-xl font-bold mb-4">Dryclean Details</h2>

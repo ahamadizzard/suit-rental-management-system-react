@@ -1,8 +1,4 @@
 import mongoose from "mongoose";
-// import AutoIncrement from "mongoose-sequence";
-
-// const connection = mongoose;
-// const AutoIncrementFactory = AutoIncrement(connection);
 
 const dryCleanSchema = new mongoose.Schema({
   drycleanId: { type: String, required: true },
@@ -12,7 +8,8 @@ const dryCleanSchema = new mongoose.Schema({
   itemShortDesc: { type: String },
   itemSize: { type: String },
   itemRentCount: { type: Number },
+  itemMasterPosted: { type: Boolean, default: false },
 });
-// dryCleanSchema.plugin(AutoIncrementFactory, { inc_field: "drycleanId" });
+
 const DryClean = mongoose.model("dryclean", dryCleanSchema);
 export default DryClean;

@@ -22,7 +22,7 @@ const itemMasterSchema = new mongoose.Schema(
     itemLastRented: { type: Date, default: "" },
     itemLastRentedInv: { type: String, default: "" },
     itemLastDryClean: { type: Date, default: "" },
-    ItemLastDryCleanRentCount: { type: Number, default: 0 },
+    itemLastDryCleanRentCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

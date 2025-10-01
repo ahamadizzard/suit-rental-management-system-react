@@ -1,3 +1,4 @@
+import DryClean from "../../models/inventory/dryCleanModel.js";
 import ItemMaster from "../../models/inventory/itemMasterModel.js";
 // import groupMaster from "../../models/inventory/groupMasterModel.js";
 
@@ -234,5 +235,73 @@ export async function searchItem(req, res) {
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ message: "Error searching products", error: error });
+  }
+}
+
+// update the itemLastDryClean and ItemLastDryCleanRentCount in item master
+export async function updateItemDryCleanDetails(req, res) {
+  try {
+    const item = await ItemMaster.findOneAndUpdate(
+      { itemCode: req.params.itemCode },
+      {
+        itemLastDryClean: req.body.itemLastDryClean,
+        itemLastDryCleanRentCount: req.body.itemLastDryCleanRentCount,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!item) return res.status(404).send("Item not found");
+    res.status(200).json({
+      message: "Item last dry clean updated successfully",
+      updatedItem: item,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+// get all the items which is not blocked
+export async function getBlockedItems(req, res) {
+  try {
+    const items = await ItemMaster.find({ isBlocked: true });
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+// post dryclean details to item master
+export async function postDrycleanToItemMaster(req, res) {
+  const { drycleanId } = req.params;
+  try {
+    // 1. Get all drycleans with this drycleanId
+    const drycleans = await DryClean.find({ drycleanId });
+    if (!drycleans.length) {
+      return res
+        .status(404)
+        .json({ message: "No dryclean records found for this ID" });
+    }
+
+    // 2. For each dryclean, update the corresponding ItemMaster
+    for (const dryclean of drycleans) {
+      await ItemMaster.findOneAndUpdate(
+        { itemCode: dryclean.itemCode },
+        {
+          itemLastDryClean: dryclean.drycleanDate,
+          itemLastDryCleanRentCount: dryclean.itemRentCount,
+        },
+        { new: true }
+      );
+    }
+
+    // 3. Update all drycleans with this drycleanId to set itemMasterPosted: true
+    await DryClean.updateMany({ drycleanId }, { itemMasterPosted: true });
+
+    res
+      .status(200)
+      .json({
+        message: "ItemMaster and DryClean records updated successfully",
+      });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 }

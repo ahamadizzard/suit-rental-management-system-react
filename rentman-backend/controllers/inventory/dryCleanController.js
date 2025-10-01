@@ -31,11 +31,20 @@ export async function getAllDryCleans(req, res) {
 }
 export async function deleteDryClean(req, res) {
   try {
-    const dryClean = await DryClean.findByIdAndDelete(req.params.id);
-    if (!dryClean) {
-      return res.status(404).json({ message: "Dry clean record not found" });
+    const { drycleanId } = req.params; // or req.body, depending on how you send it
+
+    // Delete all records matching the given drycleanId
+    const result = await DryClean.deleteMany({ drycleanId });
+
+    if (result.deletedCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "No dry clean records found for this ID" });
     }
-    res.status(200).json({ message: "Dry clean record deleted successfully" });
+
+    res.status(200).json({
+      message: `${result.deletedCount} dry clean record(s) deleted successfully`,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -84,6 +93,7 @@ export async function searchDrycleans(req, res) {
       "itemCode",
       "itemShortDesc",
       "itemSize",
+      "itemMasterPosted",
     ];
 
     // Build $or conditions for string fields

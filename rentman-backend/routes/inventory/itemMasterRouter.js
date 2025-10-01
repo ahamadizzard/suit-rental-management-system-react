@@ -10,6 +10,8 @@ import {
   deleteItemByCode,
   getUnblockedItems,
   searchItem,
+  updateItemDryCleanDetails,
+  postDrycleanToItemMaster,
 } from "../../controllers/inventory/itemMasterController.js";
 
 const itemMasterRouter = express.Router();
@@ -19,6 +21,8 @@ itemMasterRouter.get("/:itemCode", getItemByCode);
 itemMasterRouter.get("/search/:query", searchItem);
 itemMasterRouter.post("/", createItemMaster);
 itemMasterRouter.put("/:itemCode", updateItemByCode);
+itemMasterRouter.put("/dryclean/:itemCode", updateItemDryCleanDetails);
+itemMasterRouter.put("/post-dryclean/:drycleanId", postDrycleanToItemMaster);
 // itemMasterRouter.get("/:itemGroupShortDesc", getItemByGroupShortDesc);
 itemMasterRouter.get("/group/:itemGroupShortDesc", getItemByGroupShortDesc);
 itemMasterRouter.delete("/:itemCode", deleteItemByCode);

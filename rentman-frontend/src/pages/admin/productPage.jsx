@@ -632,9 +632,8 @@ export default function AdminProductPage() {
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-500">Last Dry Clean Rent Count</p>
                                                         <p className="text-gray-900">
-                                                            {selectedProduct.itemLastDryCleanRentCount ?
-                                                                new Date(selectedProduct.itemLastDryCleanRentCount).toLocaleDateString() :
-                                                                'N/A'}
+                                                            {selectedProduct.itemLastDryCleanRentCount}
+
                                                         </p>
                                                     </div>
                                                 </div>
