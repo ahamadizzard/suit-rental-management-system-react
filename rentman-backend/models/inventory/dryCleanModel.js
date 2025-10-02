@@ -9,6 +9,7 @@ const dryCleanSchema = new mongoose.Schema({
   itemSize: { type: String },
   itemRentCount: { type: Number },
   itemMasterPosted: { type: Boolean, default: false },
+  drycleanAmount: { type: Number },
 });
 
 const DryClean = mongoose.model("dryclean", dryCleanSchema);

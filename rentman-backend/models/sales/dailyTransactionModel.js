@@ -20,6 +20,7 @@ const dailyTransactionSchema = new mongoose.Schema(
         "PURCHASES",
         "OTHER",
         "DRAWINGS",
+        "DRY_CLEAN",
       ],
     },
     transactionDesc: { type: String },

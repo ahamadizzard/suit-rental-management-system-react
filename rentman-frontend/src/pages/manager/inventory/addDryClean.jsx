@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+// import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,9 @@ import moment from 'moment';
 
 export default function AddDryClean() {
     // Form and state
-    const { register, handleSubmit, reset, setValue, watch } = useForm();
+    // const { register, handleSubmit, reset, setValue, watch } = useForm();
     const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+    const [drycleanAmount, setDrycleanAmount] = useState("");
     const [itemGroups, setItemGroups] = useState([]);
     const [selectedGroup, setSelectedGroup] = useState("");
     const [items, setItems] = useState([]);
@@ -70,6 +71,17 @@ export default function AddDryClean() {
         }
         fetchItemRentCount();
     }, [selectedItem]);
+
+    function generateTransactionId() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return `TXN${year}${month}${day}${hours}${minutes}${seconds}`;
+    }
 
     function generateDrycleanId() {
         const now = new Date();
@@ -198,6 +210,7 @@ export default function AddDryClean() {
             itemShortDesc: itemRentCount.itemShortDesc || 'N/A',
             itemSize: selectedItem.itemSize || 'N/A',
             itemRentCount: itemRentCount.itemRentCount || 0,
+            drycleanAmount: drycleanAmount ? parseFloat(drycleanAmount) : 0,
         }]);
         setSelectedItem("");
         setItemRentCount("");
@@ -209,29 +222,50 @@ export default function AddDryClean() {
     const handleSaveAll = async () => {
         setError("");
         setSuccess("");
+
         if (selectedItems.length === 0) {
             setError("No items to save.");
             return;
         }
+
+        const dailyTransaction = {
+            transactionId: generateTransactionId(),
+            transactionDate: date ? new Date(date) : new Date(),
+            transactionType: "DRY_CLEAN",
+            invoiceNo: generateDrycleanId(),
+            creditAmount: 0,
+            debitAmount: drycleanAmount ? parseFloat(drycleanAmount) : 0,
+            transactionDesc: "Dryclean expenses for - Invoice " + generateDrycleanId(),
+        };
+
         try {
-            console.log("Selected Items: ", selectedItems);
-            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/dryclean/dryclean/bulk`, { items: selectedItems });
-            setSuccess(response.data.message || "All dry clean details saved.");
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/api/dryclean-transaction/bulk-with-transaction`,
+                { items: selectedItems, dailyTransaction }
+            );
+
+            setSuccess(response.data.message);
             Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: response.data.message || "All dry clean details saved.",
+                icon: "success",
+                title: "Success",
+                text: response.data.message,
             });
+
             setSelectedItems([]);
+            navigate("/dashboard/dryclean");
         } catch (error) {
+            // console.error("Save error: ", error.response?.data || error.message);
             setError(error.response?.data?.message || "Failed to save dry clean details.");
             Swal.fire({
-                icon: 'error',
-                title: 'Error',
+                icon: "error",
+                title: "Error",
                 text: error.response?.data?.message || "Failed to save dry clean details.",
             });
+        } finally {
+            setIsLoading(false);
         }
     };
+
 
     // Handler to delete item from selectedItems
     const handleDeleteItem = (itemCode) => {
@@ -246,6 +280,10 @@ export default function AddDryClean() {
                     <div className="flex flex-row gap-4 items-center">
                         <label>Date</label>
                         <input type="date" value={date} onChange={e => setDate(e.target.value)} className="border rounded px-2 py-1 w-full" />
+                    </div>
+                    <div className="flex flex-row gap-4 items-center">
+                        <label>Dry Clean Amount</label>
+                        <input type="number" placeholder="0.00" value={drycleanAmount} onChange={e => setDrycleanAmount(e.target.value)} className="border-2 rounded-lg px-2 py-1 text-right w-full" />
                     </div>
                     <Link
                         to="/dashboard/dryclean"
@@ -403,6 +441,15 @@ export default function AddDryClean() {
                 <button
                     // onClick={handleSaveAll}                
                     onClick={() => {
+                        if (drycleanAmount === "" || isNaN(drycleanAmount) || parseFloat(drycleanAmount) < 0) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Invalid Dry Clean Amount',
+                                text: 'Please enter a valid dry clean amount (0 or more).',
+                            });
+                            return;
+                        }
+
                         if (selectedItems.length === 0) {
                             Swal.fire({
                                 icon: 'warning',
@@ -412,7 +459,7 @@ export default function AddDryClean() {
                         }
                         Swal.fire({
                             title: 'Are you sure?',
-                            text: "YAre you sure you want to save this dry clean details",
+                            text: "Are you sure you want to save this dry clean details",
                             icon: 'warning',
                             showCancelButton: true,
                             confirmButtonColor: '#3085d6',

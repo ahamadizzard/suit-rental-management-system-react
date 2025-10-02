@@ -356,6 +356,7 @@ export default function DryCleanList() {
                                 <th className="px-2 py-2 text-left text-xs font-bold text-natural uppercase">Item Size</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Item RentCount</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Item Master Posted</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Dryclean Amount</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Actions</th>
 
                             </tr>
@@ -387,6 +388,7 @@ export default function DryCleanList() {
                                         <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemShortDesc}</td>
                                         <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemSize}</td>
                                         <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.itemRentCount}</td>
+
                                         <td className="px-2 py-1 whitespace-nowrap text-sm">
                                             {dryclean?.itemMasterPosted ? (
                                                 <Badge variant="success" className="bg-green-100 text-green-800 border-green-300">
@@ -398,6 +400,7 @@ export default function DryCleanList() {
                                                 </Badge>
                                             )}
                                         </td>
+                                        <td className="px-2 py-1 whitespace-nowrap text-sm">{dryclean?.drycleanAmount}</td>
 
 
 
@@ -419,16 +422,18 @@ export default function DryCleanList() {
                                                             showCancelButton: true,
                                                             confirmButtonColor: '#3085d6',
                                                             cancelButtonColor: '#d33',
-                                                        }
-                                                        ).then((result) => {
+                                                        }).then((result) => {
                                                             if (result.isConfirmed) {
                                                                 handlePosting(dryclean.drycleanId);
                                                             }
-                                                        })
-                                                    }
-                                                    }
-                                                    disabled={isLoading}
-                                                    className="text-white bg-blue-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-blue-200 text-md shadow-lg shadow-blue-500/50 hover:scale-110 transition-all duration-200"
+                                                        });
+                                                    }}
+                                                    disabled={isLoading || dryclean.itemMasterPosted}
+                                                    className={`text-white rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 text-md shadow-lg transition-all duration-200
+        ${dryclean.itemMasterPosted
+                                                            ? "bg-gray-400 cursor-not-allowed opacity-60"
+                                                            : "bg-blue-600 hover:text-blue-200 shadow-blue-500/50 hover:scale-110"
+                                                        }`}
                                                     title="Posting"
                                                 >
                                                     <FaEye /> Post to Item Master
