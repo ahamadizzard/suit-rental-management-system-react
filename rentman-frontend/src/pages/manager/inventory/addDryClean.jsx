@@ -33,6 +33,14 @@ export default function AddDryClean() {
     const groupRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
 
+
+    //setting focus on group input on component mount
+    useEffect(() => {
+        if (groupRef.current) {
+            groupRef.current.focus();
+        }
+    }, []);
+
     // Fetch item groups on mount
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/groupmaster`)

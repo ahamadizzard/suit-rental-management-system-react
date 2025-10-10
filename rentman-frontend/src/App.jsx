@@ -5,22 +5,24 @@ import LoginPage from './pages/login.jsx';
 import HomePage from './pages/home.jsx';
 import DashboardLayout from './pages/dashboard.jsx';
 import Unauthorized from './components/unauthorized.jsx';
-import AdminProductPage from './pages/admin/productPage';
-import AddProductPage from './pages/admin/addProduct';
-import AddGroupPage from './pages/admin/addGroupPage';
-import GroupMasterPage from './pages/admin/groupMasterPage';
-import EditGroupPage from './pages/admin/editGroupPage.jsx';
+import AdminProductPage from './pages/admin/inventory/productPage.jsx';
+import AddProductPage from './pages/admin/inventory/addProduct.jsx';
+import AddGroupPage from './pages/admin/inventory/addGroupPage.jsx';
+import GroupMasterPage from './pages/admin/inventory/groupMasterPage.jsx';
+import EditGroupPage from './pages/admin/inventory/editGroupPage.jsx';
 import NewBookingInvoice from './pages/cashier/newBookingInvoice.jsx';
 import { Toaster } from 'react-hot-toast';
-import ViewCustomer from './pages/manager/customer/viewCustomer';
-import PurchaseHistory from './pages/manager/customer/purchaseHistory';
-import AddCustomer from './pages/manager/customer/addCustomer';
-import ModifyBooking from './pages/cashier/modifyBooking';
-import BookingList from './pages/cashier/bookingList';
-import DailyTransaction from './pages/cashier/dailyTransaction';
-import PostBooking from './pages/manager/sales/postBooking';
-import AddDryClean from './pages/manager/inventory/addDryClean';
-import DryCleanList from './pages/manager/inventory/dryCleanList';
+import ViewCustomer from './pages/manager/customer/viewCustomer.jsx';
+import PurchaseHistory from './pages/manager/customer/purchaseHistory.jsx';
+import AddCustomer from './pages/manager/customer/addCustomer.jsx';
+import ModifyBooking from './pages/cashier/modifyBooking.jsx';
+import BookingList from './pages/cashier/bookingList.jsx';
+import DailyTransaction from './pages/cashier/dailyTransaction.jsx';
+import PostBooking from './pages/manager/sales/postBooking.jsx';
+import AddDryClean from './pages/manager/inventory/addDryClean.jsx';
+import DryCleanList from './pages/manager/inventory/dryCleanList.jsx';
+import AddEmployee from './pages/admin/employee/addEmployee.jsx';
+import EmployeeList from './pages/admin/employee/employeeList.jsx';
 // import Login from './pages/login.jsx';
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
 
               {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route path="/dashboard/addemployee" element={<AddEmployee />} />
+                <Route path="/dashboard/employeelist" element={<EmployeeList />} />
                 {/* <Route path="users" element={<UserManagement />} /> */}
                 {/* <Route path="settings" element={<SystemSettings />} /> */}
               </Route>

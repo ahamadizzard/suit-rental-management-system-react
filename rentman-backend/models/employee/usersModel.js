@@ -29,10 +29,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  imgURL: {
-    type: String,
-    default: "https://avatar.iran.liara.run/public/boy?username=ash",
-  },
 });
 
 const User = mongoose.model("users", userSchema);

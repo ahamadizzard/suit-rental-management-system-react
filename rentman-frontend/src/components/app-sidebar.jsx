@@ -167,23 +167,37 @@ const data = {
       title: "Employees",
       url: "#",
       items: [
+        // {
+        // title: "Manage Employees",
+        // url: "#",
+        // items: [
         {
-          title: "View Employees",
-          url: "#",
-          items: [
-            {
-              title: "View Products",
-              url: "#",
-              isActive: true,
-            },
-            {
-              title: "Add Products",
-              url: "#",
-              isActive: true,
-            }
-
-          ]
+          title: "Empl List/Manage",
+          url: "/dashboard/employeelist",
+          isActive: true,
         },
+        {
+          title: "Add Employee",
+          url: "/dashboard/addemployee",
+          isActive: true,
+        },
+        {
+          title: "Emp. Attendance",
+          url: "#",
+          isActive: true,
+        },
+        {
+          title: "Emp. Salary Details",
+          url: "#",
+          isActive: true,
+        },
+        {
+          title: "Emp. Salary Report",
+          url: "#",
+          isActive: true,
+        },
+        // ]
+        // },
         {
           title: "Add Employees",
           url: "#",
