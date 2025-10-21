@@ -8,6 +8,7 @@ const employeesSchema = new mongoose.Schema({
   employeeId: { type: Number, unique: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
+  email: { type: String },
   nic: { type: String },
   telephone1: { type: String },
   telephone2: { type: String },

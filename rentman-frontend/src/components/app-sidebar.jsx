@@ -24,6 +24,7 @@ import {
 import { Link } from "react-router-dom"
 
 // This is sample data.
+
 const data = {
   navMain: [
     {

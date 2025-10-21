@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from './pages/login.jsx';
 import HomePage from './pages/home.jsx';
@@ -23,15 +22,8 @@ import AddDryClean from './pages/manager/inventory/addDryClean.jsx';
 import DryCleanList from './pages/manager/inventory/dryCleanList.jsx';
 import AddEmployee from './pages/admin/employee/addEmployee.jsx';
 import EmployeeList from './pages/admin/employee/employeeList.jsx';
-// import Login from './pages/login.jsx';
 
 function App() {
-  // useEffect(() => {
-  //   // Clear authentication data on app start
-  //   localStorage.removeItem('token');
-  //   localStorage.removeItem('userFirstName');
-  //   localStorage.removeItem('userRole');
-  // }, []);
 
   return (
     <BrowserRouter>
