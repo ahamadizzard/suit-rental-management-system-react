@@ -19,6 +19,7 @@ import updateBookingRouter from "./routes/sales/updateBookingRouter.js";
 import postBookingRouter from "./routes/posted/postBookingRouter.js";
 import dryCleanRouter from "./routes/inventory/dryCleanRouter.js";
 import drycleanAndTransactionRouter from "./routes/other/drycleanAndTransactionRouter.js";
+import employeesRouter from "./routes/employee/employeesRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 6000;
@@ -83,6 +84,7 @@ app.use("/api/dryclean", dryCleanRouter);
 app.use("/api/dryclean-transaction", drycleanAndTransactionRouter);
 app.use("/api/contributor", contributorRouter);
 app.use("/api/users", userRouter);
+app.use("/api/employees", employeesRouter);
 app.use("/api/salesinvoicedetails", salesInvoiceDetailsRouter);
 app.use("/api/dailytransactions", dailyTransactionsRouter);
 app.use("/api/customers", customersRouter);

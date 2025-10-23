@@ -11,78 +11,59 @@ import { Switch } from "@/components/ui/switch"
 
 Modal.setAppElement('#root');
 
-export default function ViewCustomer() {
+export default function EmployeesList() {
     const [isLoading, setIsLoading] = useState(true);
-    const [customers, setCustomers] = useState([]);
+    const [employees, setEmployees] = useState([]);
     // const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deleteCustomerId, setDeleteCustomerId] = useState(null);
+    const [deleteEmployeeId, setDeleteEmployeeId] = useState(null);
 
     // Helper to fetch full customer list (reusable so we can call it after edits)
-    const fetchAllCustomers = async () => {
+    const fetchAllEmployees = async () => {
         try {
             setIsLoading(true);
-            const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers/');
-            setCustomers(response.data);
+            const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/employees/');
+            setEmployees(response.data);
         } catch (err) {
             console.error('Failed to fetch customers', err);
-            setCustomers([]);
+            setEmployees([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Load Customer Data
-    // useEffect(() => {
-    //     const fetchCustomers = async () => {
-    //         try {
-    //             setIsLoading(true);
-    //             const token = localStorage.getItem('token');
-    //             const response = await axios.get(import.meta.env.VITE_API_BASE_URL + '/api/customers');
-    //             setCustomers(response.data);
-    //             // console.log("Customer Data: ", response.data);
-    //         } catch (error) {
-    //             toast.error("Error fetching customers: " + error.message);
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     };
-    //     fetchCustomers();
-    // }, []);
-    // console.log("Customer Data: ", customers);
-    // Filter customers by search term
 
     useEffect(() => {
-        const searchCustomers = async () => {
+        const searchEmployees = async () => {
             if (searchQuery.length > 0) {
                 try {
                     const response = await axios.get(
-                        `${import.meta.env.VITE_API_BASE_URL}/api/customers/search/${encodeURIComponent(searchQuery)}`
+                        `${import.meta.env.VITE_API_BASE_URL}/api/employees/search/${encodeURIComponent(searchQuery)}`
                     );
-                    setCustomers(response.data);
+                    setEmployees(response.data);
                 } catch (error) {
-                    setError(error.response?.data?.message || "Failed to search products");
-                    setCustomers([]); // Clear products on error
+                    setError(error.response?.data?.message || "Failed to search Employees");
+                    setEmployees([]); // Clear products on error
                     console.log(error);
                 } finally {
                     setIsLoading(false);
                 }
             } else {
                 // use helper to fetch full list
-                await fetchAllCustomers();
+                await fetchAllEmployees();
             }
         };
 
         // Add debouncing (500ms delay)
         const debounceTimer = setTimeout(() => {
             setIsLoading(true);
-            searchCustomers();
+            searchEmployees();
         }, 500);
 
         return () => clearTimeout(debounceTimer); // Cleanup on unmount or query change
@@ -133,15 +114,15 @@ export default function ViewCustomer() {
         }
     };
 
-    const handleView = (customer) => {
-        setSelectedCustomer(customer);
+    const handleView = (employee) => {
+        setSelectedEmployee(employee);
         setIsViewModalOpen(true);
     };
 
 
     const closeModal = () => {
         setIsViewModalOpen(false);
-        setSelectedCustomer(null);
+        setSelectedEmployee(null);
     };
 
     // SweetAlert2 Edit Handler
@@ -216,14 +197,14 @@ export default function ViewCustomer() {
                         {/* <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-3 shadow-md">
                             <FaEye className="w-8 h-8" />
                         </span> */}
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Customers List</h1>
-                        <span className="text-sm text-gray-500 mt-1">View and manage all registered customers</span>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight leading-tight">Employees List</h1>
+                        <span className="text-sm text-gray-500 mt-1">View and manage all Employees</span>
                     </div>
                     <Link
-                        to="/dashboard/sales/customers/addcustomer"
+                        to="/dashboard/addemployee"
                         className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
-                        <FaPlus className="mr-2" /> Add New Customer
+                        <FaPlus className="mr-2" /> Add a new employee
                     </Link>
                 </div>
             </div>
@@ -245,7 +226,7 @@ export default function ViewCustomer() {
 
             {isLoading ? (
                 <div className="flex justify-center items-center h-32">
-                    <span className="text-lg text-gray-500">Loading customers...</span>
+                    <span className="text-lg text-gray-500">Loading employees...</span>
                 </div>
             ) : (
                 <div className="w-full  bg-white rounded-lg shadow-md overflow-x-auto">
@@ -256,7 +237,7 @@ export default function ViewCustomer() {
                         onAfterOpen={() => { }}
                         onRequestClose={() => setIsEditModalOpen(false)}
                         shouldCloseOnOverlayClick={true}
-                        contentLabel="User Details"
+                        contentLabel="Employee Details"
                         style={{
                             overlay: {
                                 backgroundColor: 'rgba(57, 62, 70, 0.75)',
@@ -279,7 +260,7 @@ export default function ViewCustomer() {
                         <div className="p-6">
                             {/* Modal Header */}
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">Customer Details</h2>
+                                <h2 className="text-2xl font-bold text-gray-800">Employees Details</h2>
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
                                     className="text-gray-500 hover:text-gray-700"
@@ -302,27 +283,43 @@ export default function ViewCustomer() {
                             {/* User Details Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-600">Customer ID</label>
+                                    <label className="block text-sm font-medium text-gray-600">Employee ID</label>
                                     <p className="text-lg font-medium disabled text-gray-800 p-2 bg-gray-50 rounded">
 
-                                        {customers[selectedCustomer]?.customerId}
+                                        {employees[selectedEmployee]?.employeeId}
                                     </p>
                                 </div>
 
                                 {/* Editable customer details */}
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                    <label className="block text-sm font-medium text-gray-600">First Name</label>
                                     <input
                                         type="text"
                                         className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
-                                        value={customers[selectedCustomer]?.customerName || ''}
+                                        value={employees[selectedEmployee]?.firstName || ''}
                                         onChange={e => {
-                                            const updated = [...customers];
-                                            updated[selectedCustomer] = {
-                                                ...updated[selectedCustomer],
-                                                customerName: e.target.value
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                firstName: e.target.value
                                             };
-                                            setCustomers(updated);
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Last Name</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.lastName || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                lastName: e.target.value
+                                            };
+                                            setEmployees(updated);
                                         }}
                                     />
                                 </div>
@@ -331,14 +328,14 @@ export default function ViewCustomer() {
                                     <input
                                         type="email"
                                         className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
-                                        value={customers[selectedCustomer]?.customerEmail || ''}
+                                        value={employees[selectedEmployee]?.email || ''}
                                         onChange={e => {
-                                            const updated = [...customers];
-                                            updated[selectedCustomer] = {
-                                                ...updated[selectedCustomer],
-                                                customerEmail: e.target.value
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                email: e.target.value
                                             };
-                                            setCustomers(updated);
+                                            setEmployees(updated);
                                         }}
                                     />
                                 </div>
@@ -347,14 +344,30 @@ export default function ViewCustomer() {
                                     <input
                                         type="text"
                                         className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
-                                        value={customers[selectedCustomer]?.customerAddress || ''}
+                                        value={employees[selectedEmployee]?.address || ''}
                                         onChange={e => {
-                                            const updated = [...customers];
-                                            updated[selectedCustomer] = {
-                                                ...updated[selectedCustomer],
-                                                customerAddress: e.target.value
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                address: e.target.value
                                             };
-                                            setCustomers(updated);
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Nic No:</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.nic || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                nic: e.target.value
+                                            };
+                                            setEmployees(updated);
                                         }}
                                     />
                                 </div>
@@ -363,14 +376,14 @@ export default function ViewCustomer() {
                                     <input
                                         type="text"
                                         className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
-                                        value={customers[selectedCustomer]?.customerTel1 || ''}
+                                        value={employees[selectedEmployee]?.telephone1 || ''}
                                         onChange={e => {
-                                            const updated = [...customers];
-                                            updated[selectedCustomer] = {
-                                                ...updated[selectedCustomer],
-                                                customerTel1: e.target.value
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                telephone1: e.target.value
                                             };
-                                            setCustomers(updated);
+                                            setEmployees(updated);
                                         }}
                                     />
                                 </div>
@@ -379,20 +392,100 @@ export default function ViewCustomer() {
                                     <input
                                         type="text"
                                         className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
-                                        value={customers[selectedCustomer]?.customerTel2 || ''}
+                                        value={employees[selectedEmployee]?.telephone2 || ''}
                                         onChange={e => {
-                                            const updated = [...customers];
-                                            updated[selectedCustomer] = {
-                                                ...updated[selectedCustomer],
-                                                customerTel2: e.target.value
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                telephone2: e.target.value
                                             };
-                                            setCustomers(updated);
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Joined Date</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.joinedDate || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                joinedDate: e.target.value
+                                            };
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Salary Rs.</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.salary || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                salary: e.target.value
+                                            };
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Department</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.department || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                department: e.target.value
+                                            };
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Designation</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.designation || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                designation: e.target.value
+                                            };
+                                            setEmployees(updated);
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                    <input
+                                        type="text"
+                                        className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded w-full"
+                                        value={employees[selectedEmployee]?.status || ''}
+                                        onChange={e => {
+                                            const updated = [...employees];
+                                            updated[selectedEmployee] = {
+                                                ...updated[selectedEmployee],
+                                                status: e.target.value
+                                            };
+                                            setEmployees(updated);
                                         }}
                                     />
                                 </div>
                                 <div className='space-y-2 flex flex-row gap-4 items-center'>
                                     <label className="inline-flex items-center">
-                                        <span className="ml-2 text-gray-700 font-medium mt-3">Customer Status: </span>
+                                        <span className="ml-2 text-gray-700 font-medium mt-3">Is Blocked? </span>
                                     </label>
 
                                     {/* Custom toggle: thumb turns red when blocked and green when unblocked. */}
@@ -400,23 +493,23 @@ export default function ViewCustomer() {
                                         <button
                                             type="button"
                                             role="switch"
-                                            aria-checked={customers[selectedCustomer]?.isBlocked || false}
+                                            aria-checked={employees[selectedEmployee]?.isBlocked || false}
                                             onClick={() => {
-                                                const updated = [...customers];
-                                                const current = !!updated[selectedCustomer]?.isBlocked;
-                                                updated[selectedCustomer] = {
-                                                    ...updated[selectedCustomer],
+                                                const updated = [...employees];
+                                                const current = !!updated[selectedEmployee]?.isBlocked;
+                                                updated[selectedEmployee] = {
+                                                    ...updated[selectedEmployee],
                                                     isBlocked: !current
                                                 };
-                                                setCustomers(updated);
+                                                setEmployees(updated);
                                             }}
-                                            className={`relative inline-flex items-center h-7 w-14 rounded-full transition-colors focus:outline-none ${customers[selectedCustomer]?.isBlocked ? 'bg-red-100' : 'bg-green-100'}`}
+                                            className={`relative inline-flex items-center h-7 w-14 rounded-full transition-colors focus:outline-none ${employees[selectedEmployee]?.isBlocked ? 'bg-red-100' : 'bg-green-100'}`}
                                         >
-                                            <span className={`absolute left-1 top-1 h-5 w-5 rounded-full transform transition-transform ${customers[selectedCustomer]?.isBlocked ? 'translate-x-7 bg-red-600' : 'translate-x-0 bg-green-600'}`}></span>
+                                            <span className={`absolute left-1 top-1 h-5 w-5 rounded-full transform transition-transform ${employees[selectedEmployee]?.isBlocked ? 'translate-x-7 bg-red-600' : 'translate-x-0 bg-green-600'}`}></span>
                                         </button>
 
-                                        <span className={`text-sm font-medium ${customers[selectedCustomer]?.isBlocked ? 'text-red-600' : 'text-green-600'}`}>
-                                            {customers[selectedCustomer]?.isBlocked ? 'blocked' : 'unblocked'}
+                                        <span className={`text-sm font-medium ${employees[selectedEmployee]?.isBlocked ? 'text-red-600' : 'text-green-600'}`}>
+                                            {employees[selectedEmployee]?.isBlocked ? 'blocked' : 'unblocked'}
                                         </span>
                                     </div>
                                 </div>
@@ -426,8 +519,8 @@ export default function ViewCustomer() {
                                     <button
                                         onClick={async () => {
                                             Swal.fire({
-                                                title: 'Update Customer',
-                                                text: 'Are you sure you want to update this customer?',
+                                                title: 'Update Employee',
+                                                text: 'Are you sure you want to update this Employee?',
                                                 icon: 'warning',
                                                 showCancelButton: true,
                                                 confirmButtonText: 'Yes, update it!',
@@ -436,26 +529,26 @@ export default function ViewCustomer() {
                                                 if (result.isConfirmed) {
                                                     try {
                                                         const token = localStorage.getItem('token');
-                                                        const customer = customers[selectedCustomer];
+                                                        const employee = employees[selectedEmployee];
                                                         const updateResponse = await axios.put(
-                                                            import.meta.env.VITE_API_BASE_URL + "/api/customers/customers/" + customer.customerId,
-                                                            customer,
+                                                            import.meta.env.VITE_API_BASE_URL + "/api/employees/employees/" + employee.employeeId,
+                                                            employee,
                                                             { headers: { Authorization: `Bearer ${token}` } }
                                                         );
                                                         if (updateResponse.status === 200) {
                                                             Swal.fire({
                                                                 title: 'Success',
-                                                                text: 'Customer updated successfully!',
+                                                                text: 'Employee updated successfully!',
                                                                 icon: 'success',
                                                                 confirmButtonText: 'OK'
                                                             });
                                                             setIsEditModalOpen(false);
                                                             // Refresh full list after update
-                                                            await fetchAllCustomers();
+                                                            await fetchAllEmployees();
                                                         } else {
                                                             Swal.fire({
                                                                 title: 'Error',
-                                                                text: 'Failed to update customer. Please try again.',
+                                                                text: 'Failed to update employee. Please try again.',
                                                                 icon: 'error',
                                                                 confirmButtonText: 'OK'
                                                             })
@@ -467,7 +560,7 @@ export default function ViewCustomer() {
                                                     } catch (error) {
                                                         Swal.fire({
                                                             title: 'Error',
-                                                            text: 'Failed to update customer. Please try again.',
+                                                            text: 'Failed to update employee. Please try again.',
                                                             icon: 'error',
                                                             confirmButtonText: 'OK'
                                                         })
@@ -478,7 +571,7 @@ export default function ViewCustomer() {
                                         }}
                                         className="px-4 py-2 bg-red-600 cursor-pointer hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
                                     >
-                                        Update Customer
+                                        Update Employee
                                     </button>
                                     <button
                                         onClick={() => setIsEditModalOpen(false)}
@@ -498,7 +591,7 @@ export default function ViewCustomer() {
                         onAfterOpen={() => { }}
                         onRequestClose={() => setIsDeleteModalOpen(false)}
                         shouldCloseOnOverlayClick={true}
-                        contentLabel="Delete Customer Confirmation"
+                        contentLabel="Delete Employee Confirmation"
                         style={{
                             overlay: {
                                 backgroundColor: 'rgba(57, 62, 70, 0.75)',
@@ -521,7 +614,7 @@ export default function ViewCustomer() {
                         <div className="p-6">
                             {/* Modal Header */}
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">Delete Customer</h2>
+                                <h2 className="text-2xl font-bold text-gray-800">Delete Employee</h2>
                                 {/* x button to close */}
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
@@ -546,40 +639,40 @@ export default function ViewCustomer() {
                             {/* User Details Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-600">Customer ID</label>
+                                    <label className="block text-sm font-medium text-gray-600">Employee ID</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
 
-                                        {customers[selectedCustomer]?.customerId}
+                                        {employees[selectedEmployee]?.employeeId}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                    <label className="block text-sm font-medium text-gray-600">First Name</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
-                                        {customers[selectedCustomer]?.customerName}
+                                        {employees[selectedEmployee]?.firstName}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                                    <label className="block text-sm font-medium text-gray-600">Last Name</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
-                                        {customers[selectedCustomer]?.customerEmail}
+                                        {employees[selectedEmployee]?.lastName || 'N/A'}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-600">Address</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
-                                        {customers[selectedCustomer]?.customerAddress}
+                                        {employees[selectedEmployee]?.address || 'N/A'}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-600">Telephone 1</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
-                                        {customers[selectedCustomer]?.customerTel1}
+                                        {employees[selectedEmployee]?.telephone1 || 'N/A'}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-gray-600">Telephone 2</label>
                                     <p className="text-lg font-medium text-gray-800 p-2 bg-gray-50 rounded">
-                                        {customers[selectedCustomer]?.customerTel2 || 'N/A'}
+                                        {employees[selectedEmployee]?.telephone2 || 'N/A'}
                                     </p>
                                 </div>
 
@@ -591,7 +684,7 @@ export default function ViewCustomer() {
                                         onClick={async () => {
                                             Swal.fire({
                                                 title: 'Are you sure?',
-                                                text: 'You will not be able to recover this customer!',
+                                                text: 'You will not be able to recover this employee!',
                                                 icon: 'warning',
                                                 showCancelButton: true,
                                                 confirmButtonColor: '#3085d6',
@@ -602,23 +695,23 @@ export default function ViewCustomer() {
                                                     try {
                                                         const token = localStorage.getItem("token");
                                                         // prefer explicit deleteCustomerId (actual customerId string), fallback to selected index lookup
-                                                        const idToDelete = deleteCustomerId || customers[selectedCustomer]?.customerId;
+                                                        const idToDelete = deleteEmployeeId || employees[selectedEmployee]?.employeeId;
                                                         await axios.delete(
-                                                            `${import.meta.env.VITE_API_BASE_URL}/api/customers/customers/${idToDelete}`,
+                                                            `${import.meta.env.VITE_API_BASE_URL}/api/employees/employees/${idToDelete}`,
                                                             { headers: { 'Authorization': `Bearer ${token}` } }
                                                         );
                                                         Swal.fire(
                                                             'Deleted!',
-                                                            'Your customer has been deleted.',
+                                                            'Your employee has been deleted.',
                                                             'success',
                                                         );
                                                         // Remove user from local state
-                                                        const updatedCustomer = customers.filter((_, index) => index !== selectedCustomer);
-                                                        setCustomers(updatedCustomer);
+                                                        const updatedEmployee = employees.filter((_, index) => index !== selectedEmployee);
+                                                        setEmployees(updatedEmployee);
                                                         setIsDeleteModalOpen(false);
                                                     } catch (error) {
-                                                        console.error("Failed to delete customer:", error);
-                                                        Swal.fire('Error', 'Failed to delete customer. Please try again.', 'error');
+                                                        // console.error("Failed to delete employee:", error);
+                                                        Swal.fire('Error', 'Failed to delete employee. Please try again.', 'error');
                                                     }
                                                 }
                                             });
@@ -641,7 +734,7 @@ export default function ViewCustomer() {
 
                                         className="px-4 py-2 bg-red-600 cursor-pointer hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
                                     >
-                                        Delete Customer
+                                        Delete Employee
                                     </button>
                                     <button
                                         onClick={() => setIsDeleteModalOpen(false)}
@@ -659,54 +752,61 @@ export default function ViewCustomer() {
                             <tr>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">ID#</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Name</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Address</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Telephone</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Status</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Address & email</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Telephone Nos.</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Joined Date</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Discount %</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Last Pur.Date</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Last Pur.Amnt</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Total Purch Amnt</th>
-                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Total Purch count</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Salary</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Designation & Dept.</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Status</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-natural uppercase">Is Blocked</th>
                                 <th className="px-4 py-2 text-center text-xs font-bold text-natural uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {customers.length === 0 && searchQuery ? (
+                            {employees.length === 0 && searchQuery ? (
                                 <tr>
-                                    <td colSpan={4} className="px-4 py-2 text-center text-gray-500">No customers found "{searchQuery}"</td>
+                                    <td colSpan={4} className="px-4 py-2 text-center text-gray-500">No employees found "{searchQuery}"</td>
                                 </tr>
                             ) : (
-                                customers.map((customer, index) => (
+                                employees.map((employee, index) => (
                                     // customers.map((customer, idx) => (
-                                    <tr key={customer}>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerId}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerName}</td>
-                                        {/* <td className="px-6 py-4 whitespace-nowrap">{customer.customerAddress}</td> */}
-                                        {/* <td className="px-6 py-4 whitespace-nowrap">{customer.customerEmail}</td> */}
-
+                                    <tr key={employee}>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{employee.employeeId}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{employee.firstName}</td>
                                         <td className="px-4 py-2 whitespace-nowrap text-sm">
                                             <div>
-                                                {customer.customerAddress}
-                                                {customer.customerEmail && (
+                                                {employee.address}
+                                                {employee.email && (
                                                     <div className="text-xs text-gray-500 mt-1">
-                                                        {customer.customerEmail}
+                                                        {employee.email}
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                            {customer.customerTel1}
-                                            {customer.customerTel2 && (
+                                            {employee.telephone1}
+                                            {employee?.telephone2 && (
                                                 <>
                                                     {" / "}
-                                                    {customer.customerTel2}
+                                                    {employee.telephone2}
                                                 </>
                                             )}
                                         </td>
-
-                                        <td className={`px-4 py-2 whitespace-nowrap text-sm font-medium ${customer.isBlocked ? "text-red-600" : "text-gray-500"}`}>
-                                            {customer.isBlocked ? (
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{employee.joinedDate ? moment(employee.joinedDate).format("DD-MMM-YYYY") : "N/A"}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{employee?.salary}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">
+                                            <div>
+                                                {employee.designation}
+                                                {employee.department && (
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {employee.department}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{employee?.status}</td>
+                                        <td className={`px-4 py-2 whitespace-nowrap text-sm font-medium ${employee.isBlocked ? "text-red-600" : "text-gray-500"}`}>
+                                            {employee.isBlocked ? (
                                                 <span className="inline-flex items-center">
                                                     <svg className="w-3 h-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -722,17 +822,11 @@ export default function ViewCustomer() {
                                                 </span>
                                             )}
                                         </td>
-                                        {/* format date to "dd-mmm-yyyy" */}
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerJoinedDate ? moment(customer.customerJoinedDate).format("DD-MMM-YYYY") : "N/A"}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerDiscountPercentage}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerLastPurchasedDate ? customer.customerLastPurchasedDate : "N/A"}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerLastPurchaseAmount ? customer.customerLastPurchaseAmount : "N/A"}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerTotalPurchaseAmount ? customer.customerTotalPurchaseAmount : "N/A"}</td>
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm">{customer.customerTotalPurchaseCount ? customer.customerTotalPurchaseCount : "N/A"}</td>
+
                                         <td className="px-4 py-2 ">
                                             <div className="flex space-x-4">
                                                 <button
-                                                    onClick={() => handleView(customer)}
+                                                    onClick={() => handleView(employee)}
                                                     className="text-white bg-blue-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-blue-200 text-md shadow-lg shadow-blue-500/50 hover:scale-110 transition-all duration-200"
                                                     title="View"
                                                 >
@@ -740,7 +834,7 @@ export default function ViewCustomer() {
                                                 </button>
                                                 <button
                                                     onClick={() => {
-                                                        setSelectedCustomer(index);
+                                                        setSelectedEmployee(index);
                                                         setIsEditModalOpen(true);
                                                     }}
                                                     className="text-white bg-green-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-green-200 text-md shadow-lg shadow-green-500/50 hover:scale-110 transition-all duration-200"
@@ -751,8 +845,8 @@ export default function ViewCustomer() {
                                                 <button
                                                     onClick={() => {
                                                         // store selected index and actual customer id so modal can show data and delete can use the id
-                                                        setSelectedCustomer(index);
-                                                        setDeleteCustomerId(customer.customerId);
+                                                        setSelectedEmployee(index);
+                                                        setDeleteEmployeeId(employee.employee);
                                                         setIsDeleteModalOpen(true);
                                                     }}
                                                     className="text-white bg-red-600 rounded-md flex flex-row cursor-pointer items-center justify-center gap-1 pl-2 pr-2 hover:text-red-200 text-md shadow-lg shadow-red-500/50 hover:scale-110 transition-all duration-200"
@@ -775,19 +869,21 @@ export default function ViewCustomer() {
                 isOpen={isModalOpen}
                 onRequestClose={closeModal}
                 style={modalStyles}
-                contentLabel="View Customer"
+                contentLabel="View Employee Details"
             >
                 <div className="p-6">
-                    <h2 className="text-xl font-bold mb-4">Customer Details</h2>
-                    {selectedCustomer ? (
+                    <h2 className="text-xl font-bold mb-4">Employee Details</h2>
+                    {selectedEmployee ? (
                         <div className="space-y-2">
-                            <div><span className="font-semibold">Name:</span> {selectedCustomer.name}</div>
-                            <div><span className="font-semibold">Email:</span> {selectedCustomer.email}</div>
-                            <div><span className="font-semibold">Phone:</span> {selectedCustomer.phone}</div>
+                            <div><span className="font-semibold">Name:</span> {selectedEmployee.firstName}</div>
+                            <div><span className="font-semibold">Name:</span> {selectedEmployee.lastName}</div>
+                            <div><span className="font-semibold">Name:</span> {selectedEmployee.address}</div>
+                            <div><span className="font-semibold">Email:</span> {selectedEmployee.email}</div>
+                            <div><span className="font-semibold">Phone:</span> {selectedEmployee.telephone1}</div>
                             {/* Add more fields as needed */}
                         </div>
                     ) : (
-                        <div>No customer selected.</div>
+                        <div>No employee+ selected.</div>
                     )}
                     <div className="mt-6 flex justify-end">
                         <button

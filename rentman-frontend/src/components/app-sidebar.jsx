@@ -1,5 +1,5 @@
 import * as React from "react"
-import { GalleryVerticalEnd, Minus, Plus } from "lucide-react"
+import { Minus, Plus } from "lucide-react"
 
 import { SearchForm } from "@/components/search-form"
 import {
@@ -22,7 +22,6 @@ import {
   SidebarSeparator
 } from "@/components/ui/sidebar"
 import { Link } from "react-router-dom"
-
 // This is sample data.
 
 const data = {
@@ -60,8 +59,7 @@ const data = {
               url: "#",
               isActive: true,
             },
-
-          ]
+          ],
         },
         {
           title: "Maintenance",
@@ -76,9 +74,8 @@ const data = {
               title: "Add Dry Clean",
               url: "#",
               isActive: true,
-            }
-
-          ]
+            },
+          ],
         },
         {
           title: "Product Group",
@@ -93,9 +90,8 @@ const data = {
               title: "Add a Group",
               url: "/dashboard/groupmaster/add",
               isActive: true,
-            }
-
-          ]
+            },
+          ],
         },
         {
           title: "Project Structure",
@@ -120,9 +116,8 @@ const data = {
               title: "Add Item",
               url: "/dashboard/itemmaster/add",
               isActive: true,
-            }
-
-          ]
+            },
+          ],
         },
         {
           title: "Dry Clean",
@@ -137,9 +132,8 @@ const data = {
               title: "Add Dry Clean",
               url: "/dashboard/dryclean/add",
               isActive: true,
-            }
-
-          ]
+            },
+          ],
         },
         {
           title: "Product Group",
@@ -154,9 +148,8 @@ const data = {
               title: "Add Product Group",
               url: "/dashboard/groupmaster/add",
               isActive: true,
-            }
-
-          ]
+            },
+          ],
         },
         {
           title: "Project Structure",
@@ -165,22 +158,61 @@ const data = {
       ],
     },
     {
-      title: "Employees",
+      title: "Employees & Users",
       url: "#",
       items: [
-        // {
-        // title: "Manage Employees",
-        // url: "#",
-        // items: [
         {
-          title: "Empl List/Manage",
-          url: "/dashboard/employeelist",
-          isActive: true,
+          title: "Employees",
+          url: "#",
+          items: [
+            {
+              title: "Employee List",
+              url: "/dashboard/employeeslist",
+              isActive: true,
+            },
+            {
+              title: "Add Employee",
+              url: "/dashboard/addemployee",
+              isActive: true,
+            },
+          ],
         },
         {
-          title: "Add Employee",
-          url: "/dashboard/addemployee",
-          isActive: true,
+          title: "Users",
+          url: "#",
+          items: [
+            {
+              title: "Users List",
+              url: "/dashboard/userslist",
+              isActive: true,
+            },
+            {
+              title: "Add Users",
+              url: "/dashboard/adduser",
+              isActive: true,
+            },
+          ],
+        },
+        {
+          title: "Employee Reports",
+          url: "#",
+          items: [
+            {
+              title: "Attendance",
+              url: "#",
+              isActive: true,
+            },
+            {
+              title: "Salary Details",
+              url: "#",
+              isActive: true,
+            },
+            {
+              title: "Salary Reports",
+              url: "#",
+              isActive: true,
+            },
+          ],
         },
         {
           title: "Emp. Attendance",
@@ -197,47 +229,43 @@ const data = {
           url: "#",
           isActive: true,
         },
-        // ]
-        // },
+      ],
+    },
+    {
+      title: "Add Employees",
+      url: "#",
+      items: [
         {
-          title: "Add Employees",
+          title: "View Dry Clean",
           url: "#",
-          items: [
-            {
-              title: "View Dry Clean",
-              url: "#",
-              isActive: true,
-            },
-            {
-              title: "Add Dry Clean Details",
-              url: "#",
-              isActive: true,
-            }
-
-          ]
+          isActive: true,
         },
         {
-          title: "Edit Employees",
+          title: "Add Dry Clean Details",
           url: "#",
-          items: [
-            {
-              title: "View Product Group",
-              url: "#",
-              isActive: true,
-            },
-            {
-              title: "Add Product Group",
-              url: "#",
-              isActive: true,
-            }
-
-          ]
-        },
-        {
-          title: "Employee Drawings",
-          url: "#",
+          isActive: true,
         },
       ],
+    },
+    {
+      title: "Edit Employees",
+      url: "#",
+      items: [
+        {
+          title: "View Product Group",
+          url: "#",
+          isActive: true,
+        },
+        {
+          title: "Add Product Group",
+          url: "#",
+          isActive: true,
+        },
+      ],
+    },
+    {
+      title: "Employee Drawings",
+      url: "#",
     },
     {
       title: "Customers",
@@ -390,10 +418,10 @@ export function AppSidebar({ ...props }) {
         <SidebarGroup>
           <SidebarMenu>
             {data.navMain.map((item, index) => (
-              <Collapsible key={item.title} defaultOpen={index === 0} className="group/collapsible">
-                <SidebarMenuItem>
+              <Collapsible key={item.title} defaultOpen={index === 0} className="group/collapsible text-blue-700">
+                <SidebarMenuItem >
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="font-bold">
+                    <SidebarMenuButton className="font-bold ">
                       {item.title}{" "}
                       <Plus className="ml-auto group-data-[state=open]/collapsible:hidden" />
                       <Minus className="ml-auto group-data-[state=closed]/collapsible:hidden" />
@@ -405,22 +433,22 @@ export function AppSidebar({ ...props }) {
                         {item.items.map((subItem, subIndex) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             {subItem.items?.length ? (
-                              <Collapsible defaultOpen={subIndex === 0} className="group/sub-collapsible">
+                              <Collapsible defaultOpen={subIndex === 0} className="group/sub-collapsible ">
                                 <CollapsibleTrigger asChild>
                                   <SidebarMenuSubButton asChild>
                                     <div className="flex items-center justify-between w-full">
-                                      <span>{subItem.title}</span>
+                                      <span className="font-bold text-green-600">{subItem.title}</span>
                                       <Plus className="ml-auto group-data-[state=open]/sub-collapsible:hidden" />
                                       <Minus className="ml-auto group-data-[state=closed]/sub-collapsible:hidden" />
                                     </div>
                                   </SidebarMenuSubButton>
                                 </CollapsibleTrigger>
-                                <CollapsibleContent>
+                                <CollapsibleContent >
                                   <SidebarMenuSub >
                                     {subItem.items.map((subSubItem) => (
                                       <SidebarMenuSubItem key={subSubItem.title} >
                                         <SidebarMenuSubButton asChild isActive={subSubItem.isActive}>
-                                          <Link to={subSubItem.url}  >{subSubItem.title}</Link>
+                                          <Link className="font-semibold" to={subSubItem.url}  >{subSubItem.title}</Link>
                                         </SidebarMenuSubButton>
                                       </SidebarMenuSubItem>
                                     ))}
@@ -438,12 +466,13 @@ export function AppSidebar({ ...props }) {
                     </CollapsibleContent>
                   ) : null}
                 </SidebarMenuItem>
-              </Collapsible>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
+              </Collapsible >
+            ))
+            }
+          </SidebarMenu >
+        </SidebarGroup >
+      </SidebarContent >
       <SidebarRail />
-    </Sidebar>
+    </Sidebar >
   );
 }

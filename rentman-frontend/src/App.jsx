@@ -21,7 +21,9 @@ import PostBooking from './pages/manager/sales/postBooking.jsx';
 import AddDryClean from './pages/manager/inventory/addDryClean.jsx';
 import DryCleanList from './pages/manager/inventory/dryCleanList.jsx';
 import AddEmployee from './pages/admin/employee/addEmployee.jsx';
-import EmployeeList from './pages/admin/employee/employeeList.jsx';
+import EmployeesList from './pages/admin/employee/employeesList.jsx';
+import AddUsers from './pages/admin/users/addUsers';
+import UsersList from './pages/admin/users/usersList';
 
 function App() {
 
@@ -41,7 +43,9 @@ function App() {
               {/* Admin only routes */}
               <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                 <Route path="/dashboard/addemployee" element={<AddEmployee />} />
-                <Route path="/dashboard/employeelist" element={<EmployeeList />} />
+                <Route path="/dashboard/employeeslist" element={<EmployeesList />} />
+                <Route path="/dashboard/adduser" element={<AddUsers />} />
+                <Route path="/dashboard/userslist" element={<UsersList />} />
                 {/* <Route path="users" element={<UserManagement />} /> */}
                 {/* <Route path="settings" element={<SystemSettings />} /> */}
               </Route>

@@ -29,12 +29,12 @@ import {
     CardContent,
     CardFooter,
 } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+// import { Calendar } from "@/components/ui/calendar"
+// import {
+//     Popover,
+//     PopoverContent,
+//     PopoverTrigger,
+// } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { FaEye } from "react-icons/fa";
 import moment from "moment";
@@ -42,7 +42,7 @@ import moment from "moment";
 const statusOptions = ["active", "inactive", "onleave"]
 const departments = ["sales", "tailoring", "manager", "cashier"]
 
-export default function AddEmployee() {
+export default function AddUsers() {
     const navigate = useNavigate()
     const inputRef = useRef(null);
     const [employeesList, setEmployeesList] = useState([]);
