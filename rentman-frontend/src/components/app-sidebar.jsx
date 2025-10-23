@@ -448,7 +448,7 @@ export function AppSidebar({ ...props }) {
                                     {subItem.items.map((subSubItem) => (
                                       <SidebarMenuSubItem key={subSubItem.title} >
                                         <SidebarMenuSubButton asChild isActive={subSubItem.isActive}>
-                                          <Link className="font-semibold" to={subSubItem.url}  >{subSubItem.title}</Link>
+                                          <Link className="font-semilight text-xs" to={subSubItem.url}  >{subSubItem.title}</Link>
                                         </SidebarMenuSubButton>
                                       </SidebarMenuSubItem>
                                     ))}

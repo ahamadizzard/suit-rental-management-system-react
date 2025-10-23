@@ -205,7 +205,7 @@ export default function AddEmployee() {
                             icon: "success",
                             confirmButtonText: "OK",
                         });
-                        navigate("/dashboard/employeelist");
+                        navigate("/dashboard/employeeslist");
                     } catch (error) {
                         console.error("Error adding employee:", error);
                         Swal.fire({
@@ -258,20 +258,6 @@ export default function AddEmployee() {
                             {/* Form columns: fields will occupy columns responsively */}
                             <div className="md:col-span-2 space-y-4">
                                 {/* <div className="space-y-2">
-                                    <Label htmlFor="customerId">Customer ID *</Label>
-                                    <Input
-                                        id="customerId"
-                                        name="customerId"
-                                        type="text"
-                                        placeholder="Enter a unique customer ID"
-                                        ref={inputRef}
-                                        value={formData.customerId}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div> */}
-
-                                <div className="space-y-2">
                                     <Label htmlFor="employeeId">Employee Id *</Label>
                                     <Input
                                         id="employeeId"
@@ -280,7 +266,7 @@ export default function AddEmployee() {
                                         onChange={handleChange}
                                     // required
                                     />
-                                </div>
+                                </div> */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName">First Name *</Label>
@@ -294,13 +280,12 @@ export default function AddEmployee() {
                                         {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="lastName">Last Name *</Label>
+                                        <Label htmlFor="lastName">Last Name </Label>
                                         <Input
                                             id="lastName"
                                             name="lastName"
                                             value={formData.lastName}
                                             onChange={handleChange}
-                                            required
                                         />
                                         {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName}</p>}
                                     </div>
@@ -330,7 +315,7 @@ export default function AddEmployee() {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="telephone1">Tele-1 *</Label>
+                                        <Label htmlFor="telephone1">Telephone-1 *</Label>
                                         <Input
                                             id="telephone1"
                                             name="telephone1"
@@ -340,7 +325,7 @@ export default function AddEmployee() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="telephone2">Tele-2</Label>
+                                        <Label htmlFor="telephone2">Telephone-2</Label>
                                         <Input
                                             id="telephone2"
                                             name="telephone2"
@@ -374,14 +359,16 @@ export default function AddEmployee() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="salary">Salary</Label>
+                                        <Label htmlFor="salary">Salary *</Label>
                                         <Input
                                             className="text-right"
                                             type="number"
                                             id="salary"
                                             name="salary"
-                                            value={formData.salary}
+                                            value={formData?.salary || "0"}
                                             onChange={handleChange}
+                                            required
+
                                         />
                                         {errors.salary && <p className="text-red-600 text-sm">{errors.salary}</p>}
                                     </div>
